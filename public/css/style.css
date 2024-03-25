@@ -1,0 +1,184 @@
+  /* Background gradient */
+  body {
+    background: #ffffff url(/img/login-bg.png) center center/cover no-repeat;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    opacity: 0.9;
+    margin: 0 auto;
+    width: 600px;
+}
+/* Panel style */
+.panel {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    width: 600px;
+    height: 300px;
+}
+.paneldaftar {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    width: 600px;
+    height: 500px;
+}
+/* Form input style */
+
+.form-control input ~ .underline{
+    background-color: #bdc1c5;
+    height: 1px;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.form-input{
+    display: block;
+    position: relative;
+    margin-bottom: 1rem;
+}
+.form-input > .material-icons{
+    position: absolute;
+    font-size: 1.8rem;
+    top: 1.2rem;
+}
+.form-input > .material-icons ~ input, .form-input > .material-icons ~ .label, .form-input > .material-icons ~ .underline{
+    margin-left: 2.25rem;
+    width: calc(100% - 2.25rem);
+}
+.form-input input{
+    border: none;
+    box-shadow: none;
+    padding-top: 1.5rem;
+    padding-right: 0;
+    padding-bottom: 0.5rem;
+    padding-left: 0;
+    outline-style: none;
+    width: 100%;
+    background-color: transparent;
+}
+
+.form-input input ~ .label{
+    font-size: 1rem;
+    margin: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 1.5rem;
+    left: 0;
+    transition: top 0.2s, font 0.2s;
+    z-index: 1;
+}
+.form-input input ~ .underline{
+    background-color: #bdc1c5;
+    height: 1px;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+.form-input input:hover ~ .underline, .form-input input:focus ~ .underline{
+    background-color: #672bb0;
+}
+.form-input input:hover ~ .label, .form-input input:focus ~ .label{
+    color: #672bb0;
+}
+.form-input input:focus ~ .underline{
+    height: 2px;
+}
+.form-input input:focus ~ .label, .form-input input:valid ~ .label{
+    top: 0;
+    font-size: 0.85rem;
+    background-color: transparent;
+}
+.form-input input:-webkit-autofill ~ .label{
+    top: 0;
+    font-size: 0.85rem;
+}
+/* Panel heading style */
+.panel-heading {
+    background-color: #4e7bd6;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 15px 0;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* Panel body style */
+.panel-body {
+    padding: 30px 40px;
+    position: center;
+}
+@media (max-width: 768px) {
+    .form-horizontal {
+        margin-bottom: 20px;
+        position: center;
+        text-align: center;
+        max-width: 100%;
+        width: 400px;
+        margin: 0 auto;
+    }
+    .container {
+        width: 90%; /* Adjust as needed */
+        margin: 0 auto; /* Center the container */
+    }
+
+    .panel {
+        width: 100%; /* Make the panel fill the container */
+    }
+}
+
+
+/* Button style */
+.btn-primary {
+    background-color: #834d9b;
+    border-color: #834d9b;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    position:relative;
+}
+
+.btn-primary:hover {
+    background-color: #6b387e;
+    border-color: #6b387e;
+}
+
+.bottom{
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    position: relative;
+
+    width: 100%;
+    font-size: medium;
+}
+.bottomb{
+    align-items: center;
+    display: block;
+    position: relative;
+    width: auto;
+    bottom:0
+}
+.float-right{
+    float:right;
+    margin-bottom: 10px;
+}
+
+.float-left{
+    float:left;
+    margin-bottom: 10px;
+}
