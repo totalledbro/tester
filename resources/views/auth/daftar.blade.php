@@ -10,17 +10,17 @@
                         <form class="form-horizontal" role="form" method="POST" action="{{ route('anggota.store') }}">
                             {{ csrf_field() }}
 
-                            <div class="form-group{{ $errors->has('first_name') ? ' has-error' : '' }}">
+                            <div class="form-group{{ $errors->has('namadepan') ? ' has-error' : '' }}">
                                 <label for="" class="form-input">
-                                    <input type="text" name="first_name" value="{{ old('first_name') }}"  required autofocus="true" />
+                                    <input type="text" name="namadepan" value="{{ old('fnamadepan') }}"  required autofocus="true" />
                                     <span class="label">Nama Depan</span>
                                     <span class="underline"></span>
                                 </label>
                             </div>
 
-                            <div class="form-group{{ $errors->has('last_name') ? ' has-error' : '' }}">
+                            <div class="form-group{{ $errors->has('namablkg') ? ' has-error' : '' }}">
                                 <label for="" class="form-input">
-                                    <input type="text" name="last_name" value="{{ old('last_name') }}"  required autofocus="true"  />
+                                    <input type="text" name="namablkg" value="{{ old('namablkg') }}"  required autofocus="true"  />
                                     <span class="label">Nama Belakang</span>
                                     <span class="underline"></span>
                                 </label>
@@ -40,7 +40,7 @@
                                     <span class="label">Password</span>
                                     <span class="underline"></span>
                                 </label>
-                                <p id="passwordError1" style="color: red; display: none;">Password must be at least 8 characters long.</p>
+                                <p id="passwordError1" style="color: red; display: none;">Password setidaknya harus 8 karakter.</p>
                             </div>
 
                             <div class="form-group">
@@ -49,7 +49,7 @@
                                     <span class="label">Konfirmasi Password</span>
                                     <span class="underline"></span>
                                 </label>
-                                <p id="passwordError2" style="color: red; display: none;">Passwords don't match.</p>
+                                <p id="passwordError2" style="color: red; display: none;">Password tidak sesuai.</p>
                             </div>
 
                             <div class="bottom text-center" >
@@ -100,3 +100,8 @@
     </script>
 
 @endsection
+@error('email')
+    <span class="invalid-feedback" role="alert">
+        <strong>{{ $message }}</strong>
+    </span>
+@enderror

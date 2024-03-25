@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreUserRequest;
 use App\Models\Anggota;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,29 +16,21 @@ class AnggotaController extends Controller
         return view('anggota.index', compact('anggota'));
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
+        if(Anggota::where('email', $request->email)->exists()) {
+            return redirect()->back()->withInput()->withErrors(['email' => 'This email has already been used. Please use a different email.']);
+        }
         // Validate the request
-        $request->validate([
-            'namadepan' => 'required',
-            'namablkg' => 'required',
-            'email' => 'required|email|unique:anggota',
-            'password' => 'required|min:8',
-        ]);
+        $validatedData = $request->validated();
 
-        // Hash the password
-        $hashedPassword = Hash::make($request->password);
+        $validatedData['namadepan'] = $request->input('namadepan');
+        $validatedData['namablkg'] = $request->input('namablkg');
+        $validatedData['email'] = $request->input('email');
+        $validatedData['password'] = bcrypt($request->password);
 
-        // Create a new anggota with hashed password
-        $anggota=Anggota::create([
-            'namadepan' => $request->namadepan,
-            'namablkg' => $request->namablkg,
-            'email' => $request->email,
-            'password' => $hashedPassword,
-        ]);
-        Log::info('Anggota created:', $anggota->toArray());
+        $anggota = Anggota::create($validatedData);
 
-        // Redirect to the index page
         return redirect('/verifikasi');
     }
 

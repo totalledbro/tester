@@ -24,10 +24,9 @@ Route::put('/administrators/{id}', [AdministratorController::class, 'update'])->
 Route::delete('/administrators/{id}', [AdministratorController::class, 'destroy'])->name('administrators.destroy');
 Route::get('/anggota', [AnggotaController::class, 'index'])->name('anggota.index');
 Route::post('/anggota', [AnggotaController::class, 'store'])->name('anggota.create');
-Route::post('/anggota/store', [AnggotaController::class, 'store'])->name('anggota.store');
 Route::get('/anggota/{id}', [AnggotaController::class, 'show'])->name('anggota.show');
 Route::get('/anggota/{id}/edit', [AnggotaController::class, 'edit'])->name('anggota.edit');
 Route::put('/anggota/{id}', [AnggotaController::class, 'update'])->name('anggota.update');
 Route::delete('/anggota/{id}', [AnggotaController::class, 'destroy'])->name('anggota.destroy');
 Route::post('/login', [AnggotaController::class, 'login']);
-Route::post('/anggota/store', [AnggotaController::class, 'store'])->name('anggota.store');
+Route::post('/anggota', [AnggotaController::class, 'store'])->name('anggota.store');
