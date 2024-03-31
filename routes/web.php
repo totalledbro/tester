@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdministratorController;
 use App\Http\Controllers\AnggotaController;
 Route::get('/', function () {
-    return view('auth.loginanggota');
+    return view('auth.coba');
 });
 
 Route::get('/daftar', function () {
