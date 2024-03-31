@@ -90,7 +90,6 @@
             function validatePassword1() {
                 if (passwordInput.value.length < 8) {
                     passwordError1.style.display = 'block';
-                    passwordInput.setCustomValidity("Password must be at least 8 characters long.");
                 } else {
                     passwordError1.style.display = 'none';
                     passwordInput.setCustomValidity('');
@@ -100,7 +99,6 @@
             function validatePassword2() {
                 if (passwordInput.value !== confirmPasswordInput.value) {
                     passwordError2.style.display = 'block';
-                    confirmPasswordInput.setCustomValidity("Passwords don't match");
                 } else {
                     passwordError2.style.display = 'none';
                     confirmPasswordInput.setCustomValidity('');

@@ -32,6 +32,7 @@ class AnggotaController extends Controller
         $anggota = Anggota::create($validatedData);
         
         return redirect('/pengunjung');
+        //return redirect()->route('/pengunjung')->with('session', 'Please check your email for a confirmation link');
     }
 
     public function edit($id)
