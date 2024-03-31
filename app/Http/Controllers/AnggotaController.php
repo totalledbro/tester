@@ -30,7 +30,7 @@ class AnggotaController extends Controller
         $validatedData['password'] = bcrypt($request->password);
 
         $anggota = Anggota::create($validatedData);
-
+        
         return redirect('/pengunjung');
     }
 

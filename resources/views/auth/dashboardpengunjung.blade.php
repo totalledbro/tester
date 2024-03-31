@@ -61,12 +61,14 @@
                         <label>Enter your email</label>
                     </div>
                     <div class="input-field">
-                        <input type="password" name="password" required>
+                        <input type="password" id="password1" name="password" required>
                         <label>Create password</label>
+                        <p id="passwordError1" style="color: red; display: none;">Password setidaknya harus 8 karakter.</p>
                     </div>
                     <div class="input-field">
-                        <input type="password" name="password_confirmation" required>
+                        <input type="password" id="password2" name="password_confirmation" required>
                         <label>Confirm password</label>
+                        <p id="passwordError2" style="color: red; display: none;">Password tidak sesuai.</p>
                     </div>
                     <button type="submit" id="signup-btn">Sign Up</button>
                 </form>
@@ -77,5 +79,35 @@
             </div>
         </div>
     </div>
-
 @endsection
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('password1');
+            const confirmPasswordInput = document.getElementById('password2');
+            const passwordError1 = document.getElementById('passwordError1');
+            const passwordError2 = document.getElementById('passwordError2');
+
+            function validatePassword1() {
+                if (passwordInput.value.length < 8) {
+                    passwordError1.style.display = 'block';
+                    passwordInput.setCustomValidity("Password must be at least 8 characters long.");
+                } else {
+                    passwordError1.style.display = 'none';
+                    passwordInput.setCustomValidity('');
+                }
+            }
+
+            function validatePassword2() {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    passwordError2.style.display = 'block';
+                    confirmPasswordInput.setCustomValidity("Passwords don't match");
+                } else {
+                    passwordError2.style.display = 'none';
+                    confirmPasswordInput.setCustomValidity('');
+                }
+            }
+
+            passwordInput.addEventListener('keyup', validatePassword1);
+            confirmPasswordInput.addEventListener('keyup', validatePassword2);
+    });
+</script>
