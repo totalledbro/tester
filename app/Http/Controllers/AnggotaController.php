@@ -31,7 +31,7 @@ class AnggotaController extends Controller
 
         $anggota = Anggota::create($validatedData);
 
-        return redirect('/verifikasi');
+        return redirect('/pengunjung');
     }
 
     public function edit($id)

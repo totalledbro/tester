@@ -4,15 +4,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdministratorController;
 use App\Http\Controllers\AnggotaController;
 Route::get('/', function () {
-    return view('auth.coba');
+    return view('auth.dashboardpengunjung');
 });
 
 Route::get('/daftar', function () {
-    return view('auth.daftar');
+    return view('auth.dashboardpengunjung');
 });
 
-Route::get('/verifikasi', function () {
-    return view('auth.verifikasi');
+Route::get('/pengunjung', function () {
+    return view('auth.dashboardpengunjung');
 });
 
 Route::get('/administrators', [AdministratorController::class, 'index'])->name('administrators.index');
