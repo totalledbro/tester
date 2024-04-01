@@ -6,7 +6,8 @@
             <span class="hamburger-btn material-symbols-rounded">menu</span>
             <a href="#" class="logo">
                 <img src="images/logo.jpg" alt="logo">
-                <h2>CodingNepal</h2>
+                <h2></h2>
+                <h3>PERPUSTAKAAN DIGITAL</h3>
             </a>
             <ul class="links">
                 <span class="close-btn material-symbols-rounded">close</span>
@@ -46,7 +47,7 @@
         <div class="form-box signup">
             <div class="form-content" role="form" method="POST" action="{{ route('anggota.store') }}">
                 <h2>SIGNUP</h2>
-                <form method="POST" action="{{ route('anggota.store') }}">
+                <form id="signup-form" method="POST" action="{{ route('anggota.store') }}">
                     @csrf
                     <div class="input-field">
                         <input type="text" name="namadepan" value="{{ old('namadepan') }}" required>
@@ -79,6 +80,10 @@
             </div>
         </div>
     </div>
+<div class="success-popup" style="display: none;">
+    <h3>Registration Successful!</h3>
+    <!-- Add any additional content or styling for the popup -->
+</div>
 @endsection
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -109,3 +114,39 @@
             confirmPasswordInput.addEventListener('keyup', validatePassword2);
     });
 </script>
+<script>
+$(document).ready(function() {
+    // Function to handle form submission
+    $("#signup-form").submit(function(event) {
+        // Prevent default form submission
+        event.preventDefault();
+
+        // Serialize form data
+        var formData = $(this).serialize();
+
+        // Send form data to the server using Ajax
+        $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: formData,
+            success: function(response) {
+                // If registration is successful, display the popup
+                if (response.success) {
+                    $(".success-popup").fadeIn(); // You can customize this class or style
+                } else {
+                    // If there's an error, log it to the console
+                    console.log(response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Handle error, if any
+                console.log(error);
+            }
+        });
+    });
+});
+
+</script>
+
+
+
