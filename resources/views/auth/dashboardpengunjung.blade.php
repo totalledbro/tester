@@ -11,9 +11,9 @@
             </a>
             <ul class="links">
                 <span class="close-btn material-symbols-rounded">close</span>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Portfolio</a></li>
-                <li><a href="#">Courses</a></li>
+                <li><a href="#">Beranda</a></li>
+                <li><a href="#">Jelajahi</a></li>
+                <li><a href="#">Kategori</a></li>
                 <li><a href="#">About us</a></li>
                 <li><a href="#">Contact us</a></li>
             </ul>
