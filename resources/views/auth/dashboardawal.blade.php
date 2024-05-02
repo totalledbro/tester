@@ -26,7 +26,8 @@
         <div class="form-box login">
             <div class="form-content">
                 <h2>LOGIN</h2>
-                <form action="#">
+                <form id="login-form" method="POST" action="{{ route('login') }}" >
+                @csrf
                     <div class="input-field">
                         <input type="text" required>
                         <label>Email</label>
@@ -45,16 +46,16 @@
             </div>
         </div>
         <div class="form-box signup">
-            <div class="form-content" role="form" method="POST" action="{{ route('anggota.store') }}">
+            <div class="form-content" role="form" method="POST" action="{{ route('register') }}">
                 <h2>SIGNUP</h2>
-                <form id="signup-form" method="POST" action="{{ route('anggota.store') }}">
+                <form id="signup-form" method="POST" action="{{ route('register') }}">
                     @csrf
                     <div class="input-field">
-                        <input type="text" name="namadepan" value="{{ old('namadepan') }}" required>
+                        <input type="text" name="firstname" value="{{ old('first_name') }}" required>
                         <label>Enter your first name</label>
                     </div>
                     <div class="input-field">
-                        <input type="text" name="namablkg" value="{{ old('namablkg') }}" required>
+                        <input type="text" name="lastname" value="{{ old('last_name') }}" required>
                         <label>Enter your last name</label>
                     </div>
                     <div class="input-field">
@@ -145,7 +146,37 @@ $(document).ready(function() {
         });
     });
 });
+$(document).ready(function() {
+        // Function to handle form submission
+        $("#login-form").submit(function(event) {
+            // Prevent default form submission
+            event.preventDefault();
 
+            // Serialize form data
+            var formData = $(this).serialize();
+
+            // Send form data to the server using AJAX
+            $.ajax({
+                type: "POST",
+                url: $(this).attr("action"),
+                data: formData,
+                success: function(response) {
+                    // Check if login was successful
+                    if (response.success) {
+                        // Redirect to dashboard or perform other actions
+                        window.location.href = "{{ route('welcome') }}";
+                    } else {
+                        // Display error message or perform other actions
+                        console.log(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle error, if any
+                    console.log(error);
+                }
+            });
+        });
+    });
 </script>
 
 
