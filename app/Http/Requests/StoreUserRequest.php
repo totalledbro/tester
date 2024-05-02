@@ -23,10 +23,10 @@ class StoreUserRequest extends FormRequest
     {
         return [
             //
-            'namadepan' => 'required',
-            'namablkg' => 'required',
-            'email' => 'required|email|unique:anggota',
-            'password' => 'required|min:8',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
         ];
     }
     public function messages(): array

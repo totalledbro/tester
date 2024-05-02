@@ -51,11 +51,11 @@
                 <form id="signup-form" method="POST" action="{{ route('register') }}">
                     @csrf
                     <div class="input-field">
-                        <input type="text" name="firstname" value="{{ old('first_name') }}" required>
+                        <input type="text" name="first_name" value="{{ old('first_name') }}" required>
                         <label>Enter your first name</label>
                     </div>
                     <div class="input-field">
-                        <input type="text" name="lastname" value="{{ old('last_name') }}" required>
+                        <input type="text" name="last_name" value="{{ old('last_name') }}" required>
                         <label>Enter your last name</label>
                     </div>
                     <div class="input-field">

@@ -8,7 +8,7 @@ Route::get('/', function () {
 });
 
 Route::get('/daftar', function () {
-    return view('auth.dashboardawal');
+    return view('welcome');
 });
 
 Route::get('/welcome', function () {
@@ -17,4 +17,4 @@ Route::get('/welcome', function () {
 
 Route::post('/', [UserController::class, 'login'])->name('login');
 Route::post('logout', [UserController::class, 'logout'])->name('logout');
-Route::post('register', [UserController::class, 'register'])->name('register');
+Route::post('/users', [UserController::class, 'register'])->name('register');
