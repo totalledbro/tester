@@ -1,32 +1,14 @@
 @extends('layouts.lay')
 
 @section('content')
-<header>
-        <nav class="navbar">
-            <span class="hamburger-btn material-symbols-rounded">menu</span>
-            <a href="#" class="logo">
-                <img src="images/logo.jpg" alt="logo">
-                <h2></h2>
-                <h3>PERPUSTAKAAN DIGITAL</h3>
-            </a>
-            <ul class="links">
-                <span class="close-btn material-symbols-rounded">close</span>
-                <li><a href="#">Beranda</a></li>
-                <li><a href="#">Jelajahi</a></li>
-                <li><a href="#">Kategori</a></li>
-                <li><a href="#">About us</a></li>
-                <li><a href="#">Contact us</a></li>
-            </ul>
-            <button class="login-btn">LOG IN</button>
-        </nav>
-    </header>
+
     <div class="blur-bg-overlay"></div>
     <div class="form-popup">
         <span class="close-btn material-symbols-rounded">close</span>
         <div class="form-box login">
             <div class="form-content">
                 <h2>LOGIN</h2>
-                <form id="login-form" method="POST" action="{{ route('login') }}" >
+                <form id="login-form" method="POST" action="{{ route('actionlogin') }}" >
                 @csrf
                     <div class="input-field">
                         <input type="text" required>

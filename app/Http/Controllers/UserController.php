@@ -8,6 +8,7 @@ use App\Http\Requests\UpdatePasswordRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 class UserController extends Controller
 {
     /**
@@ -18,42 +19,6 @@ class UserController extends Controller
     public function showLoginForm()
     {
         return view('auth.login');
-    }
-
-    /**
-     * Handle login authentication.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            // Authentication passed...
-            $user = Auth::user();
-
-            if ($user->role === 'administrator') {
-                return redirect()->route('dashboard.admin');
-            } elseif ($user->role === 'anggota') {
-                return redirect()->route('dashboard.anggota');
-            }
-        }
-        Session::flash('error', 'Username atau Password Salah');
-    }
-
-    /**
-     * Log the user out of the application.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-       // return redirect()->route('login');
     }
 
     /**
@@ -77,5 +42,6 @@ class UserController extends Controller
         $validatedData = $request->validated();
 
         $user = User::create($validatedData);
+        return redirect()->route('verify');
     }
 }
