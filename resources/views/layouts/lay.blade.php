@@ -11,8 +11,8 @@
 </head>
 <body>
 @yield('content')
-</body>
-    <header>
+
+<header>
             <nav class="navbar">
                 <span class="hamburger-btn material-symbols-rounded">menu</span>
                 <a href="#" class="logo">
@@ -30,7 +30,8 @@
                 </ul>
                 <button class="login-btn">LOG IN</button>
             </nav>
-        </header>
+</header>
+</body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js">
     @yield('script')
 </script>
