@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests;
 use App\Models\Category;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -17,5 +19,32 @@ class CategoryController extends Controller
     {
         $categories = Category::all();
         return view('index', compact('categories'));
+    }
+
+    public function add(StoreCategoryRequest $request)
+    {
+        $validatedData = $request->validated();
+        $validatedData['name'] = Str::lower($validatedData['name']);
+        $category = Category::create($validatedData);
+        return redirect()->route('kategori');
+    }
+    
+    public function edit(Product $product)
+    {
+        return view('edit', compact('product'));
+    }
+    public function update(Category $category, StoreCategoryRequest $request)
+    {
+        $validatedData = $request->validated();
+        $validatedData['name'] = Str::lower($validatedData['name']);
+        $category->update($validatedData);
+        return redirect()->route('kategori');
+    }
+
+ 
+    public function delete(Category $category)
+    {
+        $category->delete();
+        return redirect()->route('kategori');
     }
 }

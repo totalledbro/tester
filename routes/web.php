@@ -17,7 +17,7 @@ Route::get('/admin', function () {
 Route::get('/kategori', function () {
     $categories = Category::all();
     return view('admin.kategori',compact('categories'));
-});
+})->name('kategori');
 Route::get('/admins', function () {
     return view('admindasar');
 });
@@ -34,3 +34,7 @@ Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('acti
 Route::post('/users', [UserController::class, 'register'])->name('register');
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('products.index');
+Route::post('/categories', [CategoryController::class, 'add'])->name('addcategory');
+Route::get('/categories/{category}', [CategoryController::class, 'edit'])->name('editcategory');
+Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('updatecategory');
+Route::delete('/categories/{category}', [CategoryController::class, 'delete'])->name('deletecategory');
