@@ -8,6 +8,7 @@
     <title>Responsive Admin Dashboard | Korsat X Parmaga</title>
     <!-- ======= Styles ====== -->
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0">
     <style>
         /* =========== Google Fonts ============ */
         @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap");
@@ -38,7 +39,7 @@
                 </li>
 
                 <li>
-                    <a href="#">
+                    <a href="{{ url('/buku') }}">
                         <span class="icon">
                             <ion-icon name="book-outline"></ion-icon>
                         </span>

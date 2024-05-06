@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('author');
             $table->string('year');
             $table->string('stock')->default(5);
-            $table->binary('pdf')->required();
+            $table->mediumBinary('pdf')->required();
             $table->timestamps();
             $table->unsignedBigInteger('category_id');
             $table->foreign('category_id')->references('id')->on('categories');

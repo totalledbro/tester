@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="main">
+<div class="main active">
     <h1>Kategori</h1>
     <div class="content">
         <div class="category">
@@ -23,7 +23,7 @@
             </div>
         </div>
         <h2>Daftar Kategori</h2>
-        <div class="table-responsive">
+
             <table class="table">
                 <thead>
                     <tr>
@@ -44,12 +44,30 @@
                                     <ion-icon name="trash-bin-outline"></ion-icon>
                                     </button>
                             </form>
-                        <td><!-- Add actions here --></td>
                     </tr>
+                    <div class="form-popup" id="editForm{{$category->id}}">
+                            <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $category->id }})">close</span>
+
+                                <div class="form-box edit">
+                                    <div class="form-content" >
+                                        <h2>Edit Kategori</h2>
+                                        <form id="edit-form-{{ $category->id }}" method="POST" action="{{ route('updatecategory', $category->id) }}">
+                                            @csrf
+                                            @method('POST')
+                                            <div class="input-field">
+                                                <input type="text" name="name" id="categoryName{{ $category->id }}" value="{{ $category->name }}" required>
+                                                <label>Nama Kategori</label>
+                                            </div>
+                                            <button type="submit" class="update">Update</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
                     @endforeach
                 </tbody>
             </table>
-        </div>
+
         </div>
         <div class="overlay" id="overlay" onClick="closeForm()"></div> <!-- Add overlay element -->
         <div class="form-popup" id="editForm{{$category->id}}">
@@ -70,12 +88,9 @@
                                     </div>
                                 </div>
                             </div>
-    </div>
+        </div>
 </div>
 @endsection
-
-<style>
-</style>
 
 <script>
         const form = document.getElementById('add-form');

@@ -29,10 +29,7 @@ class CategoryController extends Controller
         return redirect()->route('kategori');
     }
     
-    public function edit(Product $product)
-    {
-        return view('edit', compact('product'));
-    }
+
     public function update(Category $category, StoreCategoryRequest $request)
     {
         $validatedData = $request->validated();

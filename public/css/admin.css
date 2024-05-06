@@ -156,7 +156,7 @@
     width: calc(100% - 80px);
     left: 80px;
   }
-  
+
   .topbar {
     width: 100%;
     height: 60px;
@@ -339,15 +339,19 @@
   }
 
     /* Style for the responsive table */
-    .table-responsive {
-      overflow-x: auto;
-      max-width: 100%;
-  }
-
-  /* Style for the table itself */
-  .table {
+  .table-responsive{
       width: 100%;
       border-collapse: collapse;
+      margin-top: 10px;
+  }
+  /* Style for the table itself */
+  .table {
+      display: table;
+      border-collapse: separate;
+      box-sizing: border-box;
+      text-indent: initial;
+      border-spacing: 2px;
+      border-color: gray;
   }
 
   .table th,
@@ -378,7 +382,13 @@
       pointer-events: none; /* Disable pointer events */
       transition: opacity 0.3s ease; /* Add transition for smooth visibility */
   }
-
+  .form-popup .close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: #878484;
+    cursor: pointer;
+}
   .form-popup.active {
       opacity: 1; /* Set opacity to 1 when active */
       pointer-events: auto; /* Enable pointer events */
@@ -428,8 +438,9 @@
 
   .close-btn {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 12px;
+      right: 12px;
+      color: #878484;
       cursor: pointer;
   }
 
@@ -445,7 +456,17 @@
   .delete-btn:hover {
       background-color: #ff0000; /* Change color on hover */
   }
+  
+  /* Responsive design */
+  @media (max-width: 760px) {
+    .form-popup {
+        width: 95%;
+    }
 
+    .form-box .form-content {
+        padding: 30px 20px;
+    }
+}
   /* Overlay style */
   .overlay {
       position: fixed;
