@@ -33,7 +33,7 @@ class StoreBookRequest extends FormRequest
     public function messages(): array
     {
     return [
-        'name.unique'=>"Buku sudah ada",
+        'name.unique'=>"Buku sudah adaa",
     ];
     }
 }
