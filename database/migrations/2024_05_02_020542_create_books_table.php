@@ -15,14 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('author');
-            $table->string('year');
-            $table->string('stock')->default(5);
-            $table->mediumBinary('pdf')->required();
+            $table->unsignedInteger('year'); // Changed to integer
+            $table->unsignedInteger('stock')->default(5); // Changed to integer
+            $table->string('pdf_url'); // Changed to string or text
             $table->timestamps();
             $table->unsignedBigInteger('category_id');
             $table->foreign('category_id')->references('id')->on('categories');
         });
-        
     }
 
     /**
@@ -33,3 +32,4 @@ return new class extends Migration
         Schema::dropIfExists('books');
     }
 };
+

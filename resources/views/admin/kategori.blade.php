@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="main active">
-    <h1>Kategori</h1>
+    <h1>Data Kategori</h1>
     <div class="content">
         <div class="category">
         <button class="add-btn" onClick="openForm()">Tambah Kategori</button>

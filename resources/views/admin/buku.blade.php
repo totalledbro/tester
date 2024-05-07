@@ -2,16 +2,16 @@
 
 @section('content')
 <div class="main active">
-    <h1>Kategori</h1>
+    <h1>Data Buku</h1>
     <div class="content">
         <div class="category">
-        <button class="add-btn" onClick="openForm()">Tambah Kategori</button>
+        <button class="add-btn" onClick="openForm()">Tambah Buku</button>
         <div class="form-popup" id="bookForm">
             <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
             <div class="form-box add">
                 <div class="form-content" >
                     <h2>Tambah buku</h2>
-                    <form id="add-form" method="POST" action="{{ route('addbook') }}">
+                    <form id="add-form" method="POST" action="{{ route('addbook') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="input-field">
                             <input type="text" name="title" id="title" required>

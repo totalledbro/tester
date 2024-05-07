@@ -26,8 +26,8 @@ class StoreBookRequest extends FormRequest
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
             'year' => 'required|integer|min:1900|max:2045',
-            'pdf' => 'required|mimes:pdf|max:20000',
-            'category_id' => 'required',
+            'pdf' => 'required|string|max:255',
+            'category_id' => 'required|integer|exists:categories,id',
         ];
     }
     public function messages(): array
