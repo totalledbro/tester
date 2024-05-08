@@ -11,7 +11,7 @@
             <div class="form-box add">
                 <div class="form-content" >
                     <h2>Tambah buku</h2>
-                    <form id="add-form" method="POST" action="{{ route('addbook') }}" enctype="multipart/form-data">
+                    <form id="add-form" method="POST" action="{{ route('addbook') }}">
                         @csrf
                         <div class="input-field">
                             <input type="text" name="title" id="title" required>
@@ -22,7 +22,7 @@
                             <label>Penulis</label>
                         </div>
                         <div class="input-field">
-                            <input type="text" name="tahun" id="tahun" required>
+                            <input type="text" name="year" id="year" required>
                             <label>Tahun</label>
                         </div>
                         <div class="input-field">
@@ -35,7 +35,7 @@
                             <label>Kategori</label>
                         </div>
                         <div class="input-field">
-                            <input type="file" name="pdf" id="pdf" accept=".pdf" required>
+                            <input type="text" name="pdf" id="pdf"  required>
                             <label>Upload PDF</label>
                         </div>
                         <button type="submit" class="tambah">Tambah</button>
@@ -62,7 +62,7 @@
                         <td>{{ ucwords($book->author) }}</td>
                         <td>{{ $book->year }}</td>
                         <td>{{ $book->stock }}</td>
-                        <td>{{ ucwords($book->category->name)}}</td>
+                        <td>{{ $book->category ? ucwords($book->category->name) : 'N/A' }}</td>
                         <td>
                         <button class="edit-btn" onClick="openEditForm({{ $book->id }})">edit</button>
                             <form action="{{ route('deletebook', $book->id) }}" method="POST">
@@ -148,14 +148,5 @@
             document.getElementById('editForm' + editFormId).classList.remove("active");
             document.getElementById("overlay").style.display = "none"; // Hide overlay
         }
-
-
-
-        form.addEventListener('submit', function(event) {
-            // Get the input element by its ID
-            const input = document.getElementById('categoryName');
-
-            // Convert the input value to lowercase and update the input value
-            input.value = input.value.toLowerCase();
-        });
+        
 </script>
