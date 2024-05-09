@@ -22,7 +22,7 @@
                             <label>Penulis</label>
                         </div>
                         <div class="input-field">
-                            <input type="text" name="year" id="year" required>
+                            <input type="text" name="year" id="year" required oninput="restrictToNumbers(this)">
                             <label>Tahun</label>
                         </div>
                         <div class="input-field">
@@ -148,5 +148,12 @@
             document.getElementById('editForm' + editFormId).classList.remove("active");
             document.getElementById("overlay").style.display = "none"; // Hide overlay
         }
-        
+
+        function restrictToNumbers(input) {
+            // Remove non-numeric characters from the input value
+            input.value = input.value.replace(/\D/g, '');
+            if (input.value.length > 4) {
+                input.value = input.value.slice(0, 4);
+        }}
+
 </script>
