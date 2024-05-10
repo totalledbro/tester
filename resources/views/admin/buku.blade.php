@@ -11,7 +11,7 @@
             <div class="form-box add">
                 <div class="form-content" >
                     <h2>Tambah buku</h2>
-                    <form id="add-form" method="POST" action="{{ route('addbook') }}">
+                    <form id="add-form" method="POST" action="{{ route('addbook') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="input-field">
                             <input type="text" name="title" id="title" required>
@@ -35,7 +35,7 @@
                             <label>Kategori</label>
                         </div>
                         <div class="input-field">
-                            <input type="text" name="pdf" id="pdf"  required>
+                            <input type="file" name="pdf" id="pdf" accept=".pdf" required>
                             <label>Upload PDF</label>
                         </div>
                         <button type="submit" class="tambah">Tambah</button>
