@@ -79,32 +79,32 @@
                 <div class="form-box edit">
                     <div class="form-content" >
                         <h2>Edit Buku</h2>
-                        <form id="edit-form-{{ $book->id }}" method="POST" action="{{ route('updatebook', $book->id) }}">
+                        <form id="edit-form-{{ $book->id }}" method="POST" action="{{ route('updatebook', $book->id) }}" enctype="multipart/form-data">
                             @csrf
                             @method('POST')
                             <div class="input-field">
-                                <input type="text" name="name" id="title{{ $book->id }}" value="{{ $book->title }}" required>
+                                <input type="text" name="title" id="title{{ $book->id }}" value="{{ $book->title }}" >
                                 <label>Judul</label>
                             </div>
                             <div class="input-field">
-                                <input type="text" name="author" id="author{{ $book->id }}" value="{{ $book->author }}" required>
+                                <input type="text" name="author" id="author{{ $book->id }}" value="{{ $book->author }}" >
                                 <label>Penulis</label>
                             </div>
                             <div class="input-field">
-                                <input type="text" name="tahun" id="tahun{{ $book->id }}" value="{{ $book->year }}" required>
+                                <input type="text" name="year" id="tahun{{ $book->id }}" value="{{ $book->year }}" >
                                 <label>Tahun</label>
                             </div>
                             <div class="input-field">
-                                <select name="category_id" id="category_id{{ $book->id }}" required>
+                                <select name="category_id" id="category_id{{ $book->id }}" >
                                     <option value="" disabled selected>Pilih Kategori</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ $category->id == $book->category_id ? 'selected' : '' }}>{{ $category->name }}</option>
                                     @endforeach
                                 </select>
                                 <label>Kategori</label>
-                                /div>
+                            </div>
                             <div class="input-field">
-                                <input type="file" name="pdf" id="pdf{{ $book->id }}" accept=".pdf" required>
+                                <input type="file" name="pdf" id="pdf{{ $book->id }}" accept=".pdf">
                                 <label>Upload PDF</label>
                             </div>
                             <button type="submit" class="update">Update</button>

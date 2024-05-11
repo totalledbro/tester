@@ -50,7 +50,6 @@ Route::delete('/categories/{category}', [CategoryController::class, 'delete'])->
 
 Route::get('/books',[BookController::class, 'index'])->name('books.index');
 Route::post('/books',[BookController::class, 'add'])->name('addbook');
-Route::get('/books/{book}',[BookController::class, 'edit'])->name('editbook');
 Route::post('/books/{book}',[BookController::class, 'update'])->name('updatebook');
 Route::delete('/books/{book}',[BookController::class, 'delete'])->name('deletebook');
 

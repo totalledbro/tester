@@ -51,7 +51,7 @@
                                 <div class="form-box edit">
                                     <div class="form-content" >
                                         <h2>Edit Kategori</h2>
-                                        <form id="edit-form-{{ $category->id }}" method="POST" action="{{ route('updatecategory', $category->id) }}">
+                                        <form id="edit-form-{{ $category->id }}" method="POST" action="{{ route('updatecategory', $category->id) }}" >
                                             @csrf
                                             @method('POST')
                                             <div class="input-field">
