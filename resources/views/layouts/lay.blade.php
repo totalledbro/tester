@@ -7,31 +7,15 @@
     <!-- Google Fonts Link For Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.0.1/css/ionicons.min.css">
+    
     <script src="{{ asset('js/script.js') }}" defer></script>
 </head>
 <body>
 @yield('content')
-
-<header>
-            <nav class="navbar">
-                <span class="hamburger-btn material-symbols-rounded">menu</span>
-                <a href="#" class="logo">
-                    <img src="images/logo.jpg" alt="logo">
-                    <h2></h2>
-                    <h3>PERPUSTAKAAN DIGITAL</h3>
-                </a>
-                <ul class="links">
-                    <span class="close-btn material-symbols-rounded">close</span>
-                    <li><a href="#">Beranda</a></li>
-                    <li><a href="#">Jelajahi</a></li>
-                    <li><a href="#">Kategori</a></li>
-                    <li><a href="#">About us</a></li>
-                    <li><a href="#">Contact us</a></li>
-                </ul>
-                <button class="login-btn">LOG IN</button>
-            </nav>
-</header>
 </body>
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js">
     @yield('script')
 </script>

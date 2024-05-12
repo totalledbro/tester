@@ -35,7 +35,7 @@ class BookController extends Controller
         }
     
         $book->save();
-            // Return a response with success message
+
         return redirect()->route('buku');
     }
  
