@@ -7,14 +7,21 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BookController;
 use App\Models\Book;
 use App\Models\Category;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\RedirectIfAdministrator;
 
-Route::get('/', function () {
-    return view('auth.dashboardawal');
-})->name('dash');
 
-Route::get('/admin', function () {
-    return view('admin.dashboard');
-})->name('admin');
+Route::middleware([RedirectIfAdministrator::class])->group(function () {
+    Route::get('/', function () {
+        return view('auth.dashboardawal');
+    })->name('dash');
+});
+
+Route::middleware([AdminMiddleware::class])->group(function () {
+    Route::get('/admin', function () {
+        return view('admin.dashboard');
+    })->name('admin');
+});
 
 Route::get('/kategori', function () {
     $categories = Category::all();
@@ -27,15 +34,14 @@ Route::get('/buku', function () {
     return view('admin.buku',compact('books','categories'));
 })->name('buku');
 
+Route::get('/403', function () {
+    return view('error.403');
+})->name('403');
+
+
 Route::get('/admins', function () {
     return view('admindasar');
 });
-Route::get('/welcome', function () {
-    return view('welcome');
-})->name('welcome');
-Route::get('/verify',function (){
-    return view('auth.verify');
-})->name('verify');
 
 Route::post('/', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');

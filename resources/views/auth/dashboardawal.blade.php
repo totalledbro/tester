@@ -191,34 +191,7 @@
         });
 
         // Function to handle form submission for login
-        $("#login-form").submit(function(event) {
-            // Prevent default form submission
-            event.preventDefault();
 
-            // Serialize form data
-            var formData = $(this).serialize();
-
-            // Send form data to the server using AJAX
-            $.ajax({
-                type: "POST",
-                url: $(this).attr("action"),
-                data: formData,
-                success: function(response) {
-                    // Check if login was successful
-                    if (response.success) {
-                        // Redirect to dashboard or perform other actions
-                        window.location.href = "{{ route('welcome') }}";
-                    } else {
-                        // Display error message or perform other actions
-                        console.log(response.message);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    // Handle error, if any
-                    console.log(error);
-                }
-            });
-        });
     });
 
     function dropdown() {

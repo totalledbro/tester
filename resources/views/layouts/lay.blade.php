@@ -13,10 +13,10 @@
 </head>
 <body>
 @yield('content')
-</body>
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js">
-    @yield('script')
-</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+
+
 </html>
