@@ -117,10 +117,6 @@ header {
     cursor: pointer;
     vertical-align: middle;
 }
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
 
 .dropdown-content {
     display: none;
