@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Storage;
 
 class BookController extends Controller
 {
-
     public function index()
     {
         $books = Book::with('category')->get();
@@ -21,24 +20,53 @@ class BookController extends Controller
     public function add(StoreBookRequest $request)
     {
         $book = new Book();
-        // Validate the request data
         $book->title = Str::lower($request->input('title'));
         $book->author = Str::lower($request->input('author'));
         $book->year = $request->input('year');
         $book->category_id = $request->input('category_id');
-
+    
         if ($request->hasFile('pdf')) {
             $pdf = $request->file('pdf');
             $pdfName = Str::slug($request->input('title')) . '.' . $pdf->getClientOriginalExtension();
             $pdfPath = $pdf->storeAs('data', $pdfName, 'public');
             $book->pdf_url = $pdfPath;
+    
+            // Correct storage paths
+            $pdfFullPath = storage_path('app/public/' . $pdfPath);
+            $outputDir = storage_path('app/public/cover');
+    
+            // Log the paths
+            \Log::info("PDF Full Path: " . $pdfFullPath);
+            \Log::info("Output Directory: " . $outputDir);
+    
+            // Construct the command
+            $pythonScript = base_path('app/python/extract_pdf_cover.py');
+            $command = "python3 \"$pythonScript\" \"$pdfFullPath\" \"$outputDir\"";
+            
+            // Execute the command and capture the output and return value
+            $output = [];
+            $return_var = 0;
+            exec($command, $output, $return_var);
+    
+            // Log the command and its output
+            \Log::info("Command: $command");
+            \Log::info("Command Output: " . implode("\n", $output));
+            \Log::info("Return Value: $return_var");
+    
+            if ($return_var !== 0) {
+                \Log::error("Python script error: " . implode("\n", $output));
+                return redirect()->route('buku')->with('error', 'Failed to generate cover image.');
+            }
         }
     
         $book->save();
-
-        return redirect()->route('buku');
+    
+        return redirect()->route('buku')->with('success', 'Book added successfully.');
     }
- 
+    
+    
+    
+    
     public function update(Book $book, StoreBookRequest $request)
     {
         $validatedData = $request->validated();
@@ -73,7 +101,6 @@ class BookController extends Controller
         return redirect()->route('buku')->with('success', 'Book updated successfully.');
     }
     
-
     public function delete($id)
     {
         // Retrieve the book

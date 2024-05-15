@@ -22,6 +22,19 @@ header {
     z-index: 10;
     padding: 0 10px;
 }
+.main {
+    position: absolute;
+    width: calc(100% - 300px);
+    left: 300px;
+    min-height: 100vh;
+    background: var(--white);
+    transition: 0.5s;
+  }
+  
+.main.active {
+    width: calc(100% - 80px);
+    left: 80px;
+  }
 
 .navbar {
     display: flex;
@@ -106,6 +119,11 @@ header {
     display: inline-block;
 }
 
+.container {
+    position: relative;
+    width: 100%;
+  }
+  
 .greeting {
     display: inline-block;
     margin-right: 10px; /* Adjust as needed */
