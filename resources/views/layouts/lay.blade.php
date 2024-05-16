@@ -120,6 +120,7 @@
             <h3>Registration Successful!</h3>
             <!-- Add any additional content or styling for the popup -->
         </div>
+
         @yield('content')
     </div>
 </div>
@@ -218,6 +219,32 @@
             }
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const books = @json($books); // Convert PHP array to JavaScript array
+
+    const bookContainer = document.querySelector('.book-container');
+
+    books.forEach(book => {
+        const bookCard = document.createElement('div');
+        bookCard.className = 'book-card';
+        
+        // Remove the .pdf extension from the filename
+        const pdfFilenameWithoutExtension = book.pdf.slice(0, -4);
+
+        bookCard.innerHTML = `
+            <img src="{{ asset('') }}/cover/${pdfFilenameWithoutExtension}.png" alt="Book Cover" class="book-cover">
+            <div class="book-info">
+                <h4 class="book-title">${book.title}</h4>
+                <p class="book-author">${book.author}</p>
+                <p class="book-year">${book.year}</p>
+            </div>
+        `;
+
+        bookContainer.appendChild(bookCard);
+    });
+});
+
 </script>
 </body>
 </html>

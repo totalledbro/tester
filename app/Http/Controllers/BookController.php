@@ -27,31 +27,21 @@ class BookController extends Controller
     
         if ($request->hasFile('pdf')) {
             $pdf = $request->file('pdf');
-            $pdfName = Str::slug($request->input('title')) . '.' . $pdf->getClientOriginalExtension();
+            // Replace spaces with underscores in the file name
+            $pdfName = Str::slug($request->input('title'), '_') . '.' . $pdf->getClientOriginalExtension();
             $pdfPath = $pdf->storeAs('data', $pdfName, 'public');
             $book->pdf_url = $pdfPath;
     
-            // Correct storage paths
+            // Generate cover image
             $pdfFullPath = storage_path('app/public/' . $pdfPath);
             $outputDir = storage_path('app/public/cover');
     
-            // Log the paths
-            \Log::info("PDF Full Path: " . $pdfFullPath);
-            \Log::info("Output Directory: " . $outputDir);
-    
-            // Construct the command
             $pythonScript = base_path('app/python/extract_pdf_cover.py');
             $command = "python3 \"$pythonScript\" \"$pdfFullPath\" \"$outputDir\"";
-            
-            // Execute the command and capture the output and return value
+    
             $output = [];
             $return_var = 0;
             exec($command, $output, $return_var);
-    
-            // Log the command and its output
-            \Log::info("Command: $command");
-            \Log::info("Command Output: " . implode("\n", $output));
-            \Log::info("Return Value: $return_var");
     
             if ($return_var !== 0) {
                 \Log::error("Python script error: " . implode("\n", $output));
@@ -65,8 +55,6 @@ class BookController extends Controller
     }
     
     
-    
-    
     public function update(Book $book, StoreBookRequest $request)
     {
         $validatedData = $request->validated();
@@ -75,12 +63,18 @@ class BookController extends Controller
     
         if ($book->title !== $validatedData['title']) {
             // If the title has changed, update the PDF name accordingly
-            $newPdfName = Str::slug($validatedData['title']) . '.' . pathinfo($book->pdf_url, PATHINFO_EXTENSION);
+            $newPdfName = Str::slug($validatedData['title'], '_') . '.' . pathinfo($book->pdf_url, PATHINFO_EXTENSION);
             $newPdfPath = str_replace(basename($book->pdf_url), $newPdfName, $book->pdf_url);
+    
             // Rename the PDF file
             Storage::disk('public')->move($book->pdf_url, $newPdfPath);
             // Update the PDF URL in the database
             $validatedData['pdf_url'] = $newPdfPath;
+    
+            // Rename the cover image
+            $coverImagePath = str_replace('data/', 'cover/', $book->pdf_url);
+            $newCoverImagePath = str_replace(basename($book->pdf_url), basename($newPdfPath, '.' . pathinfo($newPdfPath, PATHINFO_EXTENSION)) . '.jpg', $coverImagePath);
+            Storage::disk('public')->move($coverImagePath, $newCoverImagePath);
         }
     
         if ($request->hasFile('pdf')) {
@@ -88,33 +82,66 @@ class BookController extends Controller
             if ($book->pdf_url) {
                 Storage::disk('public')->delete($book->pdf_url);
             }
+            // Delete the existing cover image
+            $coverImagePath = str_replace('data/', 'cover/', $book->pdf_url);
+            if (Storage::disk('public')->exists($coverImagePath)) {
+                Storage::disk('public')->delete($coverImagePath);
+            }
+    
             // Upload the new PDF file
             $pdf = $request->file('pdf');
-            $pdfName = Str::slug($request->input('title')) . '.' . $pdf->getClientOriginalExtension();
+            $pdfName = Str::slug($request->input('title'), '_') . '.' . $pdf->getClientOriginalExtension();
             $pdfPath = $pdf->storeAs('data', $pdfName, 'public');
             $book->pdf_url = $pdfPath;
+    
+            // Generate the new cover image
+            $pdfFullPath = storage_path('app/public/' . $pdfPath);
+            $outputDir = storage_path('app/public/cover');
+    
+            $pythonScript = base_path('app/python/extract_pdf_cover.py');
+            $command = "python3 \"$pythonScript\" \"$pdfFullPath\" \"$outputDir\"";
+    
+            $output = [];
+            $return_var = 0;
+            exec($command, $output, $return_var);
+    
+            if ($return_var !== 0) {
+                \Log::error("Python script error: " . implode("\n", $output));
+                return redirect()->route('buku')->with('error', 'Failed to generate cover image.');
+            }
         }
+    
         unset($validatedData['pdf']);
         $book->update($validatedData);
     
-        // Return a response with success message
         return redirect()->route('buku')->with('success', 'Book updated successfully.');
     }
+    
     
     public function delete($id)
     {
         // Retrieve the book
         $book = Book::findOrFail($id);
-
+    
         // Delete the associated PDF file (if it exists)
         if ($book->pdf_url) {
             Storage::disk('public')->delete($book->pdf_url);
+            
+            // Construct the cover image path
+            $coverImagePath = str_replace('data/', 'cover/', $book->pdf_url);
+            $coverImagePath = pathinfo($coverImagePath, PATHINFO_DIRNAME) . '/' . pathinfo($coverImagePath, PATHINFO_FILENAME) . '.png';
+            
+            // Delete the associated cover image
+            if (Storage::disk('public')->exists($coverImagePath)) {
+                Storage::disk('public')->delete($coverImagePath);
+            }
         }
-
+    
         // Delete the book record from the database
         $book->delete();
-
+    
         // Return a response with success message
         return redirect()->route('buku')->with('success', 'Book deleted successfully.');
     }
+    
 }

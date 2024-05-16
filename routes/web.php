@@ -13,7 +13,7 @@ use App\Http\Middleware\RedirectIfAdministrator;
 
 Route::middleware([RedirectIfAdministrator::class])->group(function () {
     Route::get('/', function () {
-        $books = Book::all();
+        $books = Book::with('category')->orderBy('id', 'desc')->limit(3)->get();
         return view('auth.dashboardawal',compact('books'));
     })->name('dash');
 });
