@@ -1,6 +1,15 @@
 @extends('layouts.lay')
 
 @section('content')
+<div class="welcome-section">
+    <h1>Selamat Datang dan Selamat Membaca</h1>
+    <h2>Mari Jelajahi Dunia Pengetahuan di Perpustakaan Digital</h2>
+</div>
+
+<hr>
+
+<h3>Koleksi Terbaru</h3>
+
 <div class="book-container">
     @foreach($books as $book)
         <div class="book-card">

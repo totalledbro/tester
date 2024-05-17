@@ -17,6 +17,19 @@ class BookController extends Controller
         return view('index', compact('books'));
     }
 
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword');
+        \Log::info("Searching for books with keyword: $keyword");
+        $books = Book::where('title', 'like', "%{$keyword}%")
+                     ->orWhere('author', 'like', "%{$keyword}%")
+                     ->get();
+        \Log::info("Found books: " . $books->toJson());
+        return response()->json($books);
+    }
+    
+    
+
     public function add(StoreBookRequest $request)
     {
         $book = new Book();

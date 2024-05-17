@@ -11,9 +11,28 @@
 body {
     height: 100vh;
     width: 100%;
-    background: url(/img/login-bg.png) center/cover no-repeat;
+    background: url(/img/login-bg.png) center/cover no-repeat fixed;
 }
 
+.welcome-section {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.welcome-section h1, .welcome-section h2 {
+    margin-bottom: 10px;
+}
+
+hr {
+    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid #ddd;
+}
+
+h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
 header {
     position: fixed; /* Change from relative to fixed */
     width: 100%;
@@ -21,7 +40,7 @@ header {
     left: 0;
     z-index: 10;
     padding: 0 10px;
-    background: transparent; /* Add background to avoid overlap with content */
+    background: #00bcd4; /* Add background to avoid overlap with content */
     box-shadow: none; /* Optional: Add shadow for better separation */
 }
 
@@ -45,7 +64,7 @@ header {
 
 .navbar {
     display: flex;
-    padding: 22px 0;
+    padding: 10px 0; /* Adjust padding to reduce height */
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
@@ -67,14 +86,22 @@ header {
 }
 
 .navbar .logo img {
-    width: 40px;
-    border-radius: 50%;
+    width: 30px; /* Decrease width if necessary */
+    height: auto; /* Maintain aspect ratio */
 }
 
 .navbar .logo h2 {
     color: #fff;
     font-weight: 600;
     font-size: 1.7rem;
+}
+/* Add this CSS to your stylesheet */
+.navbar .logo h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    margin: 0;
 }
 
 .navbar .links {
@@ -110,13 +137,14 @@ header {
     outline: none;
     background: #fff;
     color: #275360;
-    font-size: 1rem;
+    font-size: 0.9rem; /* Slightly smaller font size */
     font-weight: 600;
-    padding: 10px 18px;
+    padding: 8px 12px; /* Reduced padding */
     border-radius: 3px;
     cursor: pointer;
     transition: 0.15s ease;
 }
+
 
 .navbar .login-btn:hover {
     background: #ddd;
@@ -394,6 +422,7 @@ form button:hover {
     margin-top: 5px; /* Add some space between input field and error message */
     display: block; /* Ensure the error message is displayed as a block element */
 }
+
 
 .book-container {
     display: flex;

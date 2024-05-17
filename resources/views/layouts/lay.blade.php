@@ -19,15 +19,15 @@
         <header>
             <nav class="navbar">
                 <span class="hamburger-btn material-symbols-rounded">menu</span>
-                <a href="#" class="logo">
-                    <img src="images/logo.jpg" alt="logo">
+                <a href="{{url('/')}}" class="logo">
+                    <img src="{{ asset('img/logodesa.png') }}" alt="logo">
                     <h2></h2>
                     <h3>PERPUSTAKAAN DIGITAL</h3>
                 </a>
                 <ul class="links">
                     <span class="close-btn material-symbols-rounded">close</span>
-                    <li><a href="#">Beranda</a></li>
-                    <li><a href="#">Jelajahi</a></li>
+                    <li><a href="{{url('/')}}">Beranda</a></li>
+                    <li><a href="{{url('/jelajahi')}}">Jelajahi</a></li>
                     <li><a href="#">Kategori</a></li>
                     <li><a href="#">About us</a></li>
                     <li><a href="#">Contact us</a></li>
@@ -220,31 +220,8 @@
         });
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
-    const books = @json($books); // Convert PHP array to JavaScript array
-
-    const bookContainer = document.querySelector('.book-container');
-
-    books.forEach(book => {
-        const bookCard = document.createElement('div');
-        bookCard.className = 'book-card';
-        
-        // Remove the .pdf extension from the filename
-        const pdfFilenameWithoutExtension = book.pdf.slice(0, -4);
-
-        bookCard.innerHTML = `
-            <img src="{{ asset('') }}/cover/${pdfFilenameWithoutExtension}.png" alt="Book Cover" class="book-cover">
-            <div class="book-info">
-                <h4 class="book-title">${book.title}</h4>
-                <p class="book-author">${book.author}</p>
-                <p class="book-year">${book.year}</p>
-            </div>
-        `;
-
-        bookContainer.appendChild(bookCard);
-    });
-});
 
 </script>
+@yield('scripts')
 </body>
 </html>

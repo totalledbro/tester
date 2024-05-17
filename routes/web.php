@@ -10,12 +10,17 @@ use App\Models\Category;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\RedirectIfAdministrator;
 
-
+Route::get('/search', [BookController::class, 'search'])->name('search');
 Route::middleware([RedirectIfAdministrator::class])->group(function () {
     Route::get('/', function () {
         $books = Book::with('category')->orderBy('id', 'desc')->limit(3)->get();
         return view('auth.dashboardawal',compact('books'));
     })->name('dash');
+
+    Route::get('/jelajahi', function () {
+        $books = Book::with('category');
+        return view('auth.jelajahi',compact('books'));
+    })->name('jelajahi');
 });
 
 Route::middleware([AdminMiddleware::class])->group(function () {
