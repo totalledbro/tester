@@ -12,22 +12,7 @@
 <div class="search-box">
     <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
 </div>
-
-<!-- List of Books -->
-<div class="book-list" id="book-list">
-    @foreach($books as $book)
-        <div class="book-item">
-            <div class="cover-container">
-                <img src="{{ asset('storage/cover/' . pathinfo($book->pdf_url, PATHINFO_FILENAME) . '.png') }}" alt="Cover of {{ $book->title }}" class="book-cover">
-            </div>
-            <div class="book-info">
-                <h3>{{ ucwords($book->title) }}</h3>
-                <p>Penulis: {{ ucwords($book->author) }}</p>
-                <p>Tahun: {{ $book->year }}</p>
-            </div>
-        </div>
-    @endforeach
-</div>
+<div id="book-list" class="book-list"></div>
 @endsection
 
 @section('scripts')
@@ -57,20 +42,18 @@ $(document).ready(function() {
                 if (data.length === 0) {
                     $('#book-list').append('<p>Tidak ada buku yang ditemukan.</p>');
                 } else {
+                    let list = '<ul>';
                     data.forEach(function(book) {
-                        $('#book-list').append(
-                            `<div class="book-item">
-                                <div class="cover-container">
-                                    <img src="/storage/cover/${book.pdf_url.split('/').pop().replace('.pdf', '.png')}" alt="Cover of ${capitalizeWords(book.title)}" class="book-cover">
-                                </div>
-                                <div class="book-info">
-                                    <h3>${capitalizeWords(book.title)}</h3>
-                                    <p>Penulis: ${capitalizeWords(book.author)}</p>
-                                    <p>Tahun: ${book.year}</p>
-                                </div>
-                            </div>`
-                        );
+                        list += `
+                            <li class="book-item">
+                                <h3>${capitalizeWords(book.title)}</h3>
+                                <p><strong>Author:</strong> ${capitalizeWords(book.author)}</p>
+                                <p><strong>Year:</strong> ${book.year}</p>
+                            </li>
+                        `;
                     });
+                    list += '</ul>';
+                    $('#book-list').append(list);
                 }
             }
         });
@@ -97,45 +80,34 @@ $(document).ready(function() {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 20px;
         padding: 20px;
+    }
+
+    .book-list ul {
+        list-style-type: none;
+        padding: 0;
     }
 
     .book-item {
-        display: flex;
-        flex-direction: column; /* Align items vertically */
-        align-items: center;
-        width: 100%;
-        max-width: 600px;
-        padding: 20px;
+        background-color: #fff;
         border: 1px solid #ccc;
         border-radius: 5px;
-        text-align: left;
+        padding: 20px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
     }
 
-    .cover-container {
-        width: 100%; /* Ensure the container takes up the full width */
-        display: flex;
-        justify-content: center; /* Center the image horizontally */
-        margin-bottom: 10px; /* Space between image and book info */
+    .book-item h3 {
+        margin: 0 0 10px;
     }
 
-    .book-cover {
-        max-width: 100px;
-        height: auto;
-    }
-
-    .book-info {
-        width: 100%; /* Ensure book info takes up the full width */
-    }
-
-    .book-info h3 {
-        margin: 0;
-        text-align: center;
-    }
-
-    .book-info p {
+    .book-item p {
         margin: 5px 0;
-        text-align: center;
+    }
+
+    .book-item p strong {
+        color: #333;
     }
 </style>

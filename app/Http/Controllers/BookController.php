@@ -20,11 +20,11 @@ class BookController extends Controller
     public function search(Request $request)
     {
         $keyword = $request->input('keyword');
-        \Log::info("Searching for books with keyword: $keyword");
+        //\Log::info("Searching for books with keyword: $keyword");
         $books = Book::where('title', 'like', "%{$keyword}%")
                      ->orWhere('author', 'like', "%{$keyword}%")
                      ->get();
-        \Log::info("Found books: " . $books->toJson());
+        //\Log::info("Found books: " . $books->toJson());
         return response()->json($books);
     }
     
