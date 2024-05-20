@@ -44,11 +44,21 @@ $(document).ready(function() {
                 } else {
                     let list = '<ul>';
                     data.forEach(function(book) {
+                        let bookCoverUrl = `{{ asset('storage/cover') }}/${book.pdf_url.split('/').pop().replace('.pdf', '.png')}`;
                         list += `
                             <li class="book-item">
-                                <h3>${capitalizeWords(book.title)}</h3>
-                                <p><strong>Author:</strong> ${capitalizeWords(book.author)}</p>
-                                <p><strong>Year:</strong> ${book.year}</p>
+                                <div class="cover">
+                                    <img src="${bookCoverUrl}" alt="Book Cover">
+                                </div>
+                                <div class="book-details">
+                                    <h3>${capitalizeWords(book.title)}</h3>
+                                    <p><strong>Author:</strong> ${capitalizeWords(book.author)}</p>
+                                    <p><strong>Year:</strong> ${book.year}</p>
+                                </div>
+                                ${@json(auth()->check()) ? `
+                                <div class="book-action">
+                                    <a href="#" class="pinjam-button">Pinjam</a>
+                                </div>` : ''}
                             </li>
                         `;
                     });
@@ -77,9 +87,6 @@ $(document).ready(function() {
     }
 
     .book-list {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         padding: 20px;
     }
 
@@ -89,25 +96,104 @@ $(document).ready(function() {
     }
 
     .book-item {
-        background-color: #fff;
+        background-color: rgba(255, 255, 255, 0.9);
         border: 1px solid #ccc;
         border-radius: 5px;
         padding: 20px;
-        width: 100%;
-        max-width: 600px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
     }
 
-    .book-item h3 {
+    .cover {
+        width: 20%;
+        max-width: 200px;
+        height: auto;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .cover img {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        margin-right: 20px;
+    }
+
+    .book-details {
+        flex: 1;
+        text-align: left;
+        margin-left: 20px;
+    }
+
+    .book-details h3 {
         margin: 0 0 10px;
+        text-transform: uppercase;
+        text-align: left;
     }
 
-    .book-item p {
+    .book-details p {
         margin: 5px 0;
     }
 
-    .book-item p strong {
+    .book-details p strong {
         color: #333;
+    }
+
+    .book-action {
+        margin-left: auto;
+    }
+
+    .pinjam-button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .pinjam-button:hover {
+        background-color: #0056b3;
+    }
+
+    @media (max-width: 600px) {
+        .book-item {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cover {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .book-details {
+            width: 100%;
+            text-align: center;
+            margin-left: 0;
+        }
+
+        .book-details h3 {
+            text-align: center;
+        }
+
+        .book-action {
+            margin-top: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .pinjam-button {
+            width: 100%;
+        }
     }
 </style>
