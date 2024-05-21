@@ -18,7 +18,10 @@ Route::middleware([RedirectIfAdministrator::class])->group(function () {
     })->name('dash');
 
     Route::get('/jelajahi', function () {
-        $books = Book::with('category');
+        $books = Book::with('category')
+        ->orderBy('id', 'desc')
+        ->get();;
+        \Log::info('Books fetched for jelajahi', $books->pluck('id')->toArray());
         return view('auth.jelajahi',compact('books'));
     })->name('jelajahi');
 });

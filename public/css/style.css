@@ -6,10 +6,34 @@
     font-family: "Open Sans", sans-serif;
 }
 
+
 body {
     width: 100%;
-    background: url(/img/login-bg.png) center/cover no-repeat fixed;
     padding-top: 80px;
+    background: none; /* Remove the background image from the body */
+    position: relative; /* Make the body position relative for pseudo-element positioning */
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url(/img/bgbg.jpg) center/cover no-repeat;
+    z-index: -1; /* Ensure the pseudo-element is behind the content */
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Adjust the opacity for darkness */
+    z-index: -1; /* Ensure the pseudo-element is behind the content */
 }
 
 /* Welcome Section */
@@ -20,6 +44,7 @@ body {
 
 .welcome-section h1, .welcome-section h2 {
     margin-bottom: 10px;
+    color: white;
 }
 
 hr {
@@ -31,6 +56,7 @@ hr {
 h3 {
     text-align: center;
     margin-bottom: 20px;
+    color:white;
 }
 
 /* Header */

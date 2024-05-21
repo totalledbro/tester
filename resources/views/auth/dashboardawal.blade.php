@@ -56,10 +56,7 @@
         border-top: 1px solid #ddd;
     }
 
-    h3 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
+
 
     /* Book Section */
     .book-container {
@@ -127,11 +124,7 @@
             font-size: 1.2rem;
             margin-bottom: 5px;
         }
-        
-        h3 {
-            font-size: 1rem;
-            margin-bottom: 10px;
-        }
+
         
         .book-container {
             flex-direction: column;
