@@ -13,6 +13,31 @@
     <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
 </div>
 <div id="book-list" class="book-list" style="display: none;"></div>
+
+<!-- Modal Form for Loan -->
+<div id="loanModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <form id="loanForm" action="{{ route('addloan') }}" method="POST">
+            @csrf
+            <input type="hidden" id="user_id" name="user_id" value="{{ Auth::user()->id }}">
+            <input type="hidden" id="book_id" name="book_id">
+            <div class="book-info">
+                <div id="book-cover" class="cover"></div>
+                <div id="loan-details">
+                    <p><strong>Title:</strong> <span id="book-title"></span></p>
+                    <p><strong>Author:</strong> <span id="book-author"></span></p>
+                    <p><strong>Year:</strong> <span id="book-year"></span></p>
+                    <p><strong>Category:</strong> <span id="book-category"></span></p>
+                    <p><strong>Today's Date:</strong> <span id="today-date"></span></p>
+                    <p><strong>Date Limit:</strong> <span id="date-limit"></span></p>
+                </div>
+            </div>
+            <button type="submit" id="pinjam-button">Submit</button>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -40,11 +65,9 @@ $(document).ready(function() {
                             <p><strong>Author:</strong> ${capitalizeWords(book.author)}</p>
                             <p><strong>Year:</strong> ${book.year}</p>
                         </div>
-                        @auth
                         <div class="book-action">
-                            <a href="#" class="pinjam-button">Pinjam</a>
+                            <a href="#" class="pinjam-button" data-book='${JSON.stringify(book)}'>Pinjam</a>
                         </div>
-                        @endauth
                     </li>
                 `;
             });
@@ -101,11 +124,83 @@ $(document).ready(function() {
     // Initially hide the book list
     $('#book-list').hide();
 
+    // Show modal when "Pinjam" button is clicked
+    $(document).on('click', '.pinjam-button', function() {
+        let bookData = $(this).data('book');
+        let bookCoverUrl = `{{ asset('storage/cover') }}/${bookData.pdf_url.split('/').pop().replace('.pdf', '.png')}`;
+        let todayDate = new Date().toISOString().split('T')[0]; // Today's date
+        let limitDate = new Date();
+        limitDate.setDate(limitDate.getDate() + 7); // Add 7 days for the limit date
+        let limitDateString = limitDate.toISOString().split('T')[0];
+
+        // Populate modal with book details
+        $('#book-cover').html(`<img src="${bookCoverUrl}" alt="Book Cover">`);
+        $('#today-date').text(todayDate);
+        $('#date-limit').text(limitDateString);
+
+        // Set book_id input value for form submission
+        $('#book_id').val(bookData.id);
+
+        // Populate other details
+        $('#book-title').text(bookData.title);
+        $('#book-author').text(bookData.author);
+        $('#book-year').text(bookData.year);
+        $('#book-category').text(bookData.category.name);
+
+        // Show the modal
+        $('#loanModal').css('display', 'block');
+    });
+
+    // Close modal when close button is clicked
+    $(document).on('click', '.close', function() {
+        $('#loanModal').css('display', 'none');
+        // Clear previous details
+        $('#book-cover').empty();
+        $('#today-date').empty();
+        $('#date-limit').empty();
+        $('#book-title').empty();
+        $('#book-author').empty();
+        $('#book-year').empty();
+        $('#book-category').empty();
+    });
+
+    // Submit the form when it's submitted
+    $('#loanForm').on('submit', function(e) {
+        e.preventDefault();
+        let today = new Date().toISOString().split('T')[0];
+        let oneWeekFromToday = new Date();
+        oneWeekFromToday.setDate(oneWeekFromToday.getDate() + 7);
+        let limitDate = oneWeekFromToday.toISOString().split('T')[0];
+
+        let bookData = {
+            book_id: $('#book_id').val(),
+            user_id: $('#user_id').val(),
+            loan_date: today,
+            limit_date: limitDate
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            data: bookData,
+            success: function(response) {
+                console.log(response);
+                // Handle success response here
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+                // Handle error response here
+            }
+        });
+
+        $('#loanModal').css('display', 'none');
+    });
+
     // Search input event handler
     $('#search-input').on('input', function() {
         let keyword = $(this).val().toLowerCase();
         if (keyword.length > 0) {
-            let filteredBooks = books.filter(book => 
+            let filteredBooks = books.filter(book =>
                 book.title.toLowerCase().includes(keyword) ||
                 book.author.toLowerCase().includes(keyword)
             );
@@ -181,8 +276,8 @@ $(document).ready(function() {
 .book-details h3 {
     margin: 0 0 10px;
     text-transform: uppercase;
-    text-align: left;
     color: black;
+    text-align: left;
 }
 
 .book-details p {
@@ -208,6 +303,73 @@ $(document).ready(function() {
 }
 
 .pinjam-button:hover {
+    background-color: #0056b3;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    text-align: left;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.book-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#loan-details {
+    text-align: left;
+    width: 100%;
+}
+
+#loanForm {
+    text-align: center;
+}
+
+#loanForm button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+#loanForm button:hover {
     background-color: #0056b3;
 }
 

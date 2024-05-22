@@ -30,7 +30,7 @@
                     <li><a href="{{url('/jelajahi')}}">Jelajahi</a></li>
                     <li><a href="#">Kategori</a></li>
                     <li><a href="#">About us</a></li>
-                    <li><a href="#">Contact us</a></li>
+                    <li><a href="{{url('/pinjaman')}}">Pinjamanku</a></li>
                 </ul>
                 @guest
                     <button class="login-btn">LOG IN</button>
@@ -132,13 +132,13 @@
         // Define the greetings based on the time of day
         let greeting;
         if (currentHour < 12) {
-            greeting = 'Selamat pagi';
+            greeting = 'Selamat Pagi';
         } else if(currentHour < 15){
-            greeting = 'Selamat siang';
+            greeting = 'Selamat Siang';
         } else if (currentHour < 18) {
-            greeting = 'Selamat sore';
+            greeting = 'Selamat Sore';
         } else {
-            greeting = 'Selamat malam';
+            greeting = 'Selamat Malam';
         }
 
         // Update the greeting in the DOM
