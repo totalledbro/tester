@@ -8,6 +8,9 @@
 
 <hr>
 
+<!-- Messages Section -->
+<div id="messages"></div>
+
 <!-- Search Box -->
 <div class="search-box">
     <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
@@ -18,9 +21,10 @@
 <div id="loanModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <form id="loanForm" action="{{ route('addloan') }}" method="POST">
+        <form id="loanForm" method="POST">
             @csrf
-            <input type="hidden" id="user_id" name="user_id" value="{{ Auth::user()->id }}">
+            <input type="hidden" id="user_id" name="user_id" value="{{ Auth::check() ? Auth::user()->id : '' }}">
+            <button type="submit" id="pinjam-button">Submit</button>
             <input type="hidden" id="book_id" name="book_id">
             <div class="book-info">
                 <div id="book-cover" class="cover"></div>
@@ -33,11 +37,9 @@
                     <p><strong>Date Limit:</strong> <span id="date-limit"></span></p>
                 </div>
             </div>
-            <button type="submit" id="pinjam-button">Submit</button>
         </form>
     </div>
 </div>
-
 @endsection
 
 @section('scripts')
@@ -66,7 +68,9 @@ $(document).ready(function() {
                             <p><strong>Year:</strong> ${book.year}</p>
                         </div>
                         <div class="book-action">
-                            <a href="#" class="pinjam-button" data-book='${JSON.stringify(book)}'>Pinjam</a>
+                            @auth
+                                <a href="#" class="pinjam-button" data-book='${JSON.stringify(book)}'>Pinjam</a>
+                            @endauth
                         </div>
                     </li>
                 `;
@@ -165,36 +169,37 @@ $(document).ready(function() {
     });
 
     // Submit the form when it's submitted
-    $('#loanForm').on('submit', function(e) {
-        e.preventDefault();
-        let today = new Date().toISOString().split('T')[0];
-        let oneWeekFromToday = new Date();
-        oneWeekFromToday.setDate(oneWeekFromToday.getDate() + 7);
-        let limitDate = oneWeekFromToday.toISOString().split('T')[0];
+// Submit the form when it's submitted
+$('#loanForm').on('submit', function(e) {
+    e.preventDefault();
 
-        let bookData = {
-            book_id: $('#book_id').val(),
-            user_id: $('#user_id').val(),
-            loan_date: today,
-            limit_date: limitDate
-        };
+    let bookData = {
+        _token: $('meta[name="csrf-token"]').attr('content'),
+        book_id: $('#book_id').val(),
+        user_id: $('#user_id').val()
+    };
 
-        $.ajax({
-            type: 'POST',
-            url: $(this).attr('action'),
-            data: bookData,
-            success: function(response) {
-                console.log(response);
-                // Handle success response here
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr.responseText);
-                // Handle error response here
-            }
-        });
-
-        $('#loanModal').css('display', 'none');
+    $.ajax({
+        type: 'POST',
+        url: '{{ route("addloan") }}',
+        data: bookData,
+        success: function(response) {
+            console.log(response);
+            // Handle success response here
+            displayMessage('Loan request submitted successfully!', 'success');
+            // Optionally, update the UI to reflect the loan
+        },
+        error: function(xhr, status, error) {
+            console.error(xhr.responseText);
+            // Handle error response here
+            let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred while submitting the loan request.';
+            displayMessage(errorMessage, 'error');
+        }
     });
+
+    $('#loanModal').css('display', 'none');
+});
+
 
     // Search input event handler
     $('#search-input').on('input', function() {
@@ -217,6 +222,11 @@ $(document).ready(function() {
 });
 </script>
 @endsection
+
+<style>
+/* Add your styles here */
+</style>
+
 
 <style>
 .search-box {
@@ -371,6 +381,16 @@ $(document).ready(function() {
 
 #loanForm button:hover {
     background-color: #0056b3;
+}
+
+.success-message {
+    color: green;
+    text-align: center;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
 }
 
 @media (max-width: 600px) {
