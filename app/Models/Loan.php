@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Loan extends Model
 {
+    public function book()
+    {
+        return $this->belongsTo(Book::class);
+    }
+
+    // Define the relationship with the User model
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     use HasFactory;
     protected $fillable = [
         'user_id',

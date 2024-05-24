@@ -21,11 +21,11 @@ Route::middleware([RedirectIfAdministrator::class])->group(function () {
     })->name('dash');
 
     Route::get('/jelajahi', function () {
+        $loans = Loan::all();
         $books = Book::with('category')
         ->orderBy('id', 'desc')
         ->get();;
-        \Log::info('Books fetched for jelajahi', $books->pluck('id')->toArray());
-        return view('auth.jelajahi',compact('books'));
+        return view('auth.jelajahi',compact('books','loans'));
     })->name('jelajahi');
 });
 
@@ -37,10 +37,11 @@ Route::middleware([AdminMiddleware::class])->group(function () {
 
 Route::middleware([RedirectIfNotAnggota::class])->group(function () {
     Route::get('/pinjaman', function () {
-    $loans = Loan::with('book')->get();
-    return view('auth.pinjaman',compact('loans'));
+        $loans = Loan::with('book')->get();
+        return view('auth.pinjaman', compact('loans'));
     })->name('pinjaman');
 });
+
 Route::get('/kategori', function () {
     $categories = Category::all();
     return view('admin.kategori',compact('categories'));
@@ -80,4 +81,4 @@ Route::delete('/books/{book}',[BookController::class, 'delete'])->name('deletebo
 Route::get('/loans',[LoanController::class, 'index'])->name('loans.index');
 Route::post('/loans',[LoanController::class, 'store'])->name('addloan');
 
-Route::post('/loans/{loan}',[LoanController::class, 'update'])->name('returnbook');
+Route::post('/return-book/{id}', [LoanController::class, 'returnBook'])->name('return.book');

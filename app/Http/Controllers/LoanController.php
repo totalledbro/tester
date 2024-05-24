@@ -56,5 +56,20 @@ class LoanController extends Controller
     
         return redirect()->route('jelajahi')->with('success', 'Loan created successfully.');
     }
+    public function returnBook($id)
+    {
+        $loan = Loan::findOrFail($id);
+        
+        if ($loan->return_date) {
+            return response()->json(['error' => 'Buku sudah dikembalikan.'], 400);
+        }
+
+        $loan->update(['return_date' => Carbon::now()]);
+
+        $book = $loan->book;
+        $book->increment('stock');
+
+        return response()->json(['success' => 'Buku berhasil dikembalikan.']);
+    }
     
 }
