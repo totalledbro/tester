@@ -48,7 +48,7 @@
                 </li>
 
                 <li>
-                    <a href="{{ url('/kategori') }}">
+                    <a href="{{ url('/datakategori') }}">
                         <span class="icon">
                             <ion-icon name="bookmarks-outline"></ion-icon>
                         </span>

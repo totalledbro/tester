@@ -24,6 +24,7 @@ class Loan extends Model
         'loan_date',
         'return_date',
         'limit_date',
+        'limit,'
     ];
 
     protected $dates = [

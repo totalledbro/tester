@@ -68,8 +68,22 @@ class LoanController extends Controller
 
         $book = $loan->book;
         $book->increment('stock');
-
+        
+        $user = $loan->user;
+        $user->increment('limit');
         return response()->json(['success' => 'Buku berhasil dikembalikan.']);
     }
     
+    public function showLoans()
+    {
+        $user = Auth::user();
+        $loans = $user->loans()->with('book')->get();
+        $loanLimit = $user->limit; // User's loan limit
+
+        return view('loans.index', [
+            'loans' => $loans,
+            'loanLimit' => $loanLimit
+        ]);
+    }
+
 }

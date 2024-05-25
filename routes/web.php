@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\CategoryController;
@@ -27,6 +28,11 @@ Route::middleware([RedirectIfAdministrator::class])->group(function () {
         ->get();;
         return view('auth.jelajahi',compact('books','loans'));
     })->name('jelajahi');
+
+    Route::get('/kategori', function(){
+        $categories = Category::all();
+        return view('auth.kategori',compact('categories'));
+    })->name('kategori');
 });
 
 Route::middleware([AdminMiddleware::class])->group(function () {
@@ -37,15 +43,23 @@ Route::middleware([AdminMiddleware::class])->group(function () {
 
 Route::middleware([RedirectIfNotAnggota::class])->group(function () {
     Route::get('/pinjaman', function () {
-        $loans = Loan::with('book')->get();
-        return view('auth.pinjaman', compact('loans'));
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'You need to be logged in to access this page.');
+        }
+
+        $loans = Loan::with('book')->where('user_id', $user->id)->get();
+        $loanLimit = $user->limit; // Fetch the dynamic loan limit from the user model
+
+        return view('auth.pinjaman', compact('loans', 'loanLimit'));
     })->name('pinjaman');
 });
 
-Route::get('/kategori', function () {
+
+Route::get('/datakategori', function () {
     $categories = Category::all();
-    return view('admin.kategori',compact('categories'));
-})->name('kategori');
+    return view('admin.datakategori',compact('categories'));
+})->name('datakategori');
 
 Route::get('/buku', function () {
     $books = Book::all();
@@ -69,9 +83,11 @@ Route::post('/users', [UserController::class, 'register'])->name('register');
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('products.index');
 Route::post('/categories', [CategoryController::class, 'add'])->name('addcategory');
-Route::get('/categories/{category}', [CategoryController::class, 'edit'])->name('editcategory');
+Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('editcategory');
 Route::post('/categories/{category}', [CategoryController::class, 'update'])->name('updatecategory');
 Route::delete('/categories/{category}', [CategoryController::class, 'delete'])->name('deletecategory');
+Route::get('/kategori/{slug}', [CategoryController::class, 'show'])->name('categories.show');
+
 
 Route::get('/books',[BookController::class, 'index'])->name('books.index');
 Route::post('/books',[BookController::class, 'add'])->name('addbook');

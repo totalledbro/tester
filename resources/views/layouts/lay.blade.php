@@ -29,9 +29,13 @@
                     <span class="close-btn material-symbols-rounded">close</span>
                     <li><a href="{{url('/')}}">Beranda</a></li>
                     <li><a href="{{url('/jelajahi')}}">Jelajahi</a></li>
-                    <li><a href="#">Kategori</a></li>
+                    <li><a href="{{url('/kategori')}}">Kategori</a></li>
                     <li><a href="#">About us</a></li>
-                    <li><a href="{{url('/pinjaman')}}">Pinjamanku</a></li>
+                    <li>
+                        @auth
+                        <a href="{{url('/pinjaman')}}">Pinjamanku</a>
+                        @endauth
+                    </li>
                 </ul>
                 @guest
                     <button class="login-btn">LOG IN</button>

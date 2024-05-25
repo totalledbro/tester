@@ -26,7 +26,7 @@ class CategoryController extends Controller
         $validatedData = $request->validated();
         $validatedData['name'] = Str::lower($validatedData['name']);
         $category = Category::create($validatedData);
-        return redirect()->route('kategori');
+        return redirect()->route('datakategori');
     }
     
 
@@ -43,5 +43,12 @@ class CategoryController extends Controller
     {
         $category->delete();
         return redirect()->route('kategori');
+    }
+    public function show($slug)
+    {
+        $category = Category::where('slug', $slug)->firstOrFail();
+        $books = $category->books; // Assuming you have a relationship set up
+
+        return view('auth.isikategori', compact('category', 'books'));
     }
 }

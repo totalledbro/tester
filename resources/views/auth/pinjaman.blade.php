@@ -7,7 +7,10 @@
 </div>
 
 <hr>
-
+<div class="limit">
+    <p><strong>Limit Pinjaman Anda:</strong> {{ $loanLimit }}</p>
+    <p><strong>Buku yang Saat Ini Dipinjam:</strong> <span id="current-loans-count">{{ $loans->count() }}</span></p>
+</div>
 <!-- Search Box -->
 <div class="search-box">
     <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
@@ -30,40 +33,39 @@
 <script>
 $(document).ready(function() {
     let loans = @json($loans); // Initially fetched loans
-    let books = loans.map(loan => loan.book);
 
     function displayBooks(loans) {
-    $('#book-list').empty().show();
-    let nonReturnedLoans = loans.filter(loan => loan.return_date === null);
-    if (nonReturnedLoans.length === 0) {
-        $('#book-list').append('<p style="color: red; text-align: center;">Tidak ada buku yang ditemukan.</p>');
-    } else {
-        let list = '<ul>';
-        nonReturnedLoans.forEach(function(loan) {
-            let book = loan.book;
-            let bookCoverUrl = `{{ asset('storage/cover') }}/${book.pdf_url.split('/').pop().replace('.pdf', '.png')}`;
-            list += `
-                <li class="book-item" data-loan-id="${loan.id}">
-                    <div class="cover">
-                        <img data-src="${bookCoverUrl}" alt="Book Cover" class="lazy-load">
-                    </div>
-                    <div class="book-details">
-                        <h3>${capitalizeWords(book.title)}</h3>
-                        <p><strong>Author:</strong> ${capitalizeWords(book.author)}</p>
-                        <p><strong>Year:</strong> ${book.year}</p>
-                    </div>
-                    <div class="book-action">
-                        <button class="return-book">Kembalikan Buku</button>
-                    </div>
-                </li>
-            `;
-        });
-        list += '</ul>';
-        $('#book-list').append(list);
-        lazyLoadImages();
+        $('#book-list').empty().show();
+        let nonReturnedLoans = loans.filter(loan => loan.return_date === null);
+        $('#current-loans-count').text(nonReturnedLoans.length);
+        if (nonReturnedLoans.length === 0) {
+            $('#book-list').append('<p style="color: red; text-align: center;">Tidak ada buku yang ditemukan.</p>');
+        } else {
+            let list = '<ul>';
+            nonReturnedLoans.forEach(function(loan) {
+                let book = loan.book;
+                let bookCoverUrl = `{{ asset('storage/cover') }}/${book.pdf_url.split('/').pop().replace('.pdf', '.png')}`;
+                list += `
+                    <li class="book-item" data-loan-id="${loan.id}">
+                        <div class="cover">
+                            <img data-src="${bookCoverUrl}" alt="Book Cover" class="lazy-load">
+                        </div>
+                        <div class="book-details">
+                            <h3>${capitalizeWords(book.title)}</h3>
+                            <p><strong>Author:</strong> ${capitalizeWords(book.author)}</p>
+                            <p><strong>Year:</strong> ${book.year}</p>
+                        </div>
+                        <div class="book-action">
+                            <button class="return-book">Kembalikan Buku</button>
+                        </div>
+                    </li>
+                `;
+            });
+            list += '</ul>';
+            $('#book-list').append(list);
+            lazyLoadImages();
+        }
     }
-}
-
 
     function capitalizeWords(str) {
         return str.replace(/\b\w/g, function(char) {
@@ -112,7 +114,7 @@ $(document).ready(function() {
     $('#search-input').on('input', function() {
         let keyword = $(this).val().toLowerCase();
         if (keyword.length > 0) {
-            let filteredLoans = loans.filter(loan => 
+            let filteredLoans = loans.filter(loan =>
                 loan.book.title.toLowerCase().includes(keyword) ||
                 loan.book.author.toLowerCase().includes(keyword)
             );
@@ -128,7 +130,7 @@ $(document).ready(function() {
 
     $('#book-list').on('click', '.return-book', function() {
         let loanId = $(this).closest('.book-item').data('loan-id');
-        
+
         // Show the confirmation modal
         $('#confirmReturnModal').css('display', 'block');
 
@@ -172,7 +174,10 @@ $(document).ready(function() {
     text-decoration: none;
     font-size: 14px;
 }
-
+.limit{
+    text-align: center;
+    color:white;
+}
 .search-box {
     text-align: center;
     margin: 20px 0;
@@ -264,25 +269,6 @@ $(document).ready(function() {
     margin: 15% auto; /* 15% from the top and centered */
     padding: 20px;
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
+    width: 80%; /* Could be more or less */
 }
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.modal-content button {
-    margin: 5px;
-}
-
 </style>
