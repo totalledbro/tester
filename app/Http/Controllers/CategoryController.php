@@ -4,17 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCategoryRequest;
-use App\Http\Requests;
 use App\Models\Category;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the categories.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $categories = Category::all();
@@ -25,25 +20,46 @@ class CategoryController extends Controller
     {
         $validatedData = $request->validated();
         $validatedData['name'] = Str::lower($validatedData['name']);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = Str::slug($validatedData['name']) . '.' . $image->getClientOriginalExtension();
+            $imagePath = $image->storeAs('kategori', $imageName, 'public');
+            $validatedData['image_url'] = $imagePath;
+        }
+
         $category = Category::create($validatedData);
-        return redirect()->route('datakategori');
+        return redirect()->route('datakategori')->with('success', 'Category added successfully.');
     }
-    
 
     public function update(Category $category, StoreCategoryRequest $request)
     {
         $validatedData = $request->validated();
         $validatedData['name'] = Str::lower($validatedData['name']);
+
+        if ($request->hasFile('image')) {
+            if ($category->image_url) {
+                Storage::disk('public')->delete($category->image_url);
+            }
+            $image = $request->file('image');
+            $imageName = Str::slug($validatedData['name']) . '.' . $image->getClientOriginalExtension();
+            $imagePath = $image->storeAs('kategori', $imageName, 'public');
+            $validatedData['image_url'] = $imagePath;
+        }
+
         $category->update($validatedData);
-        return redirect()->route('kategori');
+        return redirect()->route('datakategori')->with('success', 'Category updated successfully.');
     }
 
- 
     public function delete(Category $category)
     {
+        if ($category->image_url) {
+            Storage::disk('public')->delete($category->image_url);
+        }
         $category->delete();
-        return redirect()->route('kategori');
+        return redirect()->route('datakategori')->with('success', 'Category deleted successfully.');
     }
+
     public function show($slug)
     {
         $category = Category::where('slug', $slug)->firstOrFail();

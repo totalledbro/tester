@@ -28,8 +28,8 @@
                         <div class="input-field">
                             <select name="category_id" id="category_id" required>
                                 <option value="" disabled selected>Pilih Kategori</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @foreach($categories->sortBy('name') as $category)
+                                    <option value="{{ $category->id }}">{{ucwords($category->name)}}</option>
                                 @endforeach
                             </select>
                             <label>Kategori</label>

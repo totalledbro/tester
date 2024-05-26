@@ -13,6 +13,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'slug',
+        'image_url',
     ];
 
     protected static function boot()

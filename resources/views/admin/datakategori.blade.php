@@ -5,30 +5,34 @@
     <h1>Data Kategori</h1>
     <div class="content">
         <div class="category">
-        <button class="add-btn" onClick="openForm()">Tambah Kategori</button>
-        <div class="form-popup" id="categoryForm">
-            <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
-            <div class="form-box add">
-                <div class="form-content" >
-                    <h2>Tambah Kategori</h2>
-                    <form id="add-form" method="POST" action="{{ route('addcategory') }}">
-                        @csrf
-                        <div class="input-field">
-                            <input type="text" name="name" id="categoryName" required>
-                            <label>Nama Kategori</label>
-                        </div>
-                        <button type="submit" class="tambah">Tambah</button>
-                    </form>
+            <button class="add-btn" onClick="openForm()">Tambah Kategori</button>
+            <div class="form-popup" id="categoryForm">
+                <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
+                <div class="form-box add">
+                    <div class="form-content">
+                        <h2>Tambah Kategori</h2>
+                        <form id="add-form" method="POST" action="{{ route('addcategory') }}" enctype="multipart/form-data">
+                            @csrf
+                            <div class="input-field">
+                                <input type="text" name="name" id="categoryName" required>
+                                <label>Nama Kategori</label>
+                            </div>
+                            <div class="input-field">
+                                <input type="file" name="image" id="categoryImage" accept="image/*">
+                                <label>Gambar Kategori</label>
+                            </div>
+                            <button type="submit" class="tambah">Tambah</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-        <h2>Daftar Kategori</h2>
-
+            <h2>Daftar Kategori</h2>
             <table class="table">
                 <thead>
                     <tr>
                         <th>Nama</th>
-                        <th>Aksi</th> <!-- Empty header cell for buttons -->
+                        <th>Gambar</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,93 +40,79 @@
                     <tr>
                         <td>{{ ucwords($category->name) }}</td>
                         <td>
-                        <button class="edit-btn" onClick="openEditForm({{ $category->id }})">edit</button>
-                            <form action="{{ route('deletecategory', $category->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="delete-btn">
+                            @if($category->image_url)
+                            <img src="{{ Storage::url($category->image_url) }}" alt="{{ $category->name }}" style="width: 50px; height: 50px;">
+                            @endif
+                        </td>
+                        <td>
+                            <button class="edit-btn" onClick="openEditForm({{ $category->id }})">edit</button>
+                            <form action="{{ route('deletecategory', $category->id) }}" method="POST" style="display:inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="delete-btn">
                                     <ion-icon name="trash-bin-outline"></ion-icon>
-                                    </button>
+                                </button>
                             </form>
+                        </td>
                     </tr>
                     <div class="form-popup" id="editForm{{$category->id}}">
-                            <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $category->id }})">close</span>
-
-                                <div class="form-box edit">
-                                    <div class="form-content" >
-                                        <h2>Edit Kategori</h2>
-                                        <form id="edit-form-{{ $category->id }}" method="POST" action="{{ route('updatecategory', $category->id) }}" >
-                                            @csrf
-                                            @method('POST')
-                                            <div class="input-field">
-                                                <input type="text" name="name" id="categoryName{{ $category->id }}" value="{{ $category->name }}" required>
-                                                <label>Nama Kategori</label>
-                                            </div>
-                                            <button type="submit" class="update">Update</button>
-                                        </form>
+                        <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $category->id }})">close</span>
+                        <div class="form-box edit">
+                            <div class="form-content">
+                                <h2>Edit Kategori</h2>
+                                <form id="edit-form-{{ $category->id }}" method="POST" action="{{ route('updatecategory', $category->id) }}" enctype="multipart/form-data">
+                                    @csrf
+                                    @method('POST')
+                                    <div class="input-field">
+                                        <input type="text" name="name" id="categoryName{{ $category->id }}" value="{{ $category->name }}" required>
+                                        <label>Nama Kategori</label>
                                     </div>
-                                </div>
+                                    <div class="input-field">
+                                        <input type="file" name="image" id="categoryImage{{ $category->id }}" accept="image/*">
+                                        <label>Gambar Kategori</label>
+                                    </div>
+                                    <button type="submit" class="update">Update</button>
+                                </form>
                             </div>
+                        </div>
                     </div>
                     @endforeach
                 </tbody>
             </table>
-
         </div>
-        <div class="overlay" id="overlay" onClick="closeForm()"></div> <!-- Add overlay element -->
-        <div class="form-popup" id="editForm{{$category->id}}">
-                            <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $category->id }})">close</span>
-
-                                <div class="form-box edit">
-                                    <div class="form-content" >
-                                        <h2>Edit Kategori</h2>
-                                        <form id="edit-form-{{ $category->id }}" method="POST" action="{{ route('updatecategory', $category->id) }}">
-                                            @csrf
-                                            @method('POST')
-                                            <div class="input-field">
-                                                <input type="text" name="name" id="categoryName{{ $category->id }}" value="{{ $category->name }}" required>
-                                                <label>Nama Kategori</label>
-                                            </div>
-                                            <button type="submit" class="update">Update</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-        </div>
+        <div class="overlay" id="overlay" onClick="closeForm()"></div>
+    </div>
 </div>
 @endsection
 
 <script>
-        const form = document.getElementById('add-form');
-        function openForm() {
-            document.getElementById("categoryForm").classList.add("active");
-            document.getElementById("overlay").style.display = "block"; // Show overlay
-        }
+    function openForm() {
+        document.getElementById("categoryForm").classList.add("active");
+        document.getElementById("overlay").style.display = "block"; // Show overlay
+    }
 
-        function closeForm() {
-            document.getElementById("categoryForm").classList.remove("active");
-            document.getElementById("overlay").style.display = "none"; // Hide overlay
-        }
+    function closeForm() {
+        document.getElementById("categoryForm").classList.remove("active");
+        document.getElementById("overlay").style.display = "none"; // Hide overlay
+    }
 
-        function openEditForm(editFormId) {
-            // Show the edit form with the corresponding ID
-            document.getElementById('editForm' + editFormId).classList.add("active");
-            document.getElementById("overlay").style.display = "block"; // Show overlay
-        }
+    function openEditForm(editFormId) {
+        // Show the edit form with the corresponding ID
+        document.getElementById('editForm' + editFormId).classList.add("active");
+        document.getElementById("overlay").style.display = "block"; // Show overlay
+    }
 
-        function closeEditForm(editFormId) {
-            // Close the form with the specified ID
-            document.getElementById('editForm' + editFormId).classList.remove("active");
-            document.getElementById("overlay").style.display = "none"; // Hide overlay
-        }
+    function closeEditForm(editFormId) {
+        // Close the form with the specified ID
+        document.getElementById('editForm' + editFormId).classList.remove("active");
+        document.getElementById("overlay").style.display = "none"; // Hide overlay
+    }
 
-
-
-        form.addEventListener('submit', function(event) {
-            // Get the input element by its ID
-            const input = document.getElementById('categoryName');
-
-            // Convert the input value to lowercase and update the input value
-            input.value = input.value.toLowerCase();
-        });
+    const form = document.getElementById('add-form');
+    form.addEventListener('submit', function(event) {
+        // Get the input element by its ID
+        const input = document.getElementById('categoryName');
+        // Convert the input value to lowercase and update the input value
+        input.value = input.value.toLowerCase();
+    });
 </script>

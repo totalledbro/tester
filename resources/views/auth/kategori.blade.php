@@ -30,11 +30,13 @@ $(document).ready(function() {
             categories.forEach(function(category) {
                 list += `
                     <div class="category-card">
-                        <h3>${capitalizeWords(category.name)}</h3>
-                        <p>${category.description}</p>
-                        <a href="{{ url('/kategori') }}/${category.slug}" class="view-category-button">
-                            <ion-icon name="book-outline"></ion-icon> Lihat Buku
-                        </a>
+                        <div class="category-background" style="background-image: url('{{ asset('storage') }}/${category.image_url}');"></div>
+                        <div class="category-content">
+                            <h3>${capitalizeWords(category.name)}</h3>
+                            <a href="{{ url('/kategori') }}/${category.slug}" class="view-category-button">
+                                <ion-icon name="book-outline"></ion-icon> Lihat Koleksi
+                            </a>
+                        </div>
                     </div>
                 `;
             });
@@ -49,7 +51,9 @@ $(document).ready(function() {
             return char.toUpperCase();
         });
     }
-
+    categories.sort(function(a, b) {
+        return a.name.localeCompare(b.name);
+    });
     // Initial display of categories
     displayCategories(categories);
 });
@@ -73,23 +77,49 @@ $(document).ready(function() {
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid #ccc;
     border-radius: 5px;
-    padding: 20px;
     width: calc(33.333% - 20px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+}
+
+.category-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: transform 0.3s ease; /* Smooth zoom-in */
+}
+
+.category-card:hover .category-background {
+    transform: scale(1.1); /* Zoom in on hover */
+}
+
+.category-content {
+    position: relative;
+    z-index: 2; /* Place content above the background */
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.35);
+    padding: 20px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    color: white;
 }
 
 .category-card h3 {
     margin: 0 0 10px;
     text-transform: uppercase;
-    color: black;
-}
-
-.category-card p {
-    margin: 5px 0;
+    color: white;
 }
 
 .view-category-button {
@@ -114,15 +144,31 @@ $(document).ready(function() {
     background-color: #0056b3;
 }
 
+/* Responsive Styles */
 @media (max-width: 768px) {
     .category-card {
         width: calc(50% - 20px);
+        height: 200px;
+    }
+
+    .category-content {
+        padding: 15px;
     }
 }
 
 @media (max-width: 480px) {
     .category-card {
         width: 100%;
+        height: 150px;
+    }
+
+    .category-content {
+        padding: 10px;
+    }
+
+    .view-category-button {
+        padding: 8px 16px;
+        font-size: 12px;
     }
 }
 </style>
