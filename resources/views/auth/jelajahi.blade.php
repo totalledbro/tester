@@ -24,19 +24,20 @@
         <form id="loanForm" method="POST">
             @csrf
             <input type="hidden" id="user_id" name="user_id" value="{{ Auth::check() ? Auth::user()->id : '' }}">
-            <button type="submit" id="pinjam-button">Submit</button>
+            
             <input type="hidden" id="book_id" name="book_id">
-            <div class="book-info">
+            <!--<div class="book-info">-->
                 <div id="book-cover" class="cover"></div>
                 <div id="loan-details">
-                    <p><strong>Title:</strong> <span id="book-title"></span></p>
-                    <p><strong>Author:</strong> <span id="book-author"></span></p>
-                    <p><strong>Year:</strong> <span id="book-year"></span></p>
-                    <p><strong>Category:</strong> <span id="book-category"></span></p>
-                    <p><strong>Today's Date:</strong> <span id="today-date"></span></p>
-                    <p><strong>Date Limit:</strong> <span id="date-limit"></span></p>
+                    <p><strong>Judul:</strong> <span id="book-title"></span></p>
+                    <p><strong>Penulis:</strong> <span id="book-author"></span></p>
+                    <p><strong>Tahun:</strong> <span id="book-year"></span></p>
+                    <p><strong>Kategori:</strong> <span id="book-category"></span></p>
+                    <p><strong>Tanggal Sekarang:</strong> <span id="today-date"></span></p>
+                    <p><strong>Tanggal Batas:</strong> <span id="date-limit"></span></p>
                 </div>
-            </div>
+                <button type="submit" id="pinjam-button">Pinjam</button>
+            <!--</div>-->
         </form>
     </div>
 </div>
@@ -64,8 +65,8 @@ $(document).ready(function() {
                         </div>
                         <div class="book-details">
                             <h3>${capitalizeWords(book.title)}</h3>
-                            <p><strong>Author:</strong> ${capitalizeWords(book.author)}</p>
-                            <p><strong>Year:</strong> ${book.year}</p>
+                            <p><strong>Penulis:</strong> ${capitalizeWords(book.author)}</p>
+                            <p><strong>Tahun:</strong> ${book.year}</p>
                         </div>
                         <div class="book-action">
                             @auth
@@ -129,29 +130,29 @@ $(document).ready(function() {
     $('#book-list').hide();
 
     // Show modal when "Pinjam" button is clicked
-    $(document).on('click', '.pinjam-button', function() {
+    $(document).on('click', '.pinjam-button', function(e) {
+        e.preventDefault();
         let bookData = $(this).data('book');
         let bookCoverUrl = `{{ asset('storage/cover') }}/${bookData.pdf_url.split('/').pop().replace('.pdf', '.png')}`;
-        let todayDate = new Date().toISOString().split('T')[0]; // Today's date
+        let todayDate = new Date().toLocaleDateString('id-ID', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
         let limitDate = new Date();
-        limitDate.setDate(limitDate.getDate() + 7); // Add 7 days for the limit date
-        let limitDateString = limitDate.toISOString().split('T')[0];
+        limitDate.setDate(limitDate.getDate() + 7);
+        let limitDateString = limitDate.toLocaleDateString('id-ID', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
 
-        // Populate modal with book details
         $('#book-cover').html(`<img src="${bookCoverUrl}" alt="Book Cover">`);
         $('#today-date').text(todayDate);
         $('#date-limit').text(limitDateString);
 
-        // Set book_id input value for form submission
         $('#book_id').val(bookData.id);
-
-        // Populate other details
-        $('#book-title').text(bookData.title);
-        $('#book-author').text(bookData.author);
+        $('#book-title').text(capitalizeWords(bookData.title));
+        $('#book-author').text(capitalizeWords(bookData.author));
         $('#book-year').text(bookData.year);
-        $('#book-category').text(bookData.category.name);
+        $('#book-category').text(capitalizeWords(bookData.category.name));
 
-        // Show the modal
         $('#loanModal').css('display', 'block');
     });
 
@@ -169,37 +170,35 @@ $(document).ready(function() {
     });
 
     // Submit the form when it's submitted
-// Submit the form when it's submitted
-$('#loanForm').on('submit', function(e) {
-    e.preventDefault();
+    $('#loanForm').on('submit', function(e) {
+        e.preventDefault();
 
-    let bookData = {
-        _token: $('meta[name="csrf-token"]').attr('content'),
-        book_id: $('#book_id').val(),
-        user_id: $('#user_id').val()
-    };
+        let bookData = {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            book_id: $('#book_id').val(),
+            user_id: $('#user_id').val()
+        };
 
-    $.ajax({
-        type: 'POST',
-        url: '{{ route("addloan") }}',
-        data: bookData,
-        success: function(response) {
-            console.log(response);
-            // Handle success response here
-            displayMessage('Loan request submitted successfully!', 'success');
-            // Optionally, update the UI to reflect the loan
-        },
-        error: function(xhr, status, error) {
-            console.error(xhr.responseText);
-            // Handle error response here
-            let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred while submitting the loan request.';
-            displayMessage(errorMessage, 'error');
-        }
+        $.ajax({
+            type: 'POST',
+            url: '{{ route("addloan") }}',
+            data: bookData,
+            success: function(response) {
+                console.log(response);
+                // Handle success response here
+                displayMessage('Loan request submitted successfully!', 'success');
+                // Optionally, update the UI to reflect the loan
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+                // Handle error response here
+                let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred while submitting the loan request.';
+                displayMessage(errorMessage, 'error');
+            }
+        });
+
+        $('#loanModal').css('display', 'none');
     });
-
-    $('#loanModal').css('display', 'none');
-});
-
 
     // Search input event handler
     $('#search-input').on('input', function() {
@@ -220,6 +219,7 @@ $('#loanForm').on('submit', function(e) {
         displayBooks(books);
     }
 });
+
 </script>
 @endsection
 

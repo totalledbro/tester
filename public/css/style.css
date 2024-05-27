@@ -79,7 +79,7 @@ header {
     min-height: 100vh;
     background: var(--white);
     transition: 0.5s;
-    margin-top: 80px;
+    margin-top: 10px;
 }
 
 .main.active {
@@ -482,7 +482,7 @@ form button:hover {
 
 @media (max-width: 768px) {
     .main {
-        margin-top: 100px;
+        margin-top: 10px;
     }
 }
 

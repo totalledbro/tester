@@ -26,6 +26,7 @@
         <button id="cancelReturnBtn">Batal</button>
     </div>
 </div>
+
 @endsection
 
 @section('scripts')
@@ -146,7 +147,6 @@ $(document).ready(function() {
                     location.reload(); // Reload the page to update the list
                 },
                 error: function(xhr) {
-                    alert('Terjadi kesalahan. Silakan coba lagi.');
                 }
             });
 
@@ -174,6 +174,151 @@ $(document).ready(function() {
     text-decoration: none;
     font-size: 14px;
 }
+/* Style for the return book button */
+.return-book {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* Limit section */
+.limit {
+    text-align: center;
+    color: white;
+}
+
+/* Search box styles */
+.search-box {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.search-box input[type="text"] {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Book list styles */
+.book-list {
+    padding: 20px;
+}
+
+.book-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.book-item {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.cover {
+    width: 20%;
+    max-width: 200px;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.cover img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-right: 20px;
+}
+
+.book-details {
+    flex: 1;
+    text-align: left;
+    margin-left: 20px;
+}
+
+.book-details h3 {
+    text-align: left;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    color: black;
+}
+
+.book-details p {
+    margin: 5px 0;
+}
+
+.book-details p strong {
+    color: #333;
+}
+
+.book-action {
+    margin-left: auto;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    text-align: center; /* Center-align text in the modal */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#confirmReturnBtn, #cancelReturnBtn {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+#confirmReturnBtn:hover, #cancelReturnBtn:hover {
+    background-color: #0056b3;
+}
+
 .limit{
     text-align: center;
     color:white;
@@ -233,6 +378,7 @@ $(document).ready(function() {
 }
 
 .book-details h3 {
+    text-align: left;
     margin: 0 0 10px;
     text-transform: uppercase;
     color: black;
