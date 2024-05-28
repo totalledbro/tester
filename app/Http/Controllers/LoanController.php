@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Loan;
 use App\Models\User;
@@ -84,6 +86,34 @@ class LoanController extends Controller
             'loans' => $loans,
             'loanLimit' => $loanLimit
         ]);
+    }
+
+    public function readBook($id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('403')->with('error', 'Unauthorized access.');
+        }
+        $user = Auth::user();
+        $loan = Loan::find($id);
+    
+        if (!$loan || $loan->user_id != $user->id) {
+            return redirect()->route('403')->with('error', 'Unauthorized access.');
+        }
+    
+        return view('auth.baca', compact('loan'));
+    }
+    
+
+    public function getBookPdf($id)
+    {
+        $loan = Loan::with('book')->findOrFail($id);
+
+        if (is_null($loan->return_date)) {
+            $pdfPath = storage_path('app/public/' . $loan->book->pdf_url);
+            return response()->file($pdfPath);
+        } else {
+            abort(404, 'File not found.');
+        }
     }
 
 }

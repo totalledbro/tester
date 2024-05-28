@@ -96,5 +96,8 @@ Route::delete('/books/{book}',[BookController::class, 'delete'])->name('deletebo
 
 Route::get('/loans',[LoanController::class, 'index'])->name('loans.index');
 Route::post('/loans',[LoanController::class, 'store'])->name('addloan');
+Route::get('/baca/{id}', [LoanController::class, 'readBook'])->name('baca');
+Route::get('/get-book-pdf/{id}', [LoanController::class, 'getBookPdf'])->name('get.book.pdf');
+
 
 Route::post('/return-book/{id}', [LoanController::class, 'returnBook'])->name('return.book');
