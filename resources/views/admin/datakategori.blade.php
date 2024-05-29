@@ -6,6 +6,9 @@
     <div class="content">
         <div class="category">
             <button class="add-btn" onClick="openForm()">Tambah Kategori</button>
+            <!-- Search input -->
+            <input type="text" id="search-input" placeholder="Cari kategori..." oninput="filterCategories()">
+            
             <div class="form-popup" id="categoryForm">
                 <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
                 <div class="form-box add">
@@ -35,9 +38,9 @@
                         <th>Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="category-list">
                     @foreach ($categories as $category)
-                    <tr>
+                    <tr data-name="{{ strtolower($category->name) }}">
                         <td>{{ ucwords($category->name) }}</td>
                         <td>
                             @if($category->image_url)
@@ -115,4 +118,21 @@
         // Convert the input value to lowercase and update the input value
         input.value = input.value.toLowerCase();
     });
+
+    // Filter categories based on search input
+    function filterCategories() {
+        let keyword = document.getElementById('search-input').value.toLowerCase();
+        let categoryList = document.getElementById('category-list');
+        let rows = categoryList.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            let name = rows[i].getAttribute('data-name');
+
+            if (name.includes(keyword)) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
 </script>
