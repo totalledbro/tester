@@ -39,6 +39,7 @@ Route::middleware([AdminMiddleware::class])->group(function () {
     Route::get('/admin', function () {
         return view('admin.dashboard');
     })->name('admin');
+    Route::get('/datapinjam', [LoanController::class, 'showAllLoans'])->name('datapinjam');
 });
 
 Route::middleware([RedirectIfNotAnggota::class])->group(function () {

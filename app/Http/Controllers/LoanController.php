@@ -116,4 +116,22 @@ class LoanController extends Controller
         }
     }
 
+    public function showAllLoans(Request $request)
+    {
+        $sortColumn = $request->get('sort', 'loan_date');
+        $sortDirection = $request->get('direction', 'desc');
+    
+        $loans = Loan::with('user', 'book')
+                     ->orderBy($sortColumn, $sortDirection)
+                     ->get();
+    
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('admin.loan_table_rows', compact('loans'))->render()
+            ]);
+        }
+    
+        return view('admin.datapinjam', compact('loans', 'sortColumn', 'sortDirection'));
+    }
+    
 }
