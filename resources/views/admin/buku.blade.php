@@ -10,8 +10,8 @@
         </div>
         
         <div class="form-popup" id="bookForm">
-            <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
             <div class="form-box add">
+                <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
                 <div class="form-content">
                     <h2>Tambah buku</h2>
                     <form id="add-form" method="POST" action="{{ route('addbook') }}" enctype="multipart/form-data">
@@ -41,7 +41,7 @@
                             <input type="file" name="pdf" id="pdf" accept=".pdf" required>
                             <label>Upload PDF</label>
                         </div>
-                        <button type="submit" class="tambah">Tambah</button>
+                        <button type="submit" class="button">Tambah</button>
                     </form>
                 </div>
             </div>
@@ -52,12 +52,12 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Judul</th>
-                        <th>Penulis</th>
-                        <th>Tahun</th>
-                        <th>Stok</th>
-                        <th>Kategori</th>
-                        <th>Aksi</th>
+                        <th style="width: 200px;">Judul</th>
+                        <th style="width: 150px;">Penulis</th>
+                        <th style="width: 100px;">Tahun</th>
+                        <th style="width: 100px;">Stok</th>
+                        <th style="width: 150px;">Kategori</th>
+                        <th style="width: 100px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="book-list">
@@ -69,21 +69,23 @@
                         <td>{{ $book->stock }}</td>
                         <td>{{ $book->category ? ucwords($book->category->name) : 'N/A' }}</td>
                         <td>
-                            <button class="edit-btn" onClick="openEditForm({{ $book->id }})">edit</button>
-                            <form action="{{ route('deletebook', $book->id) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="delete-btn">
-                                    <ion-icon name="trash-bin-outline"></ion-icon>
-                                </button>
-                            </form>
+                            <div class="action-buttons">
+                                <button class="edit-btn" onClick="openEditForm({{ $book->id }})">Edit</button>
+                                <form action="{{ route('deletebook', $book->id) }}" method="POST" class="delete-form">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="delete-btn">
+                                        <ion-icon name="trash-bin-outline"></ion-icon> Delete
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     <div class="form-popup" id="editForm{{$book->id}}">
-                        <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $book->id }})">close</span>
                         <div class="form-box edit">
+                            <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $book->id }})">close</span>
                             <div class="form-content">
-                                <h2>Edit Buku</h2>
+                                <h2>Edit buku</h2>
                                 <form id="edit-form-{{ $book->id }}" method="POST" action="{{ route('updatebook', $book->id) }}" enctype="multipart/form-data">
                                     @csrf
                                     @method('POST')
@@ -102,8 +104,8 @@
                                     <div class="input-field">
                                         <select name="category_id" id="category_id{{ $book->id }}">
                                             <option value="" disabled selected>Pilih Kategori</option>
-                                            @foreach($categories as $category)
-                                                <option value="{{ $category->id }}" {{ $category->id == $book->category_id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                            @foreach($categories->sortBy('name') as $category)
+                                                <option value="{{ $category->id }}" {{ $category->id == $book->category_id ? 'selected' : '' }}>{{  ucwords($category->name) }}</option>
                                             @endforeach
                                         </select>
                                         <label>Kategori</label>
@@ -112,7 +114,7 @@
                                         <input type="file" name="pdf" id="pdf{{ $book->id }}" accept=".pdf">
                                         <label>Upload PDF</label>
                                     </div>
-                                    <button type="submit" class="update">Update</button>
+                                    <button type="submit" class="button">Update</button>
                                 </form>
                             </div>
                         </div>
@@ -126,10 +128,12 @@
 </div>
 @endsection
 
-
 <script>
-    const form = document.getElementById('add-form');
-    
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Adding event listener to the overlay to close any form when clicked
+        document.getElementById("overlay").addEventListener("click", closeAllForms);
+    });
+
     function openForm() {
         document.getElementById("bookForm").classList.add("active");
         document.getElementById("overlay").style.display = "block"; // Show overlay
@@ -142,16 +146,14 @@
 
     function openEditForm(editFormId) {
         // Show the edit form with the corresponding ID
-        document.getElementById('editForm' + editFormId).classList.add("active");
+        document.getElementById('editForm' +editFormId).classList.add("active");
         document.getElementById("overlay").style.display = "block"; // Show overlay
     }
-
     function closeEditForm(editFormId) {
-        // Close the form with the specified ID
-        document.getElementById('editForm' + editFormId).classList.remove("active");
-        document.getElementById("overlay").style.display = "none"; // Hide overlay
-    }
-
+    // Close the form with the specified ID
+    document.getElementById('editForm' + editFormId).classList.remove("active");
+    document.getElementById("overlay").style.display = "none"; // Hide overlay
+}
     function restrictToNumbers(input) {
         // Remove non-numeric characters from the input value
         input.value = input.value.replace(/\D/g, '');
@@ -160,7 +162,6 @@
         }
     }
 
-    // Filter books based on search input
     // Filter books based on search input
     function filterBooks() {
         let keyword = document.getElementById('search-input').value.toLowerCase();
@@ -195,6 +196,18 @@
         } else {
             bookList.style.display = ""; // Show the table if books are found
         }
+    }
+
+    // Function to close all forms and overlay
+    function closeAllForms() {
+        // Close the add form
+        closeForm();
+
+        // Close all edit forms
+        let editForms = document.querySelectorAll('.form-popup.active');
+        editForms.forEach(form => {
+            form.classList.remove('active');
+        });
     }
 </script>
 
@@ -253,4 +266,127 @@
     overflow-x: auto;
 }
 
+.form-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9;
+    width: 90%; /* Changed to 90% for better mobile responsiveness */
+    max-width: 500px; /* Set a max-width */
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    overflow: hidden; /* Ensure the content fits within the popup */
+}
+
+.form-popup.active {
+    display: block;
+}
+
+.form-content {
+    padding: 20px;
+}
+.h2 {
+    margin-bottom: 20px;
+}
+.input-field {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-field input,
+.input-field select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+}
+
+.input-field label {
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    background: white;
+    padding: 0 5px;
+    color: #aaa;
+    font-size: 12px;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: var(--blue);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #1e1c59;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 8;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* Adjust gap as needed */
+}
+
+.edit-btn, .delete-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #45a049;
+}
+
+.delete-btn {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f;
+}
+
+.delete-form {
+    display: inline-block;
+    margin: 0;
+}
+
+.close-btn {
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #aaa;
+}
+
+.close-btn:hover {
+    color: #000;
+}
 </style>

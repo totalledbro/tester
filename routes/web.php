@@ -40,6 +40,17 @@ Route::middleware([AdminMiddleware::class])->group(function () {
         return view('admin.dashboard');
     })->name('admin');
     Route::get('/datapinjam', [LoanController::class, 'showAllLoans'])->name('datapinjam');
+    
+    Route::get('/datakategori', function () {
+        $categories = Category::all();
+        return view('admin.datakategori',compact('categories'));
+    })->name('datakategori');
+    
+    Route::get('/buku', function () {
+        $books = Book::all();
+        $categories = Category::all();
+        return view('admin.buku',compact('books','categories'));
+    })->name('buku');
 });
 
 Route::middleware([RedirectIfNotAnggota::class])->group(function () {
@@ -57,16 +68,7 @@ Route::middleware([RedirectIfNotAnggota::class])->group(function () {
 });
 
 
-Route::get('/datakategori', function () {
-    $categories = Category::all();
-    return view('admin.datakategori',compact('categories'));
-})->name('datakategori');
 
-Route::get('/buku', function () {
-    $books = Book::all();
-    $categories = Category::all();
-    return view('admin.buku',compact('books','categories'));
-})->name('buku');
 
 Route::get('/403', function () {
     return view('error.403');

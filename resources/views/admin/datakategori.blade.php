@@ -8,28 +8,31 @@
             <button class="add-btn" onClick="openForm()">Tambah Kategori</button>
             <!-- Search input -->
             <input type="text" id="search-input" placeholder="Cari kategori..." oninput="filterCategories()">
-            
-            <div class="form-popup" id="categoryForm">
-                <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
-                <div class="form-box add">
-                    <div class="form-content">
-                        <h2>Tambah Kategori</h2>
-                        <form id="add-form" method="POST" action="{{ route('addcategory') }}" enctype="multipart/form-data">
-                            @csrf
-                            <div class="input-field">
-                                <input type="text" name="name" id="categoryName" required>
-                                <label>Nama Kategori</label>
-                            </div>
-                            <div class="input-field">
-                                <input type="file" name="image" id="categoryImage" accept="image/*">
-                                <label>Gambar Kategori</label>
-                            </div>
-                            <button type="submit" class="tambah">Tambah</button>
-                        </form>
-                    </div>
+        </div>
+        
+        <div class="form-popup" id="categoryForm">
+            <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
+            <div class="form-box add">
+                <div class="form-content">
+                    <h2>Tambah Kategori</h2>
+                    <form id="add-form" method="POST" action="{{ route('addcategory') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="input-field">
+                            <input type="text" name="name" id="categoryName" required>
+                            <label>Nama Kategori</label>
+                        </div>
+                        <div class="input-field">
+                            <input type="file" name="image" id="categoryImage" accept="image/*">
+                            <label>Gambar Kategori</label>
+                        </div>
+                        <button type="submit" class="tambah">Tambah</button>
+                    </form>
                 </div>
             </div>
-            <h2>Daftar Kategori</h2>
+        </div>
+        
+        <h2>Daftar Kategori</h2>
+        <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
@@ -89,50 +92,173 @@
 @endsection
 
 <script>
-    function openForm() {
-        document.getElementById("categoryForm").classList.add("active");
-        document.getElementById("overlay").style.display = "block"; // Show overlay
-    }
-
-    function closeForm() {
-        document.getElementById("categoryForm").classList.remove("active");
-        document.getElementById("overlay").style.display = "none"; // Hide overlay
-    }
-
-    function openEditForm(editFormId) {
-        // Show the edit form with the corresponding ID
-        document.getElementById('editForm' + editFormId).classList.add("active");
-        document.getElementById("overlay").style.display = "block"; // Show overlay
-    }
-
-    function closeEditForm(editFormId) {
-        // Close the form with the specified ID
-        document.getElementById('editForm' + editFormId).classList.remove("active");
-        document.getElementById("overlay").style.display = "none"; // Hide overlay
-    }
-
-    const form = document.getElementById('add-form');
-    form.addEventListener('submit', function(event) {
-        // Get the input element by its ID
-        const input = document.getElementById('categoryName');
-        // Convert the input value to lowercase and update the input value
-        input.value = input.value.toLowerCase();
-    });
-
-    // Filter categories based on search input
+    // Define the filterCategories function
     function filterCategories() {
-        let keyword = document.getElementById('search-input').value.toLowerCase();
-        let categoryList = document.getElementById('category-list');
-        let rows = categoryList.getElementsByTagName('tr');
+        const keyword = document.getElementById('search-input').value.toLowerCase();
+        const rows = document.getElementById('category-list').getElementsByTagName('tr');
+        let found = false;
 
         for (let i = 0; i < rows.length; i++) {
-            let name = rows[i].getAttribute('data-name');
-
+            const name = rows[i].getAttribute('data-name');
             if (name.includes(keyword)) {
                 rows[i].style.display = "";
+                found = true;
             } else {
                 rows[i].style.display = "none";
             }
         }
+
+        if (!found) {
+            document.getElementById('category-list').style.display = "none";
+        } else {
+            document.getElementById('category-list').style.display = "";
+        }
+    }
+
+    // Define other necessary functions
+    function openForm() {
+        document.getElementById("categoryForm").classList.add("active");
+        document.getElementById("overlay").style.display = "block";
+    }
+
+    function closeForm() {
+        document.getElementById("categoryForm").classList.remove("active");
+        document.getElementById("overlay").style.display = "none";
+    }
+
+    function openEditForm(editFormId) {
+        document.getElementById('editForm' + editFormId).classList.add("active");
+        document.getElementById("overlay").style.display = "block";
+    }
+
+    function closeEditForm(editFormId) {
+        document.getElementById('editForm' + editFormId).classList.remove("active");
+        document.getElementById("overlay").style.display = "none";
     }
 </script>
+
+<style>
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.category {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.add-btn {
+    padding: 10px 20px;
+    background-color: var(--blue);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-btn:hover {
+    background-color: #1e1c59;
+}
+
+#search-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 200px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #f2f2f2;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.form-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9;
+    width: 400px;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+}
+
+.form-popup.active {
+    display: block;
+}
+
+.form-content {
+    padding: 20px;
+}
+
+.input-field {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-field input,
+.input-field select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+}
+
+.input-field label {
+    position: absolute;
+    top: -20px;
+    left: 10px;
+    background: white;
+    padding: 0 5px;
+    color: #aaa;
+    font-size: 12px;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: var(--blue);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #1e1c59;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 8;
+}
+</style>
