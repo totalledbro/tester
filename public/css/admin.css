@@ -1,4 +1,4 @@
-/* =============== Globals ============== */
+/* =================== Globals =================== */
 * {
   font-family: "Ubuntu", sans-serif;
   margin: 0;
@@ -35,13 +35,44 @@ body {
   overflow: hidden;
 }
 
-.navigation.collapsed {
+.navigation.expanded {
   width: 300px;
+}
+
+.navigation .topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 10px;
+  color: var(--white);
+}
+
+.navigation .toggle {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
+  cursor: pointer;
+  color: var(--white);
+}
+
+.navigation .admin-icon {
+  display: none;
+  font-size: 1.75rem;
+  margin-left: 10px;
+  color: var(--white);
+}
+
+.navigation.expanded .admin-icon {
+  display: inline-block;
 }
 
 .navigation ul {
   position: absolute;
-  top: 0;
+  top: 60px;
   left: 0;
   width: 100%;
 }
@@ -59,16 +90,11 @@ body {
   background-color: var(--white);
 }
 
-.navigation ul li:nth-child(1) {
-  margin-bottom: 40px;
-  pointer-events: none;
-}
-
 .navigation ul li a {
   position: relative;
-  display: block;
-  width: 100%;
   display: flex;
+  align-items: center;
+  width: 100%;
   text-decoration: none;
   color: var(--white);
 }
@@ -79,44 +105,30 @@ body {
 }
 
 .navigation ul li a .icon {
-  position: relative;
-  display: block;
-  min-width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
   height: 60px;
-  line-height: 75px;
-  text-align: center;
 }
 
 .navigation ul li a .icon ion-icon {
-  font-size: 1.75rem;    
-  position: absolute;
-  display: block;
-  min-width: 40px;
-  height: 40px;
-  line-height: 100px;
-  text-align: center;
+  font-size: 1.75rem;
 }
 
 .navigation ul li a .title {
-  position: relative;
-  display: block;
+  display: none;
   padding: 0 10px;
   height: 60px;
   line-height: 60px;
-  text-align: start;
   white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.5s;
 }
 
-.navigation ul li a .titletop {
-  position: relative;
+.navigation.expanded ul li a .title {
   display: block;
-  padding: 0 10px;
-  height: 60px;
-  line-height: 60px;
-  text-align: start;
-  white-space: nowrap;
-  font-size: 150%;
-  font-weight: bold;
+  opacity: 1;
 }
 
 /* Curve outside */
@@ -148,7 +160,7 @@ body {
   pointer-events: none;
 }
 
-/* ===================== Main ===================== */
+/* =================== Main =================== */
 .main {
   position: absolute;
   width: calc(100% - 80px);
@@ -158,7 +170,7 @@ body {
   transition: 0.5s;
 }
 
-.main.collapsed {
+.main.expanded {
   width: calc(100% - 300px);
   left: 300px;
 }
@@ -167,68 +179,15 @@ body {
   width: 100%;
   height: 60px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding: 0 10px;
   background-color: #2a2185;
-}
-
-.toggle {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 2.5rem;
-  cursor: pointer;
-  z-index: 1001;
   color: var(--white);
 }
 
-.search {
-  position: relative;
-  width: 400px;
-  margin: 0 10px;
-}
-
-.search label {
-  position: relative;
-  width: 100%;
-}
-
-.search label input {
-  width: 100%;
-  height: 40px;
-  border-radius: 40px;
-  padding: 5px 20px;
-  padding-left: 35px;
-  font-size: 18px;
-  outline: none;
-  border: none;
-  background-color: var(--white);
-}
-
-.search label ion-icon {
-  position: absolute;
-  left: 15px;
-  top: 8px;
-  font-size: 1.2rem;
-}
-
-.user {
-  position: relative;
-  min-width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.user img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  object-fit: cover;
+.admin-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  white-space: nowrap;
 }

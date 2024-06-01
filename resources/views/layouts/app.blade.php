@@ -16,20 +16,21 @@
 <body>
     <div class="container">
         <div class="navigation">
+            <div class="topbar">
+                <div class="toggle"><ion-icon name="menu-outline"></ion-icon><span class="admin-icon"><ion-icon name="person-circle-outline"></ion-icon></span></div>
+            </div>
             <ul>
-                <li><a href="#"><span class="icon"><ion-icon name="desktop-outline"></ion-icon></span><span class="titletop">Admin Area</span></a></li>
-                <li><a href="#"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
-                <li><a href="{{ url('/buku') }}"><span class="icon"><ion-icon name="book-outline"></ion-icon></span><span class="title">Buku</span></a></li>
-                <li><a href="{{ url('/datakategori') }}"><span class="icon"><ion-icon name="bookmarks-outline"></ion-icon></span><span class="title">Kategori</span></a></li>
-                <li><a href="{{ url('/datapinjam') }}"><span class="icon"><ion-icon name="time-outline"></ion-icon></span><span class="title">Data Pinjam</span></a></li>
-                <li><a href="#"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
-                <li><a href="{{ route('actionlogout') }}"><span class="icon"><ion-icon name="log-out-outline"></ion-icon></span><span class="title">Sign Out</span></a></li>
+                <li class="nav-item"><a href="{{ url('/') }}"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url('/buku') }}"><span class="icon"><ion-icon name="book-outline"></ion-icon></span><span class="title">Buku</span></a></li>
+                <li class="nav-item"><a href="{{ url('/datakategori') }}"><span class="icon"><ion-icon name="bookmarks-outline"></ion-icon></span><span class="title">Kategori</span></a></li>
+                <li class="nav-item"><a href="{{ url('/datapinjam') }}"><span class="icon"><ion-icon name="time-outline"></ion-icon></span><span class="title">Data Pinjam</span></a></li>
+                <li class="nav-item"><a href="#"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
+                <li class="nav-item"><a href="{{ route('actionlogout') }}"><span class="icon"><ion-icon name="log-out-outline"></ion-icon></span><span class="title">Sign Out</span></a></li>
             </ul>
         </div>
         <div class="main">
             <div class="topbar">
-                <div class="toggle"><ion-icon name="menu-outline"></ion-icon></div>
-                <div class="search"><label><input type="text" placeholder="Search here"><ion-icon name="search-outline"></ion-icon></label></div>
+                <div class="admin-title">Admin Area</div>
             </div>
             @yield('content')
         </div>
@@ -39,38 +40,52 @@
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const list = document.querySelectorAll(".navigation li");
+        const list = document.querySelectorAll(".navigation .nav-item");
         const toggle = document.querySelector(".toggle");
         const navigation = document.querySelector(".navigation");
         const main = document.querySelector(".main");
+        const adminIcon = document.querySelector(".admin-icon");
 
+        // Function to add 'hovered' class to active link
         function activeLink() {
             list.forEach(item => item.classList.remove("hovered"));
             this.classList.add("hovered");
         }
 
-        list.forEach(item => item.addEventListener("mouseover", activeLink));
+        list.forEach(item => item.addEventListener("click", activeLink));
 
-        // Restore navigation state from localStorage
         if (localStorage.getItem('navState') === 'active') {
-            navigation.classList.remove('collapsed');
-            main.classList.remove('collapsed');
+            navigation.classList.add('expanded');
+            main.classList.add('expanded');
+            adminIcon.style.display = 'inline-block';
         } else {
-            navigation.classList.add('collapsed');
-            main.classList.add('collapsed');
+            navigation.classList.remove('expanded');
+            main.classList.remove('expanded');
+            adminIcon.style.display = 'none';
         }
 
         toggle.onclick = function () {
-            navigation.classList.toggle("collapsed");
-            main.classList.toggle("collapsed");
+            navigation.classList.toggle("expanded");
+            main.classList.toggle("expanded");
 
-            // Save state to localStorage
-            if (navigation.classList.contains('collapsed')) {
-                localStorage.removeItem('navState');
-            } else {
+            if (navigation.classList.contains('expanded')) {
                 localStorage.setItem('navState', 'active');
+                adminIcon.style.display = 'inline-block';
+            } else {
+                localStorage.removeItem('navState');
+                adminIcon.style.display = 'none';
             }
         };
+
+        // Highlight the current page
+        const currentPage = window.location.pathname;
+        list.forEach(item => {
+            const link = item.querySelector('a').getAttribute('href');
+            const fullPath = new URL(link, window.location.origin).pathname;
+            if (currentPage === fullPath) {
+                item.classList.add('hovered');
+            }
+        });
     });
     </script>
 </body>
