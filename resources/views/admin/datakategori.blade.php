@@ -6,13 +6,12 @@
     <div class="content">
         <div class="category">
             <button class="add-btn" onClick="openForm()">Tambah Kategori</button>
-            <!-- Search input -->
             <input type="text" id="search-input" placeholder="Cari kategori..." oninput="filterCategories()">
         </div>
         
         <div class="form-popup" id="categoryForm">
-            <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
             <div class="form-box add">
+                <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
                 <div class="form-content">
                     <h2>Tambah Kategori</h2>
                     <form id="add-form" method="POST" action="{{ route('addcategory') }}" enctype="multipart/form-data">
@@ -25,7 +24,7 @@
                             <input type="file" name="image" id="categoryImage" accept="image/*">
                             <label>Gambar Kategori</label>
                         </div>
-                        <button type="submit" class="tambah">Tambah</button>
+                        <button type="submit" class="button">Tambah</button>
                     </form>
                 </div>
             </div>
@@ -38,7 +37,7 @@
                     <tr>
                         <th>Nama</th>
                         <th>Gambar</th>
-                        <th>Aksi</th>
+                        <th style="width: 150px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="category-list">
@@ -47,23 +46,29 @@
                         <td>{{ ucwords($category->name) }}</td>
                         <td>
                             @if($category->image_url)
-                            <img src="{{ Storage::url($category->image_url) }}" alt="{{ $category->name }}" style="width: 50px; height: 50px;">
+                                <div class="image-container">
+                                    <img src="{{ Storage::url($category->image_url) }}" alt="{{ $category->name }}" class="category-image">
+                                </div>
                             @endif
                         </td>
                         <td>
-                            <button class="edit-btn" onClick="openEditForm({{ $category->id }})">edit</button>
-                            <form action="{{ route('deletecategory', $category->id) }}" method="POST" style="display:inline-block;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="delete-btn">
-                                    <ion-icon name="trash-bin-outline"></ion-icon>
+                            <div class="action-buttons">
+                                <button class="edit-btn" onClick="openEditForm({{ $category->id }})">
+                                    <ion-icon name="create-outline"></ion-icon> Edit
                                 </button>
-                            </form>
+                                <form action="{{ route('deletecategory', $category->id) }}" method="POST" class="delete-form">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="delete-btn">
+                                        <ion-icon name="trash-bin-outline"></ion-icon> Delete
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     <div class="form-popup" id="editForm{{$category->id}}">
-                        <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $category->id }})">close</span>
                         <div class="form-box edit">
+                            <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $category->id }})">close</span>
                             <div class="form-content">
                                 <h2>Edit Kategori</h2>
                                 <form id="edit-form-{{ $category->id }}" method="POST" action="{{ route('updatecategory', $category->id) }}" enctype="multipart/form-data">
@@ -77,7 +82,7 @@
                                         <input type="file" name="image" id="categoryImage{{ $category->id }}" accept="image/*">
                                         <label>Gambar Kategori</label>
                                     </div>
-                                    <button type="submit" class="update">Update</button>
+                                    <button type="submit" class="button">Update</button>
                                 </form>
                             </div>
                         </div>
@@ -92,7 +97,6 @@
 @endsection
 
 <script>
-    // Define the filterCategories function
     function filterCategories() {
         const keyword = document.getElementById('search-input').value.toLowerCase();
         const rows = document.getElementById('category-list').getElementsByTagName('tr');
@@ -115,7 +119,6 @@
         }
     }
 
-    // Define other necessary functions
     function openForm() {
         document.getElementById("categoryForm").classList.add("active");
         document.getElementById("overlay").style.display = "block";
@@ -199,11 +202,13 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 9;
-    width: 400px;
+    width: 80%; /* Reduced width */
+    max-width: 400px; /* Reduced max-width */
     background-color: white;
     border: 1px solid #ddd;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     border-radius: 5px;
+    overflow: hidden; /* Ensure the content fits within the popup */
 }
 
 .form-popup.active {
@@ -230,7 +235,7 @@
 
 .input-field label {
     position: absolute;
-    top: -20px;
+    top: -5px;
     left: 10px;
     background: white;
     padding: 0 5px;
@@ -261,4 +266,66 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 8;
 }
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px; /* Adjust gap as needed */
+}
+
+.edit-btn, .delete-btn {
+    padding: 8px 12px; /* Increased padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #45a049;
+}
+
+.delete-btn {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #da190b;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.category-image {
+    max-width: 50px;
+    max-height: 50px;
+    border-radius: 50%;
+}
+
+.form-box.add, .form-box.edit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-box .close-btn {
+    align-self: flex-end;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.form-content h2 {
+    margin-bottom: 20px; /* Added space below heading */
+}
+
 </style>

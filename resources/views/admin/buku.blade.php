@@ -347,7 +347,7 @@
 }
 
 .edit-btn, .delete-btn {
-    padding: 5px 10px;
+    padding: 8px 12px; /* Increased padding */
     border: none;
     border-radius: 5px;
     cursor: pointer;

@@ -33,7 +33,6 @@
 </div>
 @endsection
 
-@section('scripts')
 <script>
     function filterLoans() {
         const keyword = document.getElementById('search-input').value.toLowerCase();
@@ -50,7 +49,7 @@
         }
     }
 </script>
-@endsection
+
 
 <style>
 .content {
