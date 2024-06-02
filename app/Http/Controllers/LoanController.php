@@ -133,5 +133,21 @@ class LoanController extends Controller
     
         return view('admin.datapinjam', compact('loans', 'sortColumn', 'sortDirection'));
     }
-    
+    public function adminDashboard()
+    {
+        $books = Book::all();
+        $userCount = User::where('role', 'anggota')->count();
+
+        // Prepare data for the chart
+        $loanData = Loan::selectRaw('COUNT(*) as count, DATE_FORMAT(loan_date, "%Y-%m") as month')
+            ->groupBy('month')
+            ->orderBy('month', 'asc')
+            ->take(6)
+            ->get();
+
+        $loanMonths = $loanData->pluck('month');
+        $loanCounts = $loanData->pluck('count');
+
+        return view('admin.stats', compact('books', 'userCount', 'loanMonths', 'loanCounts'));
+    }
 }

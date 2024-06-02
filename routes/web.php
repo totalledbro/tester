@@ -51,6 +51,8 @@ Route::middleware([AdminMiddleware::class])->group(function () {
         $categories = Category::all();
         return view('admin.buku',compact('books','categories'));
     })->name('buku');
+    
+    Route::get('/dashboard', [LoanController::class, 'adminDashboard'])->name('stats');
 });
 
 Route::middleware([RedirectIfNotAnggota::class])->group(function () {

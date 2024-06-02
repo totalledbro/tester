@@ -5,13 +5,13 @@
     <h1>Data Buku</h1>
     <div class="content">
         <div class="category">
-            <button class="add-btn" onClick="openForm()">Tambah Buku</button>
+            <button class="add-btn" onclick="openForm()">Tambah Buku</button>
             <input type="text" id="search-input" placeholder="Cari buku..." oninput="filterBooks()">
         </div>
-        
+
         <div class="form-popup" id="bookForm">
             <div class="form-box add">
-                <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
+                <span class="close-btn material-symbols-rounded" onclick="closeForm()">close</span>
                 <div class="form-content">
                     <h2>Tambah buku</h2>
                     <form id="add-form" method="POST" action="{{ route('addbook') }}" enctype="multipart/form-data">
@@ -46,7 +46,7 @@
                 </div>
             </div>
         </div>
-        
+
         <h2>Daftar Buku</h2>
         <div class="table-responsive">
             <table class="table">
@@ -62,7 +62,7 @@
                 </thead>
                 <tbody id="book-list">
                     @foreach ($books as $book)
-                    <tr data-title="{{ strtolower($book->title) }}" data-author="{{ strtolower($book->author) }}" data-year="{{ $book->year }}" data-stock="{{ $book->stock }}" data-category="{{ strtolower($book->category ? $book->category->name : 'N/A') }}">
+                    <tr class="book-entry" data-title="{{ strtolower($book->title) }}" data-author="{{ strtolower($book->author) }}" data-year="{{ $book->year }}" data-stock="{{ $book->stock }}" data-category="{{ strtolower($book->category ? $book->category->name : 'N/A') }}">
                         <td>{{ ucwords($book->title) }}</td>
                         <td>{{ ucwords($book->author) }}</td>
                         <td>{{ $book->year }}</td>
@@ -70,7 +70,7 @@
                         <td>{{ $book->category ? ucwords($book->category->name) : 'N/A' }}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="edit-btn" onClick="openEditForm({{ $book->id }})">Edit</button>
+                                <button class="edit-btn" onclick="openEditForm({{ $book->id }})">Edit</button>
                                 <form action="{{ route('deletebook', $book->id) }}" method="POST" class="delete-form">
                                     @csrf
                                     @method('DELETE')
@@ -83,7 +83,7 @@
                     </tr>
                     <div class="form-popup" id="editForm{{$book->id}}">
                         <div class="form-box edit">
-                            <span class="close-btn material-symbols-rounded" onClick="closeEditForm({{ $book->id }})">close</span>
+                            <span class="close-btn material-symbols-rounded" onclick="closeEditForm({{ $book->id }})">close</span>
                             <div class="form-content">
                                 <h2>Edit buku</h2>
                                 <form id="edit-form-{{ $book->id }}" method="POST" action="{{ route('updatebook', $book->id) }}" enctype="multipart/form-data">
@@ -123,93 +123,129 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="pagination">
+            <button id="prev-page" disabled>&laquo; Previous</button>
+            <button id="next-page">Next &raquo;</button>
+        </div>
     </div>
-    <div class="overlay" id="overlay" onClick="closeForm()"></div>
+    <div class="overlay" id="overlay" onclick="closeAllForms()"></div>
 </div>
 @endsection
 
+@section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        // Adding event listener to the overlay to close any form when clicked
-        document.getElementById("overlay").addEventListener("click", closeAllForms);
+document.addEventListener('DOMContentLoaded', (event) => {
+    const entries = document.querySelectorAll('.book-entry');
+    let currentIndex = 0;
+    const entriesPerPage = 10;
+
+    const prevPageButton = document.getElementById('prev-page');
+    const nextPageButton = document.getElementById('next-page');
+    const overlay = document.getElementById('overlay');
+
+    if (!prevPageButton || !nextPageButton || !overlay) {
+        console.error('Pagination buttons or overlay not found');
+        return;
+    }
+
+    const showEntries = () => {
+        for (let i = 0; i < entries.length; i++) {
+            entries[i].style.display = (i >= currentIndex && i < currentIndex + entriesPerPage) ? '' : 'none';
+        }
+        prevPageButton.disabled = currentIndex === 0;
+        nextPageButton.disabled = currentIndex + entriesPerPage >= entries.length;
+
+        // Add the show class with a delay to trigger the fade-in effect
+        setTimeout(() => {
+            entries.forEach((entry, index) => {
+                if (index >= currentIndex && index < currentIndex + entriesPerPage) {
+                    entry.classList.add('show');
+                } else {
+                    entry.classList.remove('show');
+                }
+            });
+        }, 100); // 100ms delay to ensure the elements are in the DOM
+    };
+
+    prevPageButton.addEventListener('click', () => {
+        currentIndex = Math.max(currentIndex - entriesPerPage, 0);
+        showEntries();
     });
 
-    function openForm() {
-        document.getElementById("bookForm").classList.add("active");
-        document.getElementById("overlay").style.display = "block"; // Show overlay
-    }
+    nextPageButton.addEventListener('click', () => {
+        currentIndex = Math.min(currentIndex + entriesPerPage, entries.length - entriesPerPage);
+        showEntries();
+    });
 
-    function closeForm() {
-        document.getElementById("bookForm").classList.remove("active");
-        document.getElementById("overlay").style.display = "none"; // Hide overlay
-    }
+    showEntries();
 
-    function openEditForm(editFormId) {
-        // Show the edit form with the corresponding ID
-        document.getElementById('editForm' +editFormId).classList.add("active");
-        document.getElementById("overlay").style.display = "block"; // Show overlay
-    }
-    function closeEditForm(editFormId) {
-    // Close the form with the specified ID
-    document.getElementById('editForm' + editFormId).classList.remove("active");
-    document.getElementById("overlay").style.display = "none"; // Hide overlay
+    overlay.addEventListener("click", closeAllForms);
+});
+
+function openForm() {
+    document.getElementById("bookForm").classList.add("active");
+    document.getElementById("overlay").style.display = "block"; 
 }
-    function restrictToNumbers(input) {
-        // Remove non-numeric characters from the input value
-        input.value = input.value.replace(/\D/g, '');
-        if (input.value.length > 4) {
-            input.value = input.value.slice(0, 4);
-        }
+
+function closeForm() {
+    document.getElementById("bookForm").classList.remove("active");
+    document.getElementById("overlay").style.display = "none"; 
+}
+
+function openEditForm(editFormId) {
+    document.getElementById('editForm' + editFormId).classList.add("active");
+    document.getElementById("overlay").style.display = "block"; 
+}
+
+function closeEditForm(editFormId) {
+    document.getElementById('editForm' + editFormId).classList.remove("active");
+    document.getElementById("overlay").style.display = "none"; 
+}
+
+function restrictToNumbers(input) {
+    input.value = input.value.replace(/\D/g, '');
+    if (input.value.length > 4) {
+        input.value = input.value.slice(0, 4);
     }
+}
 
-    // Filter books based on search input
-    function filterBooks() {
-        let keyword = document.getElementById('search-input').value.toLowerCase();
-        let bookList = document.getElementById('book-list');
-        let rows = bookList.getElementsByTagName('tr');
-        let found = false; // Variable to track if any book is found
+function filterBooks() {
+    let keyword = document.getElementById('search-input').value.toLowerCase();
+    let bookList = document.getElementById('book-list');
+    let rows = bookList.getElementsByTagName('tr');
 
-        for (let i = 0; i < rows.length; i++) {
-            let title = rows[i].getAttribute('data-title');
-            let author = rows[i].getAttribute('data-author');
-            let year = rows[i].getAttribute('data-year');
-            let stock = rows[i].getAttribute('data-stock');
-            let category = rows[i].getAttribute('data-category');
+    for (let i = 0; i < rows.length; i++) {
+        let title = rows[i].getAttribute('data-title');
+        let author = rows[i].getAttribute('data-author');
+        let year = rows[i].getAttribute('data-year');
+        let stock = rows[i].getAttribute('data-stock');
+        let category = rows[i].getAttribute('data-category');
 
-            if (
-                title.includes(keyword) ||
-                author.includes(keyword) ||
-                year.includes(keyword) ||
-                stock.includes(keyword) ||
-                category.includes(keyword)
-            ) {
-                rows[i].style.display = "";
-                found = true; // Book found, set found to true
-            } else {
-                rows[i].style.display = "none";
-            }
-        }
-
-        // If no book is found, hide the entire table
-        if (!found) {
-            bookList.style.display = "none";
+        if (
+            title.includes(keyword) ||
+            author.includes(keyword) ||
+            year.includes(keyword) ||
+            stock.includes(keyword) ||
+            category.includes(keyword)
+        ) {
+            rows[i].style.display = "";
         } else {
-            bookList.style.display = ""; // Show the table if books are found
+            rows[i].style.display = "none";
         }
     }
+}
 
-    // Function to close all forms and overlay
-    function closeAllForms() {
-        // Close the add form
-        closeForm();
+function closeAllForms() {
+    closeForm();
+    let editForms = document.querySelectorAll('.form-popup.active');
+    editForms.forEach(form => {
+        form.classList.remove('active');
+    });
+}
 
-        // Close all edit forms
-        let editForms = document.querySelectorAll('.form-popup.active');
-        editForms.forEach(form => {
-            form.classList.remove('active');
-        });
-    }
 </script>
+@endsection
 
 <style>
 .content {
@@ -244,7 +280,7 @@
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    width: 200px; /* Adjust the width as needed */
+    width: 200px; 
 }
 
 .table {
@@ -273,13 +309,13 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 9;
-    width: 90%; /* Changed to 90% for better mobile responsiveness */
-    max-width: 500px; /* Set a max-width */
+    width: 90%; 
+    max-width: 500px; 
     background-color: white;
     border: 1px solid #ddd;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     border-radius: 5px;
-    overflow: hidden; /* Ensure the content fits within the popup */
+    overflow: hidden; 
 }
 
 .form-popup.active {
@@ -289,9 +325,11 @@
 .form-content {
     padding: 20px;
 }
+
 .h2 {
     margin-bottom: 20px;
 }
+
 .input-field {
     position: relative;
     margin-bottom: 20px;
@@ -343,11 +381,11 @@
 .action-buttons {
     display: flex;
     justify-content: space-between;
-    gap: 10px; /* Adjust gap as needed */
+    gap: 10px;
 }
 
 .edit-btn, .delete-btn {
-    padding: 8px 12px; /* Increased padding */
+    padding: 8px 12px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -355,7 +393,7 @@
 }
 
 .edit-btn {
-    background-color: #4CAF50; /* Green */
+    background-color: #4CAF50;
     color: white;
 }
 
@@ -364,7 +402,7 @@
 }
 
 .delete-btn {
-    background-color: #f44336; /* Red */
+    background-color: #f44336;
     color: white;
 }
 
@@ -388,5 +426,42 @@
 
 .close-btn:hover {
     color: #000;
+}
+
+.book-entry {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.book-entry.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 10px 20px;
+    margin: 0 5px;
+    background-color: var(--blue);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.pagination button:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+}
+
+.pagination button:hover:not(:disabled) {
+    background-color: #1e1c59;
 }
 </style>

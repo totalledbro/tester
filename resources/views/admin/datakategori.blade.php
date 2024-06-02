@@ -42,7 +42,7 @@
                 </thead>
                 <tbody id="category-list">
                     @foreach ($categories as $category)
-                    <tr data-name="{{ strtolower($category->name) }}">
+                    <tr class="category-entry" data-name="{{ strtolower($category->name) }}">
                         <td>{{ ucwords($category->name) }}</td>
                         <td>
                             @if($category->image_url)
@@ -96,7 +96,19 @@
 </div>
 @endsection
 
+@section('scripts')
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const entries = document.querySelectorAll('.category-entry');
+
+        // Add fade-in effect
+        entries.forEach((entry, index) => {
+            setTimeout(() => {
+                entry.classList.add('show');
+            }, index * 100); // Adjust the delay here (in milliseconds)
+        });
+    });
+
     function filterCategories() {
         const keyword = document.getElementById('search-input').value.toLowerCase();
         const rows = document.getElementById('category-list').getElementsByTagName('tr');
@@ -139,6 +151,7 @@
         document.getElementById("overlay").style.display = "none";
     }
 </script>
+@endsection
 
 <style>
 .content {
@@ -328,4 +341,14 @@
     margin-bottom: 20px; /* Added space below heading */
 }
 
+/* Fade-in effect */
+.category-entry {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.category-entry.show {
+    opacity: 1;
+}
 </style>
+

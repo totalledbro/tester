@@ -17,10 +17,12 @@
     <div class="container">
         <div class="navigation">
             <div class="topbar">
-                <div class="toggle"><ion-icon name="menu-outline"></ion-icon><span class="admin-icon"><ion-icon name="person-circle-outline"></ion-icon></span></div>
+                <div class="toggle"><ion-icon name="menu-outline"></ion-icon></div>
+                <span class="admin-icon"><ion-icon name="person-circle-outline"></ion-icon></span>
+                <span class="greeting" id="greeting"></span>
             </div>
             <ul>
-                <li class="nav-item"><a href="{{ url('/') }}"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ url('/dashboard') }}"><span class="icon"><ion-icon name="home-outline"></ion-icon></span><span class="title">Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ url('/buku') }}"><span class="icon"><ion-icon name="book-outline"></ion-icon></span><span class="title">Buku</span></a></li>
                 <li class="nav-item"><a href="{{ url('/datakategori') }}"><span class="icon"><ion-icon name="bookmarks-outline"></ion-icon></span><span class="title">Kategori</span></a></li>
                 <li class="nav-item"><a href="{{ url('/datapinjam') }}"><span class="icon"><ion-icon name="time-outline"></ion-icon></span><span class="title">Data Pinjam</span></a></li>
@@ -45,6 +47,7 @@
         const navigation = document.querySelector(".navigation");
         const main = document.querySelector(".main");
         const adminIcon = document.querySelector(".admin-icon");
+        const greeting = document.getElementById('greeting');
 
         // Function to add 'hovered' class to active link
         function activeLink() {
@@ -58,10 +61,12 @@
             navigation.classList.add('expanded');
             main.classList.add('expanded');
             adminIcon.style.display = 'inline-block';
+            greeting.style.display = 'inline-block';
         } else {
             navigation.classList.remove('expanded');
             main.classList.remove('expanded');
             adminIcon.style.display = 'none';
+            greeting.style.display = 'none';
         }
 
         toggle.onclick = function () {
@@ -71,9 +76,11 @@
             if (navigation.classList.contains('expanded')) {
                 localStorage.setItem('navState', 'active');
                 adminIcon.style.display = 'inline-block';
+                greeting.style.display = 'inline-block';
             } else {
                 localStorage.removeItem('navState');
                 adminIcon.style.display = 'none';
+                greeting.style.display = 'none';
             }
         };
 
@@ -86,7 +93,25 @@
                 item.classList.add('hovered');
             }
         });
+
+        // Set greeting text
+        const currentHour = new Date().getHours();
+        let greetingText;
+        if (currentHour < 12) {
+            greetingText = 'Selamat Pagi';
+        } else if (currentHour < 15) {
+            greetingText = 'Selamat Siang';
+        } else if (currentHour < 18) {
+            greetingText = 'Selamat Sore';
+        } else {
+            greetingText = 'Selamat Malam';
+        }
+
+        // Assuming the user's last name is available in a JavaScript variable
+        const userLastName = '{{ ucwords(Auth::user()->last_name) }}';
+        greeting.innerText = `${greetingText}, ${userLastName}`;
     });
     </script>
+    @yield('scripts')
 </body>
 </html>

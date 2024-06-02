@@ -18,7 +18,7 @@ class LoginController extends Controller
             $user = Auth::user();
             
             if ($user->role === 'administrator') {
-                return redirect()->route('admin');
+                return redirect()->route('stats');
             } else {
                 return redirect()->route('dash')->withInput($credentials);
             }
