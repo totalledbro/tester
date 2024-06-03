@@ -4,7 +4,7 @@
 <div class="main active">
     <h1>Data Buku</h1>
     <div class="content">
-        <div class="category">
+        <div class="book">
             <button class="add-btn" onclick="openForm()">Tambah Buku</button>
             <input type="text" id="search-input" placeholder="Cari buku..." oninput="filterBooks()">
         </div>
@@ -150,22 +150,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 
     const showEntries = () => {
-        for (let i = 0; i < entries.length; i++) {
-            entries[i].style.display = (i >= currentIndex && i < currentIndex + entriesPerPage) ? '' : 'none';
+
+        // Show and animate entries within the current page range
+        for (let i = currentIndex; i < Math.min(currentIndex + entriesPerPage, entries.length); i++) {
+            setTimeout(() => {
+                entries[i].style.display = '';
+                entries[i].classList.add('show');
+            }, (i - currentIndex) * 100); // 100ms delay between each entry
         }
+
         prevPageButton.disabled = currentIndex === 0;
         nextPageButton.disabled = currentIndex + entriesPerPage >= entries.length;
-
-        // Add the show class with a delay to trigger the fade-in effect
-        setTimeout(() => {
-            entries.forEach((entry, index) => {
-                if (index >= currentIndex && index < currentIndex + entriesPerPage) {
-                    entry.classList.add('show');
-                } else {
-                    entry.classList.remove('show');
-                }
-            });
-        }, 100); // 100ms delay to ensure the elements are in the DOM
     };
 
     prevPageButton.addEventListener('click', () => {
@@ -255,7 +250,7 @@ function closeAllForms() {
     padding: 20px;
 }
 
-.category {
+.book {
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -430,13 +425,11 @@ function closeAllForms() {
 
 .book-entry {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 0.5s ease-in-out;
 }
 
 .book-entry.show {
     opacity: 1;
-    transform: translateY(0);
 }
 
 .pagination {
@@ -464,4 +457,5 @@ function closeAllForms() {
 .pagination button:hover:not(:disabled) {
     background-color: #1e1c59;
 }
+
 </style>

@@ -18,12 +18,42 @@
                 </thead>
                 <tbody id="loan-list">
                     @foreach ($loans as $loan)
-                    <tr class="loan-entry" data-name="{{ strtolower($loan->user->first_name . ' ' . $loan->user->last_name) }}" data-book="{{ strtolower($loan->book->title) }}">
-                        <td>{{ ucwords($loan->user->first_name) . ' ' . ucwords($loan->user->last_name) }}</td>
-                        <td>{{ ucwords($loan->book->title) }}</td>
-                        <td>{{ \Carbon\Carbon::parse($loan->loan_date)->translatedFormat('j F Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($loan->limit_date)->translatedFormat('j F Y') }}</td>
-                        <td>{{ $loan->return_date ? \Carbon\Carbon::parse($loan->return_date)->translatedFormat('j F Y') : 'Buku belum dikembalikan' }}</td>
+                    <tr class="loan-entry" data-name="{{ strtolower($loan->user->first_name . ' ' . $loan->user->last_name) ?? 'Tidak ada data' }}" data-book="{{ strtolower($loan->book->title ?? 'Tidak ada data') }}">
+                        <td>
+                            @if ($loan->user && $loan->user->first_name && $loan->user->last_name)
+                                {{ ucwords($loan->user->first_name) . ' ' . ucwords($loan->user->last_name) }}
+                            @else
+                                <span class="missing-data">Tidak ada data</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($loan->book && $loan->book->title)
+                                {{ ucwords($loan->book->title) }}
+                            @else
+                                <span class="missing-data">Tidak ada data</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($loan->loan_date)
+                                {{ \Carbon\Carbon::parse($loan->loan_date)->translatedFormat('j F Y') }}
+                            @else
+                                <span class="missing-data">Tidak ada data</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($loan->limit_date)
+                                {{ \Carbon\Carbon::parse($loan->limit_date)->translatedFormat('j F Y') }}
+                            @else
+                                <span class="missing-data">Tidak ada data</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($loan->return_date)
+                                {{ \Carbon\Carbon::parse($loan->return_date)->translatedFormat('j F Y') }}
+                            @else
+                                Buku belum dikembalikan
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -39,97 +69,101 @@
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const entries = document.querySelectorAll('.loan-entry');
-        let currentIndex = 0;
-        const entriesPerPage = 10;
+document.addEventListener('DOMContentLoaded', (event) => {
+    const entries = document.querySelectorAll('.loan-entry');
+    let currentIndex = 0;
+    const entriesPerPage = 10;
 
-        const prevPageButton = document.getElementById('prev-page');
-        const nextPageButton = document.getElementById('next-page');
+    const prevPageButton = document.getElementById('prev-page');
+    const nextPageButton = document.getElementById('next-page');
 
-        const showEntries = () => {
-            for (let i = 0; i < entries.length; i++) {
-                entries[i].style.display = (i >= currentIndex && i < currentIndex + entriesPerPage) ? '' : 'none';
-            }
-            prevPageButton.disabled = currentIndex === 0;
-            nextPageButton.disabled = currentIndex + entriesPerPage >= entries.length;
+    const showEntries = () => {
+        entries.forEach((entry, index) => {
+            entry.style.display = (index >= currentIndex && index < currentIndex + entriesPerPage) ? '' : 'none';
+            entry.classList.remove('show');
+        });
 
-            // Add the show class with a delay to trigger the fade-in effect
-            setTimeout(() => {
-                entries.forEach((entry, index) => {
-                    if (index >= currentIndex && index < currentIndex + entriesPerPage) {
+        setTimeout(() => {
+            entries.forEach((entry, index) => {
+                if (index >= currentIndex && index < currentIndex + entriesPerPage) {
+                    setTimeout(() => {
                         entry.classList.add('show');
-                    } else {
-                        entry.classList.remove('show');
-                    }
-                });
-            }, 100); // 100ms delay to ensure the elements are in the DOM
-        };
+                    }, (index - currentIndex) * 100); // Stagger the addition of the 'show' class
+                }
+            });
+        }, 100);
 
-        prevPageButton.addEventListener('click', () => {
-            currentIndex = Math.max(currentIndex - entriesPerPage, 0);
-            showEntries();
-        });
+        prevPageButton.disabled = currentIndex === 0;
+        nextPageButton.disabled = currentIndex + entriesPerPage >= entries.length;
+    };
 
-        nextPageButton.addEventListener('click', () => {
-            currentIndex = Math.min(currentIndex + entriesPerPage, entries.length - entriesPerPage);
-            showEntries();
-        });
-
+    prevPageButton.addEventListener('click', () => {
+        currentIndex = Math.max(currentIndex - entriesPerPage, 0);
         showEntries();
     });
 
-    function filterLoans() {
-        const keyword = document.getElementById('search-input').value.toLowerCase();
-        const rows = document.getElementById('loan-list').getElementsByTagName('tr');
+    nextPageButton.addEventListener('click', () => {
+        currentIndex = Math.min(currentIndex + entriesPerPage, entries.length - entriesPerPage);
+        showEntries();
+    });
 
-        for (let i = 0; i < rows.length; i++) {
-            const name = rows[i].getAttribute('data-name');
-            const book = rows[i].getAttribute('data-book');
-            rows[i].style.display = (name.includes(keyword) || book.includes(keyword)) ? '' : 'none';
+    showEntries();
+});
+
+function filterLoans() {
+    const keyword = document.getElementById('search-input').value.toLowerCase();
+    const rows = document.getElementById('loan-list').getElementsByTagName('tr');
+    let visibleRows = [];
+
+    for (let i = 0; i < rows.length; i++) {
+        const name = rows[i].getAttribute('data-name');
+        const book = rows[i].getAttribute('data-book');
+        if (name.includes(keyword) || book.includes(keyword)) {
+            rows[i].style.display = '';
+            visibleRows.push(rows[i]);
+        } else {
+            rows[i].style.display = 'none';
         }
-
-        // Reset pagination after filtering
-        const visibleRows = Array.from(rows).filter(row => row.style.display === '');
-        const entriesPerPage = 10;
-        let currentPage = 0;
-
-        const showVisibleEntries = () => {
-            visibleRows.forEach((row, index) => {
-                row.style.display = (index >= currentPage * entriesPerPage && index < (currentPage + 1) * entriesPerPage) ? '' : 'none';
-            });
-
-            document.getElementById('prev-page').disabled = currentPage === 0;
-            document.getElementById('next-page').disabled = currentPage >= Math.ceil(visibleRows.length / entriesPerPage) - 1;
-
-            // Add the show class with a delay to trigger the fade-in effect
-            setTimeout(() => {
-                visibleRows.forEach((entry, index) => {
-                    if (index >= currentPage * entriesPerPage && index < (currentPage + 1) * entriesPerPage) {
-                        entry.classList.add('show');
-                    } else {
-                        entry.classList.remove('show');
-                    }
-                });
-            }, 100); // 100ms delay to ensure the elements are in the DOM
-        };
-
-        document.getElementById('prev-page').addEventListener('click', () => {
-            if (currentPage > 0) {
-                currentPage--;
-                showVisibleEntries();
-            }
-        });
-
-        document.getElementById('next-page').addEventListener('click', () => {
-            if (currentPage < Math.ceil(visibleRows.length / entriesPerPage) - 1) {
-                currentPage++;
-                showVisibleEntries();
-            }
-        });
-
-        showVisibleEntries();
     }
+
+    const entriesPerPage = 10;
+    let currentPage = 0;
+
+    const showVisibleEntries = () => {
+        visibleRows.forEach((row, index) => {
+            row.style.display = (index >= currentPage * entriesPerPage && index < (currentPage + 1) * entriesPerPage) ? '' : 'none';
+        });
+
+        document.getElementById('prev-page').disabled = currentPage === 0;
+        document.getElementById('next-page').disabled = currentPage >= Math.ceil(visibleRows.length / entriesPerPage) - 1;
+
+        setTimeout(() => {
+            visibleRows.forEach((entry, index) => {
+                if (index >= currentPage * entriesPerPage && index < (currentPage + 1) * entriesPerPage) {
+                    entry.classList.add('show');
+                } else {
+                    entry.classList.remove('show');
+                }
+            });
+        }, 100);
+    };
+
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 0) {
+            currentPage--;
+            showVisibleEntries();
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage < Math.ceil(visibleRows.length / entriesPerPage) - 1) {
+            currentPage++;
+            showVisibleEntries();
+        }
+    });
+
+    showVisibleEntries();
+}
 </script>
 @endsection
 
@@ -197,12 +231,15 @@
 /* Add the fade-in effect */
 .loan-entry {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 0.5s ease-in-out;
 }
 
 .loan-entry.show {
     opacity: 1;
-    transform: translateY(0);
+}
+
+/* Red color for missing data */
+.missing-data {
+    color: red;
 }
 </style>

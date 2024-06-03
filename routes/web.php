@@ -47,7 +47,7 @@ Route::middleware([AdminMiddleware::class])->group(function () {
     })->name('datakategori');
     
     Route::get('/buku', function () {
-        $books = Book::all();
+        $books = Book::with('category')->orderBy('id', 'desc')->get();
         $categories = Category::all();
         return view('admin.buku',compact('books','categories'));
     })->name('buku');
