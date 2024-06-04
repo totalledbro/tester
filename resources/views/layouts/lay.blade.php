@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>PERPUSTAKAAN DIGITAL KALINGANYAR</title>
-    <!-- Google Fonts Link For Icons -->
     <link rel="icon" href="{{ asset('img/logodesa.png') }}" type="image/png">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
@@ -14,6 +13,7 @@
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body>
 <div class="container">
@@ -42,14 +42,14 @@
                     <button class="login-btn">LOG IN</button>
                 @else
                     <div class="dropdown">
-                        <div class="greeting" id="greeting"> {{ ucwords(Auth::user()->last_name) }}</div>
+                        <div class="greeting" id="greeting">{{ ucwords(Auth::user()->last_name) }}</div>
                         <button id="dropdown-button" class="dropbtn">
                             <span class="icon"><ion-icon name="caret-down-outline"></ion-icon></span>
                         </button>
                         <div class="dropdown-content">
                             <a href="#">Settings</a>
                             <a href="{{ route('actionlogout') }}"
-                                onclick="event.preventDefault();
+                               onclick="event.preventDefault();
                                         document.getElementById('logout-form').submit();">
                                 Logout
                             </a>
@@ -70,7 +70,7 @@
                     <form id="login-form" method="POST" action="{{ route('actionlogin') }}">
                         @csrf
                         <div class="input-field">
-                            <input type="text" name="email" required>
+                            <input type="text" name="email" autocomplete="email" required>
                             <label>Email</label>
                         </div>
                         <div class="input-field">
@@ -130,6 +130,18 @@
         @yield('content')
     </div>
 </div>
+
+<!-- Modal for login error -->
+<div id="loginErrorModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+        </div>
+        <p>Email Atau Password Salah!</p>
+        <p>Mohon Coba Lagi</p>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Get the current hour
@@ -182,6 +194,46 @@
         confirmPasswordInput.addEventListener('keyup', validatePassword2);
     });
 
+    document.addEventListener('DOMContentLoaded', function () {
+        // Login form submission handling
+        $("#login-form").submit(function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Serialize form data
+            var formData = $(this).serialize();
+
+            // Send form data to the server using Ajax
+            $.ajax({
+                type: "POST",
+                url: $(this).attr("action"),
+                data: formData,
+                success: function(response) {
+                    // If login is successful, redirect to the dashboard
+                    if (response.success) {
+                        window.location.href = response.redirect_url;
+                    } else {
+                        // If there's an error, display the error modal and blur login modal
+                        $("#loginErrorModal").fadeIn();
+                        $(".form-popup").addClass("blur-and-disable");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle error, if any
+                    console.log(error);
+                }
+            });
+        });
+
+        // Handle error modal close when clicking outside of modal content
+        $(window).click(function(event) {
+            var modal = $("#loginErrorModal");
+            if (event.target == modal[0]) {
+                modal.fadeOut();
+                $(".form-popup").removeClass("blur-and-disable");
+            }
+        });
+    });
+
     $(document).ready(function() {
         // Function to handle form submission
         $("#signup-form").submit(function(event) {
@@ -225,8 +277,6 @@
             }
         });
     });
-
-
 </script>
 @yield('scripts')
 </body>

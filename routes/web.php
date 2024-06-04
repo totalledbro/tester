@@ -14,12 +14,12 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\RedirectIfAdministrator;
 use App\Http\Middleware\RedirectIfNotAnggota;
 
-
+Route::get('/', function () {
+    $books = Book::with('category')->orderBy('id', 'desc')->limit(3)->get();
+    return view('auth.dashboardawal',compact('books'));
+})->name('dash');
 Route::middleware([RedirectIfAdministrator::class])->group(function () {
-    Route::get('/', function () {
-        $books = Book::with('category')->orderBy('id', 'desc')->limit(3)->get();
-        return view('auth.dashboardawal',compact('books'));
-    })->name('dash');
+
 
     Route::get('/jelajahi', function () {
         $loans = Loan::all();
@@ -37,7 +37,8 @@ Route::middleware([RedirectIfAdministrator::class])->group(function () {
 
 Route::middleware([AdminMiddleware::class])->group(function () {
     Route::get('/admin', function () {
-        return view('admin.dashboard');
+        $books = Book::all();
+        return view('admin.stats');
     })->name('admin');
     Route::get('/datapinjam', [LoanController::class, 'showAllLoans'])->name('datapinjam');
     

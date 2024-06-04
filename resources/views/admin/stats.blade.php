@@ -48,7 +48,13 @@
                         beginAtZero: true
                     },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return Number.isInteger(value) ? value : null;
+                            },
+                            stepSize: 1
+                        }
                     }
                 },
                 plugins: {
@@ -65,6 +71,7 @@
     });
 </script>
 @endsection
+
 
 <style>
     .statistics {

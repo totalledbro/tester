@@ -13,20 +13,17 @@ class LoginController extends Controller
     public function actionlogin(Request $request)
     {
         $credentials = $request->only('email', 'password');
- 
+    
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            
-            if ($user->role === 'administrator') {
-                return redirect()->route('stats');
-            } else {
-                return redirect()->route('dash')->withInput($credentials);
-            }
+            $redirectUrl = $user->role === 'administrator' ? route('stats') : route('dash');
+    
+            return response()->json(['success' => true, 'redirect_url' => $redirectUrl]);
         }
-
-        Session::flash('error', 'email atau Password Salah');
-        return redirect()->route('dash');
+    
+        return response()->json(['success' => false, 'message' => 'Invalid credentials']);
     }
+    
 
     public function actionlogout()
     {

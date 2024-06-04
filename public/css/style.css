@@ -6,7 +6,6 @@
     font-family: "Open Sans", sans-serif;
 }
 
-
 body {
     width: 100%;
     padding-top: 80px;
@@ -56,7 +55,7 @@ hr {
 h3 {
     text-align: center;
     margin-bottom: 20px;
-    color:white;
+    color: white;
 }
 
 /* Header */
@@ -372,6 +371,60 @@ form button:hover {
 
 .form-popup.show-signup .signup {
     display: flex;
+}
+
+/* Modal Styles */
+/* Add this to your CSS file */
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 40%; /* Could be more or less, depending on screen size */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.modal-icon {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.modal-icon ion-icon {
+    font-size: 48px;
+    color: #f44336; /* Red color for the error icon */
+}
+
+/* Optional: Add animation to the modal */
+@keyframes modalFadeIn {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+.modal {
+    animation: modalFadeIn 0.4s;
+}
+
+
+.blur-and-disable {
+    filter: blur(5px);
+    pointer-events: none;
+    user-select: none;
 }
 
 /* Book Section */
