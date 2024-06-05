@@ -150,4 +150,42 @@ class LoanController extends Controller
 
         return view('admin.stats', compact('books', 'userCount', 'loanMonths', 'loanCounts'));
     }
+
+    public function getDailyLoans(Request $request)
+    {
+        $year = $request->input('year');
+        $month = $request->input('month');
+
+        // Query to get daily loans for the specified month and year
+        $dailyLoans = Loan::selectRaw('DAY(loan_date) as day, COUNT(*) as count')
+            ->whereYear('loan_date', $year)
+            ->whereMonth('loan_date', $month)
+            ->groupBy('day')
+            ->get()
+            ->keyBy('day');
+
+        $daysInMonth = Carbon::createFromDate($year, $month, 1)->daysInMonth;
+        $data = [];
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $data[] = $dailyLoans->get($day, (object) ['count' => 0])->count;
+        }
+
+        return response()->json([
+            'days' => range(1, $daysInMonth),
+            'data' => $data
+        ]);
+    }
+
+    public function getDailyLoanDetails(Request $request)
+    {
+        $date = $request->input('date');
+
+        // Query to get loans for the specified date
+        $loans = Loan::with('user', 'book')
+            ->whereDate('loan_date', $date)
+            ->get();
+
+        return response()->json($loans);
+    }
+
 }

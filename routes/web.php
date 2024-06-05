@@ -54,6 +54,10 @@ Route::middleware([AdminMiddleware::class])->group(function () {
     })->name('buku');
     
     Route::get('/dashboard', [LoanController::class, 'adminDashboard'])->name('stats');
+    Route::get('/daily-loans', [LoanController::class, 'getDailyLoans'])->name('daily-loans');
+    Route::get('/daily-loan-details', [LoanController::class, 'getDailyLoanDetails'])->name('daily-loan-details');
+
+
 });
 
 Route::middleware([RedirectIfNotAnggota::class])->group(function () {
