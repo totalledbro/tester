@@ -41,6 +41,15 @@
         </form>
     </div>
 </div>
+
+<!-- Success Modal -->
+<div id="successModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p id="success-message" class="success-message"></p>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -158,7 +167,7 @@ $(document).ready(function() {
 
     // Close modal when close button is clicked
     $(document).on('click', '.close', function() {
-        $('#loanModal').css('display', 'none');
+        $(this).closest('.modal').css('display', 'none');
         // Clear previous details
         $('#book-cover').empty();
         $('#today-date').empty();
@@ -168,6 +177,12 @@ $(document).ready(function() {
         $('#book-year').empty();
         $('#book-category').empty();
     });
+
+    // Function to display success message
+    function displayMessage(message, type) {
+        $('#success-message').text(message).addClass(type === 'success' ? 'success-message' : 'error-message');
+        $('#successModal').css('display', 'block');
+    }
 
     // Submit the form when it's submitted
     $('#loanForm').on('submit', function(e) {
@@ -184,13 +199,11 @@ $(document).ready(function() {
             url: '{{ route("addloan") }}',
             data: bookData,
             success: function(response) {
-                console.log(response);
                 // Handle success response here
                 displayMessage('Loan request submitted successfully!', 'success');
                 // Optionally, update the UI to reflect the loan
             },
             error: function(xhr, status, error) {
-                console.error(xhr.responseText);
                 // Handle error response here
                 let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred while submitting the loan request.';
                 displayMessage(errorMessage, 'error');
@@ -219,14 +232,8 @@ $(document).ready(function() {
         displayBooks(books);
     }
 });
-
 </script>
 @endsection
-
-<style>
-/* Add your styles here */
-</style>
-
 
 <style>
 .search-box {

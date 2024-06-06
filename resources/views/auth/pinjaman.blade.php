@@ -11,6 +11,7 @@
     <p><strong>Limit Pinjaman Anda:</strong> {{ $loanLimit }}</p>
     <p><strong>Buku yang Saat Ini Dipinjam:</strong> <span id="current-loans-count">{{ $loans->count() }}</span></p>
 </div>
+
 <!-- Search Box -->
 <div class="search-box">
     <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
@@ -49,21 +50,38 @@
                     let book = loan.book;
                     let bookCoverUrl = `{{ asset('storage/cover') }}/${book.pdf_url.split('/').pop().replace('.pdf', '.png')}`;
                     let bacaUrl = bacaBookUrl.replace('PLACEHOLDER', loan.id);
+                    let limitDate = new Date(loan.limit_date);
+                    let today = new Date();
+                    
+                    // Only compare dates, ignoring the time
+                    limitDate.setHours(0, 0, 0, 0);
+                    today.setHours(0, 0, 0, 0);
+
+                    let timeDiff = limitDate.getTime() - today.getTime();
+                    let daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                    let limitDateString = limitDate.toLocaleDateString('id-ID', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                    
+                    // Add "(1 hari lagi)" for books expiring in 1 day
+                    if (daysLeft === 1) {
+                        limitDateString += " (1 hari lagi)";
+                    }
+                    let itemClass = daysLeft <= 1 ? 'book-item urgent' : 'book-item';
                     list += `
-                        <li class="book-item" data-loan-id="${loan.id}">
+                        <li class="${itemClass}" data-loan-id="${loan.id}">
                             <div class="cover">
                                 <img data-src="${bookCoverUrl}" alt="Book Cover" class="lazy-load">
                             </div>
                             <div class="book-details">
                                 <h3>${capitalizeWords(book.title)}</h3>
-                                <p><strong>Author:</strong> ${capitalizeWords(book.author)}</p>
-                                <p><strong>Year:</strong> ${book.year}</p>
+                                <p><strong>Penulis:</strong> ${capitalizeWords(book.author)}</p>
+                                <p><strong>Tahun:</strong> ${book.year}</p>
+                                <p><strong>Batas Pinjam:</strong> ${limitDateString}</p>
                             </div>
-                            <div class="book-action">
+                            <div class="book-actions">
                                 <a href="${bacaUrl}" class="read-book">Baca Buku</a>
-                            </div>
-
-                            <div class="book-action">
                                 <button class="return-book">Kembalikan Buku</button>
                             </div>
                         </li>
@@ -172,16 +190,6 @@
 @endsection
 
 <style>
-.return-book {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 14px;
-}
-
 /* Limit section */
 .limit {
     text-align: center;
@@ -223,6 +231,10 @@
     align-items: center;
 }
 
+.book-item.urgent {
+    background-color: rgba(2234, 229, 204, 0.9);
+}
+
 .cover {
     width: 20%;
     max-width: 200px;
@@ -259,8 +271,33 @@
     color: #333;
 }
 
-.book-action {
+.book-actions {
+    display: flex;
+    flex-direction: column;
     margin-left: auto;
+    gap: 10px;
+}
+
+.read-book {
+    background-color: #007bff; /* Current "Kembalikan Buku" button color */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    text-align: center;
+}
+
+.return-book {
+    background-color: #28a745; /* New color for "Kembalikan Buku" button */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    text-align: center;
 }
 
 /* Modal styles */

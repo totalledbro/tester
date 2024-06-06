@@ -20,7 +20,7 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <label for="page-input-modal"> Buka halaman:</label>
-        <input type="text" id="page-input-modal" min="1" class="page-input" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+        <input type="text" id="page-input-modal" min="1" class="page-input" oninput="this.value = this.value.replace(/[^0-9]/g, ''); " autocomplete="off">
         <button id="go-to-page" class="control-button">Go</button>
     </div>
 </div>
