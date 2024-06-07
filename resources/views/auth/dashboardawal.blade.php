@@ -43,6 +43,17 @@
 </div>
 @endsection
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var bookCards = document.querySelectorAll('.book-card');
+        bookCards.forEach(function(card) {
+            card.addEventListener('click', function() {
+                this.querySelector('.book-info').classList.toggle('show-info');
+            });
+        });
+    });
+</script>
+
 <style>
     /* Welcome Section */
     .welcome-section {
@@ -72,18 +83,17 @@
 
     .book-card {
         position: relative;
-        width: calc(100% - 40px); /* Adjust the width for smaller screens */
-        max-width: 300px;
-        height: auto; /* Allow the height to adjust according to content */
+        width: 300px;
+        height: 450px;
         overflow: hidden;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px; /* Add some space at the bottom */
+        cursor: pointer;
     }
 
     .book-cover {
         width: 100%;
-        height: auto; /* Allow the height to adjust according to content */
+        height: 100%;
         object-fit: cover;
         transition: transform 0.3s ease;
     }
@@ -104,7 +114,7 @@
         transition: transform 0.3s ease;
     }
 
-    .book-card:hover .book-info {
+    .book-info.show-info {
         transform: translateY(0);
     }
 
@@ -134,7 +144,7 @@
 
     .about-us h3 {
         margin-bottom: 10px;
-        color:black;
+        color: black;
     }
 
     .about-us p {
@@ -191,15 +201,29 @@
     }
 
     @media (max-width: 576px) {
+        .book-container {
+            height: auto; /* Ensure container can grow to fit content */
+        }
+
         .book-card {
-            width: 100%;
-            height: auto;
+            width: 200px; /* Smaller width for smaller screens */
+            height: 300px; /* Adjust height accordingly */
         }
 
         .book-info {
-            position: relative;
-            transform: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             padding: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .book-info.show-info {
+            transform: translateY(0);
         }
     }
 
@@ -221,6 +245,7 @@
             flex-direction: column;
             align-items: center;
             padding: 0 10px;
+            height: auto; /* Ensure container can grow to fit content */
         }
 
         .book-card {
