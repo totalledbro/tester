@@ -27,7 +27,17 @@
 
 <div class="info-section">
     <div class="map-box">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15844.740299399678!2d115.29940899999998!3d-6.86841345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f30!3m3!1m2!1s0x2ddabd69c53ff505%3A0x4e6a833e66168e8c!2sKalinganyar%2C%20Kalianyar%2C%20Arjasa%2C%20Kabupaten%20Sumenep%2C%20Jawa%20Timur!5e0!3m2!1sid!2sid!4v1717473694329!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d253488.46258826382!2d115.22165987150804!3d-6.919600167820184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2ddaa486f0484a57%3A0x7b1ed6efa51aa6ea!2sPulau%20Kangean!5e0!3m2!1sid!2sid!4v1717815170595!5m2!1sid!2sid" 
+            width="100%" 
+            height="300" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade" 
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+        </iframe>
+
     </div>
     <div class="about-us">
         <h3>Tentang Kami</h3>
@@ -37,7 +47,7 @@
             <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
             <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
             <a href="#"><ion-icon name="logo-whatsapp"></ion-icon></a>
-            <a href="tel:+62123456789"><ion-icon name="call"></ion-icon> +62123456789</a>
+            <a href="#"><ion-icon name="call"></ion-icon></a>
         </div>
     </div>
 </div>
