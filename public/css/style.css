@@ -297,7 +297,7 @@ form .input-field {
     background: none;
     outline: none;
     font-size: 0.95rem;
-    padding: 0 15px;
+    padding: 0 45px 0 15px; /* Adjusted padding to make room for icon */
     border: 1px solid #717171;
     border-radius: 3px;
 }
@@ -317,13 +317,26 @@ form .input-field {
 }
 
 .input-field input:is(:focus, :valid) {
-    padding: 16px 15px 0;
+    padding: 16px 45px 0 15px; /* Adjusted padding to make room for icon */
 }
 
 .input-field input:is(:focus, :valid) ~ label {
     transform: translateY(-120%);
     color: #00bcd4;
     font-size: 0.75rem;
+}
+
+.input-field .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #717171;
+}
+
+.input-field .toggle-password:hover {
+    color: #00bcd4;
 }
 
 .form-box a {
@@ -374,8 +387,6 @@ form button:hover {
 }
 
 /* Modal Styles */
-/* Add this to your CSS file */
-
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -420,13 +431,11 @@ form button:hover {
     animation: modalFadeIn 0.4s;
 }
 
-
 .blur-and-disable {
     filter: blur(5px);
     pointer-events: none;
     user-select: none;
 }
-
 
 /* Responsive Styles */
 @media (max-width: 950px) {

@@ -90,6 +90,7 @@ Route::post('/', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');
 
 Route::post('/users', [UserController::class, 'register'])->name('register');
+Route::post('/change-password', [UserController::class, 'changePassword'])->name('changePassword');
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('products.index');
 Route::post('/categories', [CategoryController::class, 'add'])->name('addcategory');

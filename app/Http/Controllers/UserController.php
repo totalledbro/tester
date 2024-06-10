@@ -9,8 +9,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+
 class UserController extends Controller
 {
+    // Existing methods...
+
     /**
      * Show the login form.
      *
@@ -45,5 +48,30 @@ class UserController extends Controller
         $validatedData['email'] = Str::lower($validatedData['email']);
         $user = User::create($validatedData);
         return redirect()->route('dash');
+    }
+
+    /**
+     * Handle the password change request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['success' => false, 'message' => 'Current password is incorrect.']);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['success' => true, 'message' => 'Password successfully changed.']);
     }
 }

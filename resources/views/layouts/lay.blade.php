@@ -13,7 +13,6 @@
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 </head>
 
 <body>
@@ -22,43 +21,39 @@
         <header>
             <nav class="navbar">
                 <span class="hamburger-btn material-symbols-rounded">menu</span>
-                <a href="{{url('/')}}" class="logo">
+                <a href="{{ url('/') }}" class="logo">
                     <img src="{{ asset('img/logodesa.png') }}" alt="logo">
                     <h2></h2>
                     <h3>PERPUSTAKAAN DIGITAL</h3>
                 </a>
                 <ul class="links">
                     <span class="close-btn material-symbols-rounded">close</span>
-                    <li><a href="{{url('/')}}">Beranda</a></li>
-                    <li><a href="{{url('/jelajahi')}}">Jelajahi</a></li>
-                    <li><a href="{{url('/kategori')}}">Kategori</a></li>
+                    <li><a href="{{ url('/') }}">Beranda</a></li>
+                    <li><a href="{{ url('/jelajahi') }}">Jelajahi</a></li>
+                    <li><a href="{{ url('/kategori') }}">Kategori</a></li>
                     <li><a href="#">About us</a></li>
                     <li>
                         @auth
-                        <a href="{{url('/pinjaman')}}">Pinjamanku</a>
+                        <a href="{{ url('/pinjaman') }}">Pinjamanku</a>
                         @endauth
                     </li>
                 </ul>
                 @guest
-                    <button class="login-btn">LOG IN</button>
+                <button class="login-btn">LOGIN</button>
                 @else
-                    <div class="dropdown">
-                        <div class="greeting" id="greeting">{{ ucwords(Auth::user()->last_name) }}</div>
-                        <button id="dropdown-button" class="dropbtn">
-                            <span class="icon"><ion-icon name="caret-down-outline"></ion-icon></span>
-                        </button>
-                        <div class="dropdown-content">
-                            <a href="#">Settings</a>
-                            <a href="{{ route('actionlogout') }}"
-                               onclick="event.preventDefault();
-                                        document.getElementById('logout-form').submit();">
-                                Logout
-                            </a>
-                        </div>
+                <div class="dropdown">
+                    <div class="greeting" id="greeting">{{ ucwords(Auth::user()->last_name) }}</div>
+                    <button id="dropdown-button" class="dropbtn">
+                        <span class="icon"><ion-icon name="caret-down-outline"></ion-icon></span>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="#" id="ubah-password-link">Ubah password</a>
+                        <a href="{{ route('actionlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
                     </div>
-                    <form id="logout-form" action="{{ route('actionlogout') }}" method="GET" style="display: none;">
-                        @csrf
-                    </form>
+                </div>
+                <form id="logout-form" action="{{ route('actionlogout') }}" method="GET" style="display: none;">
+                    @csrf
+                </form>
                 @endguest
             </nav>
         </header>
@@ -75,15 +70,17 @@
                             <label>Email</label>
                         </div>
                         <div class="input-field">
-                            <input type="password" name="password" required>
+                            <input type="password" name="password" id="login-password" required>
                             <label>Password</label>
+                            <span class="toggle-password">
+                                <ion-icon name="eye-off-outline" id="toggle-login-password"></ion-icon>
+                            </span>
                         </div>
                         <a href="#" class="forgot-pass-link">Forgot password?</a>
-                        <button type="submit">Log In</button>
+                        <button type="submit">Login</button>
                     </form>
                     <div class="bottom-link">
-                        Don't have an account?
-                        <a href="#" id="signup-link">Signup</a>
+                        Don't have an account? <a href="#" id="signup-link">Signup</a>
                     </div>
                 </div>
             </div>
@@ -107,18 +104,23 @@
                         <div class="input-field">
                             <input type="password" id="password1" name="password" required>
                             <label>Create password</label>
+                            <span class="toggle-password">
+                                <ion-icon name="eye-off-outline" id="toggle-password1"></ion-icon>
+                            </span>
                             <p id="passwordError1" style="color: red; display: none;">Password setidaknya harus 8 karakter.</p>
                         </div>
                         <div class="input-field">
                             <input type="password" id="password2" name="password_confirmation" required>
                             <label>Confirm password</label>
+                            <span class="toggle-password">
+                                <ion-icon name="eye-off-outline" id="toggle-password2"></ion-icon>
+                            </span>
                             <p id="passwordError2" style="color: red; display: none;">Password tidak sesuai.</p>
                         </div>
                         <button type="submit" id="signup-btn">Sign Up</button>
                     </form>
                     <div class="bottom-link">
-                        Already have an account?
-                        <a href="#" id="login-link">Login</a>
+                        Already have an account? <a href="#" id="login-link">Login</a>
                     </div>
                 </div>
             </div>
@@ -127,7 +129,38 @@
             <h3>Registration Successful!</h3>
             <!-- Add any additional content or styling for the popup -->
         </div>
-
+        <div id="ubah-password-modal" class="modal">
+            <div class="modal-content">
+                <h2>Ubah Password</h2>
+                <form id="ubah-password-form" method="POST" action="{{ route('changePassword') }}">
+                    @csrf
+                    <div class="input-field">
+                        <input type="password" name="current_password" id="current-password" required>
+                        <label>Current Password</label>
+                        <span class="toggle-password">
+                            <ion-icon name="eye-off-outline" id="toggle-current-password"></ion-icon>
+                        </span>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" name="new_password" id="new-password" required>
+                        <label>New Password</label>
+                        <span class="toggle-password">
+                            <ion-icon name="eye-off-outline" id="toggle-new-password"></ion-icon>
+                        </span>
+                        <p id="newPasswordError1" style="color: red; display: none;">Password setidaknya harus 8 karakter.</p>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" name="new_password_confirmation" id="new-password-confirmation" required>
+                        <label>Confirm New Password</label>
+                        <span class="toggle-password">
+                            <ion-icon name="eye-off-outline" id="toggle-new-password-confirmation"></ion-icon>
+                        </span>
+                        <p id="newPasswordError2" style="color: red; display: none;">Password tidak sesuai.</p>
+                    </div>
+                    <button type="submit">Change Password</button>
+                </form>
+            </div>
+        </div>
         @yield('content')
     </div>
 </div>
@@ -140,6 +173,17 @@
         </div>
         <p>Email Atau Password Salah!</p>
         <p>Mohon Coba Lagi</p>
+    </div>
+</div>
+
+<!-- Modal for password change success -->
+<div id="passwordSuccessModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <p>Password Berhasil Diubah!</p>
+        <p>Silakan login kembali.</p>
     </div>
 </div>
 
@@ -193,6 +237,26 @@
 
         passwordInput.addEventListener('keyup', validatePassword1);
         confirmPasswordInput.addEventListener('keyup', validatePassword2);
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            icon.addEventListener('click', function () {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                icon.setAttribute('name', type === 'password' ? 'eye-off-outline' : 'eye-outline');
+            });
+        }
+
+        togglePasswordVisibility('login-password', 'toggle-login-password');
+        togglePasswordVisibility('password1', 'toggle-password1');
+        togglePasswordVisibility('password2', 'toggle-password2');
+        togglePasswordVisibility('current-password', 'toggle-current-password');
+        togglePasswordVisibility('new-password', 'toggle-new-password');
+        togglePasswordVisibility('new-password-confirmation', 'toggle-new-password-confirmation');
     });
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -277,6 +341,81 @@
                 $(".dropdown-content").removeClass("show");
             }
         });
+
+        // Show the "Ubah Password" modal
+        $("#ubah-password-link").click(function() {
+            $("#ubah-password-modal").fadeIn();
+        });
+
+        // Close the "Ubah Password" modal when clicking outside of the modal content
+        $(window).click(function(event) {
+            var modal = $("#ubah-password-modal");
+            if (event.target == modal[0]) {
+                modal.fadeOut();
+            }
+        });
+
+        // Handle "Ubah Password" form submission
+        $("#ubah-password-form").submit(function(event) {
+            event.preventDefault();
+
+            var formData = $(this).serialize();
+
+            $.ajax({
+                type: "POST",
+                url: $(this).attr("action"),
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        alert("Password berhasil diubah!");
+                        $("#ubah-password-modal").fadeOut();
+                    } else {
+                        console.log(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+    });
+
+
+    // Handle "Ubah Password" form submission
+    $("#ubah-password-form").submit(function(event) {
+        event.preventDefault();
+
+        var formData = $(this).serialize();
+
+        $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    $("#passwordSuccessModal").fadeIn();
+                    $(".form-popup").addClass("blur-and-disable");
+                    
+                    setTimeout(function() {
+                        document.getElementById('logout-form').submit();
+                    }, 3000);
+                } else {
+                    console.log(response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+
+    // Handle success modal close when clicking outside of modal content
+    $(window).click(function(event) {
+        var modal = $("#passwordSuccessModal");
+        if (event.target == modal[0]) {
+            modal.fadeOut();
+            $(".form-popup").removeClass("blur-and-disable");
+        }
     });
 </script>
 @yield('scripts')
