@@ -8,7 +8,7 @@
 
 <hr>
 <div class="limit">
-    <p><strong>Limit Pinjaman Anda:</strong> {{ $loanLimit }}</p>
+    <p><strong>Sisa Limit Pinjaman Anda:</strong> {{ $loanLimit }}</p>
     <p><strong>Buku yang Saat Ini Dipinjam:</strong> <span id="current-loans-count">{{ $loans->count() }}</span></p>
 </div>
 
@@ -232,7 +232,7 @@
 }
 
 .book-item.urgent {
-    background-color: rgba(2234, 229, 204, 0.9);
+    background-color: rgba(253, 170, 201, 0.9);
 }
 
 .cover {

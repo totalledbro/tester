@@ -160,11 +160,15 @@ document.addEventListener('DOMContentLoaded', function() {
 .pdf-container {
     text-align: center;
     width: 100%;
-    background-color: rgba(248, 249, 250, 0.3);
+    background-color: rgba(100, 100, 100, 0.5);
     padding: 0;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none; /* Chrome, Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none; 
 }
 
 .pdf-controls {
