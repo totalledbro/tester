@@ -5,8 +5,9 @@
     <h1>History Peminjaman</h1>
     <div class="content">
         <input type="text" id="search-input" placeholder="Cari data peminjaman..." oninput="filterLoans()">
+        <button id="print-button" onclick="openPrintModal()">Print</button>
         <div class="table-responsive">
-            <table class="table">
+            <table class="table" id="loan-table">
                 <thead>
                     <tr>
                         <th style="width: 200px;">Nama</th>
@@ -17,155 +18,240 @@
                     </tr>
                 </thead>
                 <tbody id="loan-list">
+                    @php
+                        $index = 0; // Initialize index for pagination
+                    @endphp
                     @foreach ($loans as $loan)
-                    <tr class="loan-entry" data-name="{{ strtolower($loan->user->first_name . ' ' . $loan->user->last_name) ?? 'Tidak ada data' }}" data-book="{{ strtolower($loan->book->title ?? 'Tidak ada data') }}">
-                        <td>
-                            @if ($loan->user && $loan->user->first_name && $loan->user->last_name)
-                                {{ ucwords($loan->user->first_name) . ' ' . ucwords($loan->user->last_name) }}
-                            @else
-                                <span class="missing-data">Tidak ada data</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if ($loan->book && $loan->book->title)
-                                {{ ucwords($loan->book->title) }}
-                            @else
-                                <span class="missing-data">Tidak ada data</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if ($loan->loan_date)
-                                {{ \Carbon\Carbon::parse($loan->loan_date)->translatedFormat('j F Y') }}
-                            @else
-                                <span class="missing-data">Tidak ada data</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if ($loan->limit_date)
-                                {{ \Carbon\Carbon::parse($loan->limit_date)->translatedFormat('j F Y') }}
-                            @else
-                                <span class="missing-data">Tidak ada data</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if ($loan->return_date)
-                                {{ \Carbon\Carbon::parse($loan->return_date)->translatedFormat('j F Y') }}
-                            @else
-                                Buku belum dikembalikan
-                            @endif
-                        </td>
-                    </tr>
+                        @if ($index % 20 == 0 && $index > 0)
+                            </tbody>
+                        </table>
+                        <div class="page-break"></div>
+                        <table class="table" id="loan-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 200px;">Nama</th>
+                                    <th style="width: 300px;">Buku</th>
+                                    <th style="width: 150px;">Tanggal Pinjam</th>
+                                    <th style="width: 150px;">Tanggal Batas</th>
+                                    <th style="width: 150px;">Tanggal Kembali</th>
+                                </tr>
+                            </thead>
+                            <tbody id="loan-list">
+                        @endif
+                        <tr class="loan-entry" data-name="{{ strtolower($loan->user->first_name . ' ' . $loan->user->last_name) ?? 'Tidak ada data' }}" data-book="{{ strtolower($loan->book->title ?? 'Tidak ada data') }}" data-loan-date="{{ $loan->loan_date }}">
+                            <td>
+                                @if ($loan->user && $loan->user->first_name && $loan->user->last_name)
+                                    {{ ucwords($loan->user->first_name) . ' ' . ucwords($loan->user->last_name) }}
+                                @else
+                                    <span class="missing-data">Tidak ada data</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($loan->book && $loan->book->title)
+                                    {{ ucwords($loan->book->title) }}
+                                @else
+                                    <span class="missing-data">Tidak ada data</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($loan->loan_date)
+                                    {{ \Carbon\Carbon::parse($loan->loan_date)->translatedFormat('j F Y') }}
+                                @else
+                                    <span class="missing-data">Tidak ada data</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($loan->limit_date)
+                                    {{ \Carbon\Carbon::parse($loan->limit_date)->translatedFormat('j F Y') }}
+                                @else
+                                    <span class="missing-data">Tidak ada data</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($loan->return_date)
+                                    {{ \Carbon\Carbon::parse($loan->return_date)->translatedFormat('j F Y') }}
+                                @else
+                                    Buku belum dikembalikan
+                                @endif
+                            </td>
+                        </tr>
+                        @php
+                            $index++;
+                        @endphp
                     @endforeach
                 </tbody>
             </table>
         </div>
-        <div class="pagination">
-            <button id="prev-page" disabled>&laquo; Previous</button>
-            <button id="next-page">Next &raquo;</button>
-        </div>
+    </div>
+</div>
+
+<!-- Print Modal -->
+<div id="printModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePrintModal()">&times;</span>
+        <h2>Pilih Periode Waktu untuk Print</h2>
+        <form id="printForm">
+            <label for="startDate">Mulai Tanggal:</label>
+            <input type="date" id="startDate" name="startDate">
+            <label for="endDate">Sampai Tanggal:</label>
+            <input type="date" id="endDate" name="endDate">
+            <button type="button" onclick="printTable()">Print</button>
+            <p id="dateError" style="color: red; display: none;">"Mulai Tanggal" harus lebih awal dari "Sampai Tanggal".</p>
+        </form>
     </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', (event) => {
-    const entries = document.querySelectorAll('.loan-entry');
-    let currentIndex = 0;
-    const entriesPerPage = 10;
-
-    const prevPageButton = document.getElementById('prev-page');
-    const nextPageButton = document.getElementById('next-page');
-
-    const showEntries = () => {
-        entries.forEach((entry, index) => {
-            entry.style.display = (index >= currentIndex && index < currentIndex + entriesPerPage) ? '' : 'none';
-            entry.classList.remove('show');
-        });
-
-        setTimeout(() => {
-            entries.forEach((entry, index) => {
-                if (index >= currentIndex && index < currentIndex + entriesPerPage) {
-                    setTimeout(() => {
-                        entry.classList.add('show');
-                    }, (index - currentIndex) * 100); // Stagger the addition of the 'show' class
-                }
-            });
-        }, 100);
-
-        prevPageButton.disabled = currentIndex === 0;
-        nextPageButton.disabled = currentIndex + entriesPerPage >= entries.length;
-    };
-
-    prevPageButton.addEventListener('click', () => {
-        currentIndex = Math.max(currentIndex - entriesPerPage, 0);
-        showEntries();
-    });
-
-    nextPageButton.addEventListener('click', () => {
-        currentIndex = Math.min(currentIndex + entriesPerPage, entries.length - entriesPerPage);
-        showEntries();
-    });
-
-    showEntries();
-});
-
 function filterLoans() {
     const keyword = document.getElementById('search-input').value.toLowerCase();
-    const rows = document.getElementById('loan-list').getElementsByTagName('tr');
-    let visibleRows = [];
+    const rows = document.querySelectorAll('.loan-entry');
 
-    for (let i = 0; i < rows.length; i++) {
-        const name = rows[i].getAttribute('data-name');
-        const book = rows[i].getAttribute('data-book');
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name');
+        const book = row.getAttribute('data-book');
         if (name.includes(keyword) || book.includes(keyword)) {
-            rows[i].style.display = '';
-            visibleRows.push(rows[i]);
+            row.style.display = '';
         } else {
-            rows[i].style.display = 'none';
+            row.style.display = 'none';
         }
+    });
+}
+
+function openPrintModal() {
+    document.getElementById('printModal').style.display = 'block';
+}
+
+function closePrintModal() {
+    document.getElementById('printModal').style.display = 'none';
+}
+
+function printTable() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const rows = document.querySelectorAll('.loan-entry');
+    const filteredRows = [];
+
+    let printTitle = '';
+
+    // Validate if endDate is earlier than startDate
+    if (startDate && endDate && startDate > endDate) {
+        document.getElementById('dateError').style.display = 'block';
+        return; // Exit function if validation fails
+    } else {
+        document.getElementById('dateError').style.display = 'none';
     }
 
-    const entriesPerPage = 10;
-    let currentPage = 0;
+    if (startDate && endDate) {
+        printTitle = `Data Peminjaman Buku dari ${formatDate(startDate)} hingga ${formatDate(endDate)}`;
+    } else if (startDate) {
+        printTitle = `Data Peminjaman Buku Tanggal ${formatDate(startDate)}`;
+    }
 
-    const showVisibleEntries = () => {
-        visibleRows.forEach((row, index) => {
-            row.style.display = (index >= currentPage * entriesPerPage && index < (currentPage + 1) * entriesPerPage) ? '' : 'none';
-        });
-
-        document.getElementById('prev-page').disabled = currentPage === 0;
-        document.getElementById('next-page').disabled = currentPage >= Math.ceil(visibleRows.length / entriesPerPage) - 1;
-
-        setTimeout(() => {
-            visibleRows.forEach((entry, index) => {
-                if (index >= currentPage * entriesPerPage && index < (currentPage + 1) * entriesPerPage) {
-                    entry.classList.add('show');
-                } else {
-                    entry.classList.remove('show');
-                }
-            });
-        }, 100);
-    };
-
-    document.getElementById('prev-page').addEventListener('click', () => {
-        if (currentPage > 0) {
-            currentPage--;
-            showVisibleEntries();
+    // Collect actual DOM elements in filteredRows array
+    rows.forEach(row => {
+        const loanDate = row.getAttribute('data-loan-date');
+        if (!startDate || !endDate || (loanDate >= startDate && loanDate <= endDate)) {
+            filteredRows.push(row.outerHTML); // Push the HTML content of the row
         }
     });
 
-    document.getElementById('next-page').addEventListener('click', () => {
-        if (currentPage < Math.ceil(visibleRows.length / entriesPerPage) - 1) {
-            currentPage++;
-            showVisibleEntries();
-        }
-    });
+    // Format current date to dd MonthName yyyy
+    const currentDate = new Date();
+    const printDate = `${currentDate.getDate()} ${getMonthName(currentDate.getMonth())} ${currentDate.getFullYear()}`;
 
-    showVisibleEntries();
+    const printContents = `
+        <div class="print-header">
+            <h2>PERPUSTAKAAN DIGITAL KALINGANYAR</h2>
+            <h3>${printTitle}</h3>
+            <p>Dicetak pada ${printDate}</p>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 200px;">Nama</th>
+                    <th style="width: 300px;">Buku</th>
+                    <th style="width: 150px;">Tanggal Pinjam</th>
+                    <th style="width: 150px;">Tanggal Batas</th>
+                    <th style="width: 150px;">Tanggal Kembali</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filteredRows.join('')}
+            </tbody>
+        </table>
+    `;
+
+    const originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = `
+        <html>
+            <head>
+                <title>Perpustakaan Digital Kalinganyar</title>
+                <style>
+                    @media print {
+                        .table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 20px;
+                        }
+                        .table th, .table td {
+                            padding: 8px;
+                            border: 1px solid #ddd;
+                            text-align: left;
+                        }
+                        .table th {
+                            background-color: #f2f2f2;
+                        }
+                        .print-header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        h2, h3 {
+                            text-transform: capitalize; /* Capitalize each word */
+                        }
+                        p {
+                            text-align: right;
+                            margin-top: 10px;
+                            margin-bottom: 0;
+                        }
+                        .page-break {
+                            page-break-before: always;
+                        }
+                        .table tr {
+                            page-break-inside: avoid; /* Avoid splitting rows across pages */
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                ${printContents}
+            </body>
+        </html>
+    `;
+
+    window.print();
+
+    document.body.innerHTML = originalContents;
+    location.reload();
+}
+
+
+function formatDate(date) {
+    const [yyyy, mm, dd] = date.split('-');
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return `${parseInt(dd, 10)} ${months[parseInt(mm, 10) - 1]} ${yyyy}`;
+}
+
+function getMonthName(monthIndex) {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return months[monthIndex];
 }
 </script>
 @endsection
+
+
 
 <style>
 .content {
@@ -181,6 +267,20 @@ function filterLoans() {
     border-radius: 5px;
     width: 100%;
     margin-bottom: 20px;
+}
+
+#print-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+#print-button:hover {
+    background-color: #45a049;
 }
 
 .table-responsive {
@@ -208,38 +308,44 @@ function filterLoans() {
     background-color: #e0e0e0; /* Highlight color */
 }
 
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-}
-
-.pagination button {
-    padding: 10px 20px;
-    border: 1px solid #ddd;
-    background-color: #f2f2f2;
-    cursor: pointer;
-    margin: 0 5px;
-}
-
-.pagination button:disabled {
-    cursor: not-allowed;
-    background-color: #e0e0e0;
-}
-
-/* Add the fade-in effect */
-.loan-entry {
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-}
-
-.loan-entry.show {
-    opacity: 1;
-}
-
-/* Red color for missing data */
 .missing-data {
     color: red;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
 </style>
