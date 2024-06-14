@@ -40,8 +40,11 @@ Route::middleware([AdminMiddleware::class])->group(function () {
         $books = Book::all();
         return view('admin.stats');
     })->name('admin');
-    Route::get('/datapinjam', [LoanController::class, 'showAllLoans'])->name('datapinjam');
     
+    Route::get('/datapinjam', [LoanController::class, 'showAllLoans'])->name('datapinjam');
+
+    Route::get('/print', [LoanController::class, 'printLoans'])->name('print');
+
     Route::get('/datakategori', function () {
         $categories = Category::all();
         return view('admin.datakategori',compact('categories'));

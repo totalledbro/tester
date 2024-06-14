@@ -6,6 +6,7 @@
     <div class="content">
         <input type="text" id="search-input" placeholder="Cari data peminjaman..." oninput="filterLoans()">
         <button id="print-button" onclick="openPrintModal()">Print</button>
+
         <div class="table-responsive">
             <table class="table" id="loan-table">
                 <thead>
@@ -18,26 +19,7 @@
                     </tr>
                 </thead>
                 <tbody id="loan-list">
-                    @php
-                        $index = 0; // Initialize index for pagination
-                    @endphp
                     @foreach ($loans as $loan)
-                        @if ($index % 20 == 0 && $index > 0)
-                            </tbody>
-                        </table>
-                        <div class="page-break"></div>
-                        <table class="table" id="loan-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 200px;">Nama</th>
-                                    <th style="width: 300px;">Buku</th>
-                                    <th style="width: 150px;">Tanggal Pinjam</th>
-                                    <th style="width: 150px;">Tanggal Batas</th>
-                                    <th style="width: 150px;">Tanggal Kembali</th>
-                                </tr>
-                            </thead>
-                            <tbody id="loan-list">
-                        @endif
                         <tr class="loan-entry" data-name="{{ strtolower($loan->user->first_name . ' ' . $loan->user->last_name) ?? 'Tidak ada data' }}" data-book="{{ strtolower($loan->book->title ?? 'Tidak ada data') }}" data-loan-date="{{ $loan->loan_date }}">
                             <td>
                                 @if ($loan->user && $loan->user->first_name && $loan->user->last_name)
@@ -75,12 +57,66 @@
                                 @endif
                             </td>
                         </tr>
-                        @php
-                            $index++;
-                        @endphp
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls">
+            <form method="GET" action="{{ url('datapinjam') }}">
+                <label for="perPage">Tampilkan:</label>
+                <select name="perPage" id="perPage" onchange="this.form.submit()">
+                    <option value="10"{{ $perPage == 10 ? ' selected' : '' }}>10</option>
+                    <option value="20"{{ $perPage == 20 ? ' selected' : '' }}>20</option>
+                </select>
+            </form>
+            <div class="pagination-info">
+                Halaman {{ $loans->currentPage() }} dari {{ $loans->lastPage() }}
+            </div>
+            <div class="pagination-links">
+            @if ($loans->onFirstPage())
+                <span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>
+            @else
+                <a href="{{ $loans->previousPageUrl() }}"><ion-icon name="chevron-back-outline"></ion-icon></a>
+            @endif
+
+            @php
+                $current = $loans->currentPage();
+                $last = $loans->lastPage();
+                $start = max(1, $current - 2);
+                $end = min($last, $current + 2);
+            @endphp
+
+            @if ($start > 1)
+                <a href="{{ $loans->url(1) }}">1</a>
+                @if ($start > 2)
+                    <span>...</span>
+                @endif
+            @endif
+
+            @for ($page = $start; $page <= $end; $page++)
+                @if ($page == $current)
+                    <span class="current">{{ $page }}</span>
+                @else
+                    <a href="{{ $loans->url($page) }}">{{ $page }}</a>
+                @endif
+            @endfor
+
+            @if ($end < $last)
+                @if ($end < $last - 1)
+                    <span>...</span>
+                @endif
+                <a href="{{ $loans->url($last) }}">{{ $last }}</a>
+            @endif
+
+            @if ($loans->hasMorePages())
+                <a href="{{ $loans->nextPageUrl() }}"><ion-icon name="chevron-forward-outline"></ion-icon></a>
+            @else
+                <span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>
+            @endif
+        </div>
+
         </div>
     </div>
 </div>
@@ -130,128 +166,161 @@ function closePrintModal() {
 function printTable() {
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
-    const rows = document.querySelectorAll('.loan-entry');
-    const filteredRows = [];
 
-    let printTitle = '';
-
-    // Validate if endDate is earlier than startDate
     if (startDate && endDate && startDate > endDate) {
         document.getElementById('dateError').style.display = 'block';
-        return; // Exit function if validation fails
+        return;
     } else {
         document.getElementById('dateError').style.display = 'none';
     }
 
-    if (startDate && endDate) {
-        printTitle = `Data Peminjaman Buku dari ${formatDate(startDate)} hingga ${formatDate(endDate)}`;
-    } else if (startDate) {
-        printTitle = `Data Peminjaman Buku Tanggal ${formatDate(startDate)}`;
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+
+    const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfTokenElement) {
+        console.error('CSRF token not found');
+        return;
     }
+    const csrfToken = csrfTokenElement.getAttribute('content');
 
-    // Collect actual DOM elements in filteredRows array
-    rows.forEach(row => {
-        const loanDate = row.getAttribute('data-loan-date');
-        if (!startDate || !endDate || (loanDate >= startDate && loanDate <= endDate)) {
-            filteredRows.push(row.outerHTML); // Push the HTML content of the row
+    fetch(`/print?${params.toString()}`, {
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
         }
-    });
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(loans => {
+        console.log('Loans fetched:', loans);
 
-    // Format current date to dd MonthName yyyy
-    const currentDate = new Date();
-    const printDate = `${currentDate.getDate()} ${getMonthName(currentDate.getMonth())} ${currentDate.getFullYear()}`;
+        // Sort loans based on loan date
+        loans.sort((a, b) => new Date(a.loan_date) - new Date(b.loan_date));
 
-    const printContents = `
-        <div class="print-header">
-            <h2>PERPUSTAKAAN DIGITAL KALINGANYAR</h2>
-            <h3>${printTitle}</h3>
-            <p>Dicetak pada ${printDate}</p>
-        </div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th style="width: 200px;">Nama</th>
-                    <th style="width: 300px;">Buku</th>
-                    <th style="width: 150px;">Tanggal Pinjam</th>
-                    <th style="width: 150px;">Tanggal Batas</th>
-                    <th style="width: 150px;">Tanggal Kembali</th>
+        const filteredRows = loans.map(loan => {
+            const userFirstName = loan.user ? loan.user.first_name.toLowerCase() : 'tidak ada data';
+            const userLastName = loan.user ? loan.user.last_name.toLowerCase() : 'tidak ada data';
+            const bookTitle = loan.book ? loan.book.title.toLowerCase() : 'tidak ada data';
+            const loanDate = loan.loan_date || '';
+            const limitDate = loan.limit_date || '';
+            const returnDate = loan.return_date || 'Buku belum dikembalikan';
+
+            return `
+                <tr class="loan-entry" data-name="${userFirstName} ${userLastName}" data-book="${bookTitle}" data-loan-date="${loanDate}">
+                    <td>${loan.user ? ucwords(loan.user.first_name) + ' ' + ucwords(loan.user.last_name) : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loan.book ? ucwords(loan.book.title) : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loanDate ? new Date(loanDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${limitDate ? new Date(limitDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loan.return_date ? new Date(returnDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Buku belum dikembalikan'}</td>
                 </tr>
-            </thead>
-            <tbody>
-                ${filteredRows.join('')}
-            </tbody>
-        </table>
-    `;
+            `;
+        }).join('');
 
-    const originalContents = document.body.innerHTML;
+        const printWindow = window.open('', '_blank');
+        const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    document.body.innerHTML = `
-        <html>
-            <head>
-                <title>Perpustakaan Digital Kalinganyar</title>
-                <style>
-                    @media print {
-                        .table {
+        let periodText = startDate && endDate ? ` Data Peminjaman Buku Tanggal ${new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} Hingga ${new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`
+            : startDate ? `Tanggal ${new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`
+            : 'Semua Periode';
+
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print Data Peminjaman</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                        }
+                        h1 {
+                            text-align: center;
+                            font-size: 24px;
+                        }
+                        h2 {
+                            text-align: center;
+                            font-size: 18px;
+                        }
+                        table {
                             width: 100%;
                             border-collapse: collapse;
-                            margin-top: 20px;
                         }
-                        .table th, .table td {
+                        th, td {
+                            border: 1px solid black;
                             padding: 8px;
-                            border: 1px solid #ddd;
                             text-align: left;
                         }
-                        .table th {
+                        th {
                             background-color: #f2f2f2;
-                        }
-                        .print-header {
                             text-align: center;
+                        }
+                        tr {
+                            page-break-inside: avoid;
+                        }
+                        .missing-data {
+                            color: red;
+                        }
+                        .header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
                             margin-bottom: 20px;
                         }
-                        h2, h3 {
-                            text-transform: capitalize; /* Capitalize each word */
+                        .header .title {
+                            font-size: 32px;
+                            text-align: center;
+                            width: 100%;
                         }
-                        p {
+                        .header .date {
+                            font-size: 14px;
                             text-align: right;
-                            margin-top: 10px;
-                            margin-bottom: 0;
                         }
-                        .page-break {
-                            page-break-before: always;
-                        }
-                        .table tr {
-                            page-break-inside: avoid; /* Avoid splitting rows across pages */
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                ${printContents}
-            </body>
-        </html>
-    `;
-
-    window.print();
-
-    document.body.innerHTML = originalContents;
-    location.reload();
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="title">Perpustakaan Digital Kalinganyar</div>
+                    </div>
+                    <h2>${periodText}</h2>
+                    <div class="date">Dicetak Pada ${today}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Buku</th>
+                                <th>Tanggal Pinjam</th>
+                                <th>Tanggal Batas</th>
+                                <th>Tanggal Kembali</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredRows}
+                        </tbody>
+                    </table>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+        printWindow.onafterprint = function() {
+            window.location.reload();
+        };
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
 
-
-function formatDate(date) {
-    const [yyyy, mm, dd] = date.split('-');
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    return `${parseInt(dd, 10)} ${months[parseInt(mm, 10) - 1]} ${yyyy}`;
-}
-
-function getMonthName(monthIndex) {
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    return months[monthIndex];
+function ucwords(str) {
+    return str.replace(/^(.)|\s+(.)/g, function (letter) {
+        return letter.toUpperCase();
+    });
 }
 </script>
 @endsection
-
-
 
 <style>
 .content {
@@ -347,5 +416,63 @@ function getMonthName(monthIndex) {
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination-controls form {
+    display: flex;
+    align-items: center;
+}
+
+.pagination-controls label {
+    margin-right: 10px;
+}
+
+.pagination-controls select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.pagination-info {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.pagination-links {
+    display: flex;
+    align-items: center;
+}
+
+.pagination-links a, .pagination-links span {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.pagination-links a:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-links .current {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+}
+
+.pagination-links .disabled {
+    color: #ccc;
+    pointer-events: none;
 }
 </style>

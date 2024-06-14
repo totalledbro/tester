@@ -120,10 +120,11 @@ class LoanController extends Controller
     {
         $sortColumn = $request->get('sort', 'loan_date');
         $sortDirection = $request->get('direction', 'desc');
-    
+        $perPage = $request->get('perPage', 10);
+
         $loans = Loan::with('user', 'book')
                      ->orderBy($sortColumn, $sortDirection)
-                     ->get();
+                     ->paginate($perPage);
     
         if ($request->ajax()) {
             return response()->json([
@@ -131,7 +132,7 @@ class LoanController extends Controller
             ]);
         }
     
-        return view('admin.datapinjam', compact('loans', 'sortColumn', 'sortDirection'));
+        return view('admin.datapinjam', compact('loans', 'sortColumn', 'sortDirection', 'perPage'));
     }
     public function adminDashboard()
     {
@@ -188,4 +189,20 @@ class LoanController extends Controller
         return response()->json($loans);
     }
 
+    public function printLoans(Request $request)
+    {
+        $startDate = $request->input('startDate');
+        $endDate = $request->input('endDate');
+
+        $query = Loan::with('user', 'book');
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('loan_date', [$startDate, $endDate]);
+        }
+
+        $loans = $query->get();
+
+        return response()->json($loans);
+    }
+    
 }
