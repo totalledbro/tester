@@ -50,11 +50,7 @@ Route::middleware([AdminMiddleware::class])->group(function () {
         return view('admin.datakategori',compact('categories'));
     })->name('datakategori');
     
-    Route::get('/buku', function () {
-        $books = Book::with('category')->orderBy('id', 'desc')->get();
-        $categories = Category::all();
-        return view('admin.buku',compact('books','categories'));
-    })->name('buku');
+    Route::get('/buku', [BookController::class, 'showAllBooks'])->name('buku');
     
     Route::get('/dashboard', [LoanController::class, 'adminDashboard'])->name('stats');
     Route::get('/daily-loans', [LoanController::class, 'getDailyLoans'])->name('daily-loans');

@@ -4,9 +4,8 @@
 <div class="main active">
     <h1>History Peminjaman</h1>
     <div class="content">
-        <input type="text" id="search-input" placeholder="Cari data peminjaman..." oninput="filterLoans()">
         <button id="print-button" onclick="openPrintModal()">Print</button>
-
+        <input type="text" id="search-input" placeholder="Cari data peminjaman..." oninput="filterLoans()">
         <div class="table-responsive">
             <table class="table" id="loan-table">
                 <thead>

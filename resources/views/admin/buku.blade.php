@@ -4,9 +4,8 @@
 <div class="main active">
     <h1>Data Buku</h1>
     <div class="content">
-        <div class="book">
+        <div class="header">
             <button class="add-btn" onclick="openForm()">Tambah Buku</button>
-            <input type="text" id="search-input" placeholder="Cari buku..." oninput="filterBooks()">
         </div>
 
         <div class="form-popup" id="bookForm">
@@ -46,7 +45,7 @@
                 </div>
             </div>
         </div>
-
+        <input type="text" id="search-input" placeholder="Cari buku..." oninput="filterBooks()">
         <h2>Daftar Buku</h2>
         <div class="table-responsive">
             <table class="table">
@@ -124,60 +123,66 @@
             </table>
         </div>
 
-        <div class="pagination">
-            <button id="prev-page" disabled>&laquo; Previous</button>
-            <button id="next-page">Next &raquo;</button>
+        <div class="pagination-controls">
+            <form method="GET" action="{{ url('buku') }}">
+                <label for="perPage">Tampilkan:</label>
+                <select name="perPage" id="perPage" onchange="this.form.submit()">
+                    <option value="10"{{ $perPage == 10 ? ' selected' : '' }}>10</option>
+                    <option value="20"{{ $perPage == 20 ? ' selected' : '' }}>20</option>
+                </select>
+            </form>
+            <div class="pagination-info">
+                Halaman {{ $books->currentPage() }} dari {{ $books->lastPage() }}
+            </div>
+            <div class="pagination-links">
+            @if ($books->onFirstPage())
+                <span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>
+            @else
+                <a href="{{ $books->previousPageUrl() }}"><ion-icon name="chevron-back-outline"></ion-icon></a>
+            @endif
+
+            @php
+                $current = $books->currentPage();
+                $last = $books->lastPage();
+                $start = max(1, $current - 2);
+                $end = min($last, $current + 2);
+                @endphp
+
+            @if ($start > 1)
+                <a href="{{ $books->url(1) }}">1</a>
+                @if ($start > 2)
+                    <span>...</span>
+                @endif
+            @endif
+
+            @for ($page = $start; $page <= $end; $page++)
+                @if ($page == $current)
+                    <span class="current">{{ $page }}</span>
+                @else
+                    <a href="{{ $books->url($page) }}">{{ $page }}</a>
+                @endif
+            @endfor
+
+            @if ($end < $last)
+                @if ($end < $last - 1)
+                    <span>...</span>
+                @endif
+                <a href="{{ $books->url($last) }}">{{ $last }}</a>
+            @endif
+
+            @if ($books->hasMorePages())
+                <a href="{{ $books->nextPageUrl() }}"><ion-icon name="chevron-forward-outline"></ion-icon></a>
+            @else
+                <span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>
+            @endif
+            </div>
         </div>
     </div>
-    <div class="overlay" id="overlay" onclick="closeAllForms()"></div>
 </div>
-@endsection
 
-@section('scripts')
+<div id="overlay" onclick="closeAllForms()"></div>
+
 <script>
-document.addEventListener('DOMContentLoaded', (event) => {
-    const entries = document.querySelectorAll('.book-entry');
-    let currentIndex = 0;
-    const entriesPerPage = 10;
-
-    const prevPageButton = document.getElementById('prev-page');
-    const nextPageButton = document.getElementById('next-page');
-    const overlay = document.getElementById('overlay');
-
-    if (!prevPageButton || !nextPageButton || !overlay) {
-        console.error('Pagination buttons or overlay not found');
-        return;
-    }
-
-    const showEntries = () => {
-
-        // Show and animate entries within the current page range
-        for (let i = currentIndex; i < Math.min(currentIndex + entriesPerPage, entries.length); i++) {
-            setTimeout(() => {
-                entries[i].style.display = '';
-                entries[i].classList.add('show');
-            }, (i - currentIndex) * 100); // 100ms delay between each entry
-        }
-
-        prevPageButton.disabled = currentIndex === 0;
-        nextPageButton.disabled = currentIndex + entriesPerPage >= entries.length;
-    };
-
-    prevPageButton.addEventListener('click', () => {
-        currentIndex = Math.max(currentIndex - entriesPerPage, 0);
-        showEntries();
-    });
-
-    nextPageButton.addEventListener('click', () => {
-        currentIndex = Math.min(currentIndex + entriesPerPage, entries.length - entriesPerPage);
-        showEntries();
-    });
-
-    showEntries();
-
-    overlay.addEventListener("click", closeAllForms);
-});
-
 function openForm() {
     document.getElementById("bookForm").classList.add("active");
     document.getElementById("overlay").style.display = "block"; 
@@ -188,57 +193,43 @@ function closeForm() {
     document.getElementById("overlay").style.display = "none"; 
 }
 
-function openEditForm(editFormId) {
-    document.getElementById('editForm' + editFormId).classList.add("active");
-    document.getElementById("overlay").style.display = "block"; 
+function openEditForm(id) {
+    document.getElementById("editForm" + id).classList.add("active");
+    document.getElementById("overlay").style.display = "block";
 }
 
-function closeEditForm(editFormId) {
-    document.getElementById('editForm' + editFormId).classList.remove("active");
+function closeEditForm(id) {
+    document.getElementById("editForm" + id).classList.remove("active");
     document.getElementById("overlay").style.display = "none"; 
+}
+
+function closeAllForms() {
+    document.querySelectorAll('.form-popup.active').forEach((form) => {
+        form.classList.remove('active');
+    });
+    document.getElementById("overlay").style.display = "none";
+}
+
+function filterBooks() {
+    let input = document.getElementById('search-input').value.toLowerCase();
+    let books = document.querySelectorAll('.book-entry');
+    books.forEach((book) => {
+        let title = book.dataset.title;
+        let author = book.dataset.author;
+        let year = book.dataset.year;
+        let stock = book.dataset.stock;
+        let category = book.dataset.category;
+        if (title.includes(input) || author.includes(input) || year.includes(input) || stock.includes(input) || category.includes(input)) {
+            book.style.display = "";
+        } else {
+            book.style.display = "none";
+        }
+    });
 }
 
 function restrictToNumbers(input) {
     input.value = input.value.replace(/\D/g, '');
-    if (input.value.length > 4) {
-        input.value = input.value.slice(0, 4);
-    }
 }
-
-function filterBooks() {
-    let keyword = document.getElementById('search-input').value.toLowerCase();
-    let bookList = document.getElementById('book-list');
-    let rows = bookList.getElementsByTagName('tr');
-
-    for (let i = 0; i < rows.length; i++) {
-        let title = rows[i].getAttribute('data-title');
-        let author = rows[i].getAttribute('data-author');
-        let year = rows[i].getAttribute('data-year');
-        let stock = rows[i].getAttribute('data-stock');
-        let category = rows[i].getAttribute('data-category');
-
-        if (
-            title.includes(keyword) ||
-            author.includes(keyword) ||
-            year.includes(keyword) ||
-            stock.includes(keyword) ||
-            category.includes(keyword)
-        ) {
-            rows[i].style.display = "";
-        } else {
-            rows[i].style.display = "none";
-        }
-    }
-}
-
-function closeAllForms() {
-    closeForm();
-    let editForms = document.querySelectorAll('.form-popup.active');
-    editForms.forEach(form => {
-        form.classList.remove('active');
-    });
-}
-
 </script>
 @endsection
 
@@ -250,11 +241,20 @@ function closeAllForms() {
     padding: 20px;
 }
 
-.book {
+.header {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    margin-bottom: 20px;
+    gap: 20px; /* Add some gap between button and input */
+}
+
+#search-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
     margin-bottom: 20px;
 }
 
@@ -271,30 +271,33 @@ function closeAllForms() {
     background-color: #1e1c59;
 }
 
-#search-input {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    width: 200px; 
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
+    margin-bottom: 20px;
 }
 
 .table th, .table td {
     padding: 8px;
     border: 1px solid #ddd;
+    text-align: left;
 }
 
 .table th {
     background-color: #f2f2f2;
 }
 
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
+.table tbody tr:hover {
+    background-color: #e0e0e0;
+}
+
+.missing-data {
+    color: red;
 }
 
 .form-popup {
@@ -424,38 +427,64 @@ function closeAllForms() {
 }
 
 .book-entry {
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    /* Removed animation for simplicity */
 }
 
-.book-entry.show {
-    opacity: 1;
-}
-
-.pagination {
+.pagination-controls {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     margin-top: 20px;
 }
 
-.pagination button {
-    padding: 10px 20px;
-    margin: 0 5px;
-    background-color: var(--blue);
-    color: var(--white);
-    border: none;
+.pagination-controls form {
+    display: flex;
+    align-items: center;
+}
+
+.pagination-controls label {
+    margin-right: 10px;
+}
+
+.pagination-controls select {
+    padding: 5px;
     border-radius: 5px;
-    cursor: pointer;
+    border: 1px solid #ddd;
 }
 
-.pagination button:disabled {
-    background-color: #ddd;
-    cursor: not-allowed;
+.pagination-info {
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
-.pagination button:hover:not(:disabled) {
-    background-color: #1e1c59;
+.pagination-links {
+    display: flex;
+    align-items: center;
 }
 
+.pagination-links a, .pagination-links span {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.pagination-links a:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination-links .current {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+}
+
+.pagination-links .disabled {
+    color: #ccc;
+    pointer-events: none;
+}
 </style>

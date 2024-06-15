@@ -134,6 +134,7 @@ class LoanController extends Controller
     
         return view('admin.datapinjam', compact('loans', 'sortColumn', 'sortDirection', 'perPage'));
     }
+    
     public function adminDashboard()
     {
         $books = Book::all();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreBookRequest;
 use App\Models\Book;
+use App\Models\Category;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
@@ -130,5 +131,15 @@ class BookController extends Controller
         }
         $book->delete();
         return redirect()->route('buku')->with('success', 'Book deleted successfully.');
+    }
+
+    public function showAllBooks(Request $request)
+    {
+        $perPage = $request->get('perPage', 10); // Default to 10 items per page
+
+        $books = Book::with('category')->orderBy('id', 'desc')->paginate($perPage);
+        $categories = Category::all();
+
+        return view('admin.buku', compact('books', 'categories', 'perPage'));
     }
 }
