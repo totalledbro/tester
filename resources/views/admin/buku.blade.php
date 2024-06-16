@@ -6,6 +6,9 @@
     <div class="content">
         <div class="header">
             <button class="add-btn" onclick="openForm()">Tambah Buku</button>
+            <form method="GET" action="{{ route('buku') }}" id="search-form">
+                <input type="text" name="search" id="search-input" placeholder="Cari buku..." value="{{ $search ?? '' }}">
+            </form>
         </div>
 
         <div class="form-popup" id="bookForm">
@@ -45,7 +48,7 @@
                 </div>
             </div>
         </div>
-        <input type="text" id="search-input" placeholder="Cari buku..." oninput="filterBooks()">
+
         <h2>Daftar Buku</h2>
         <div class="table-responsive">
             <table class="table">
@@ -69,12 +72,12 @@
                         <td>{{ $book->category ? ucwords($book->category->name) : 'N/A' }}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="edit-btn" onclick="openEditForm({{ $book->id }})">Edit</button>
+                                <button class="edit-btn" onclick="openEditForm({{ $book->id }})"><ion-icon name="create-outline"></ion-icon>Edit</button>
                                 <form action="{{ route('deletebook', $book->id) }}" method="POST" class="delete-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="delete-btn">
-                                        <ion-icon name="trash-bin-outline"></ion-icon> Delete
+                                        <ion-icon name="trash-bin-outline"></ion-icon>Delete
                                     </button>
                                 </form>
                             </div>
@@ -124,114 +127,93 @@
         </div>
 
         <div class="pagination-controls">
-            <form method="GET" action="{{ url('buku') }}">
+            <form method="GET" action="{{ route('buku') }}">
                 <label for="perPage">Tampilkan:</label>
                 <select name="perPage" id="perPage" onchange="this.form.submit()">
                     <option value="10"{{ $perPage == 10 ? ' selected' : '' }}>10</option>
                     <option value="20"{{ $perPage == 20 ? ' selected' : '' }}>20</option>
                 </select>
+                <input type="hidden" name="search" value="{{ $search }}">
             </form>
             <div class="pagination-info">
                 Halaman {{ $books->currentPage() }} dari {{ $books->lastPage() }}
             </div>
             <div class="pagination-links">
-            @if ($books->onFirstPage())
-                <span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>
-            @else
-                <a href="{{ $books->previousPageUrl() }}"><ion-icon name="chevron-back-outline"></ion-icon></a>
-            @endif
+                @if ($books->onFirstPage())
+                    <span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>
+                @else
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->previousPageUrl() }}"><ion-icon name="chevron-back-outline"></ion-icon></a>
+                @endif
 
-            @php
-                $current = $books->currentPage();
-                $last = $books->lastPage();
-                $start = max(1, $current - 2);
-                $end = min($last, $current + 2);
+                @php
+                    $current = $books->currentPage();
+                    $last = $books->lastPage();
+                    $start = max(1, $current - 2);
+                    $end = min($last, $current + 2);
                 @endphp
 
-            @if ($start > 1)
-                <a href="{{ $books->url(1) }}">1</a>
-                @if ($start > 2)
-                    <span>...</span>
+                @if ($start > 1)
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url(1) }}">1</a>
+                    @if ($start > 2)
+                        <span>...</span>
+                    @endif
                 @endif
-            @endif
 
-            @for ($page = $start; $page <= $end; $page++)
-                @if ($page == $current)
-                    <span class="current">{{ $page }}</span>
+                @for ($i = $start; $i <= $end; $i++)
+                    @if ($i == $current)
+                        <span class="active">{{ $i }}</span>
+                    @else
+                        <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($i) }}">{{ $i }}</a>
+                    @endif
+                @endfor
+
+                @if ($end < $last)
+                    @if ($end < $last - 1)
+                        <span>...</span>
+                    @endif
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($last) }}">{{ $last }}</a>
+                @endif
+
+                @if ($books->hasMorePages())
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->nextPageUrl() }}"><ion-icon name="chevron-forward-outline"></ion-icon></a>
                 @else
-                    <a href="{{ $books->url($page) }}">{{ $page }}</a>
+                    <span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>
                 @endif
-            @endfor
-
-            @if ($end < $last)
-                @if ($end < $last - 1)
-                    <span>...</span>
-                @endif
-                <a href="{{ $books->url($last) }}">{{ $last }}</a>
-            @endif
-
-            @if ($books->hasMorePages())
-                <a href="{{ $books->nextPageUrl() }}"><ion-icon name="chevron-forward-outline"></ion-icon></a>
-            @else
-                <span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>
-            @endif
             </div>
         </div>
     </div>
 </div>
 
-<div id="overlay" onclick="closeAllForms()"></div>
+@endsection
 
+@section('scripts')
 <script>
 function openForm() {
-    document.getElementById("bookForm").classList.add("active");
-    document.getElementById("overlay").style.display = "block"; 
+    document.getElementById("bookForm").style.display = "block";
 }
 
 function closeForm() {
-    document.getElementById("bookForm").classList.remove("active");
-    document.getElementById("overlay").style.display = "none"; 
+    document.getElementById("bookForm").style.display = "none";
 }
 
 function openEditForm(id) {
-    document.getElementById("editForm" + id).classList.add("active");
-    document.getElementById("overlay").style.display = "block";
+    document.getElementById(`editForm${id}`).style.display = "block";
 }
 
 function closeEditForm(id) {
-    document.getElementById("editForm" + id).classList.remove("active");
-    document.getElementById("overlay").style.display = "none"; 
+    document.getElementById(`editForm${id}`).style.display = "none";
 }
 
-function closeAllForms() {
-    document.querySelectorAll('.form-popup.active').forEach((form) => {
-        form.classList.remove('active');
-    });
-    document.getElementById("overlay").style.display = "none";
-}
+document.getElementById('search-input').addEventListener('input', function() {
+    document.getElementById('search-form').submit();
+});
 
-function filterBooks() {
-    let input = document.getElementById('search-input').value.toLowerCase();
-    let books = document.querySelectorAll('.book-entry');
-    books.forEach((book) => {
-        let title = book.dataset.title;
-        let author = book.dataset.author;
-        let year = book.dataset.year;
-        let stock = book.dataset.stock;
-        let category = book.dataset.category;
-        if (title.includes(input) || author.includes(input) || year.includes(input) || stock.includes(input) || category.includes(input)) {
-            book.style.display = "";
-        } else {
-            book.style.display = "none";
-        }
-    });
-}
-
-function restrictToNumbers(input) {
-    input.value = input.value.replace(/\D/g, '');
+function restrictToNumbers(element) {
+    element.value = element.value.replace(/[^0-9]/g, '');
 }
 </script>
 @endsection
+
 
 <style>
 .content {

@@ -136,10 +136,27 @@ class BookController extends Controller
     public function showAllBooks(Request $request)
     {
         $perPage = $request->get('perPage', 10); // Default to 10 items per page
-
-        $books = Book::with('category')->orderBy('id', 'desc')->paginate($perPage);
+        $search = $request->get('search', '');
+    
+        $query = Book::with('category');
+    
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('author', 'like', '%' . $search . '%')
+                  ->orWhere('year', 'like', '%' . $search . '%')
+                  ->orWhereHas('category', function($q) use ($search) {
+                      $q->where('name', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+    
+        $books = $query->orderBy('id', 'desc')->paginate($perPage);
         $categories = Category::all();
-
-        return view('admin.buku', compact('books', 'categories', 'perPage'));
+    
+        return view('admin.buku', compact('books', 'categories', 'perPage', 'search'));
     }
+    
+    
+    
 }
