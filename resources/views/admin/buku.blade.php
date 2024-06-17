@@ -50,86 +50,14 @@
         </div>
 
         <h2>Daftar Buku</h2>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="width: 200px;">Judul</th>
-                        <th style="width: 150px;">Penulis</th>
-                        <th style="width: 100px;">Tahun</th>
-                        <th style="width: 100px;">Stok</th>
-                        <th style="width: 150px;">Kategori</th>
-                        <th style="width: 100px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="book-list">
-                    @foreach ($books as $book)
-                    <tr class="book-entry" data-title="{{ strtolower($book->title) }}" data-author="{{ strtolower($book->author) }}" data-year="{{ $book->year }}" data-stock="{{ $book->stock }}" data-category="{{ strtolower($book->category ? $book->category->name : 'N/A') }}">
-                        <td>{{ ucwords($book->title) }}</td>
-                        <td>{{ ucwords($book->author) }}</td>
-                        <td>{{ $book->year }}</td>
-                        <td>{{ $book->stock }}</td>
-                        <td>{{ $book->category ? ucwords($book->category->name) : 'N/A' }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="edit-btn" onclick="openEditForm({{ $book->id }})"><ion-icon name="create-outline"></ion-icon>Edit</button>
-                                <form action="{{ route('deletebook', $book->id) }}" method="POST" class="delete-form">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="delete-btn">
-                                        <ion-icon name="trash-bin-outline"></ion-icon>Delete
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    <div class="form-popup" id="editForm{{$book->id}}">
-                        <div class="form-box edit">
-                            <span class="close-btn material-symbols-rounded" onclick="closeEditForm({{ $book->id }})">close</span>
-                            <div class="form-content">
-                                <h2>Edit buku</h2>
-                                <form id="edit-form-{{ $book->id }}" method="POST" action="{{ route('updatebook', $book->id) }}" enctype="multipart/form-data">
-                                    @csrf
-                                    @method('POST')
-                                    <div class="input-field">
-                                        <input type="text" name="title" id="title{{ $book->id }}" value="{{ $book->title }}">
-                                        <label>Judul</label>
-                                    </div>
-                                    <div class="input-field">
-                                        <input type="text" name="author" id="author{{ $book->id }}" value="{{ $book->author }}">
-                                        <label>Penulis</label>
-                                    </div>
-                                    <div class="input-field">
-                                        <input type="text" name="year" id="tahun{{ $book->id }}" value="{{ $book->year }}">
-                                        <label>Tahun</label>
-                                    </div>
-                                    <div class="input-field">
-                                        <select name="category_id" id="category_id{{ $book->id }}">
-                                            <option value="" disabled selected>Pilih Kategori</option>
-                                            @foreach($categories->sortBy('name') as $category)
-                                                <option value="{{ $category->id }}" {{ $category->id == $book->category_id ? 'selected' : '' }}>{{  ucwords($category->name) }}</option>
-                                            @endforeach
-                                        </select>
-                                        <label>Kategori</label>
-                                    </div>
-                                    <div class="input-field">
-                                        <input type="file" name="pdf" id="pdf{{ $book->id }}" accept=".pdf">
-                                        <label>Upload PDF</label>
-                                    </div>
-                                    <button type="submit" class="button">Update</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </tbody>
-            </table>
+        <div class="table-responsive" id="table-container">
+            {!! isset($html) ? $html : '' !!}
         </div>
 
         <div class="pagination-controls">
-            <form method="GET" action="{{ route('buku') }}">
+            <form method="GET" action="{{ route('buku') }}" id="pagination-form">
                 <label for="perPage">Tampilkan:</label>
-                <select name="perPage" id="perPage" onchange="this.form.submit()">
+                <select name="perPage" id="perPage" onchange="submitPaginationForm()">
                     <option value="10"{{ $perPage == 10 ? ' selected' : '' }}>10</option>
                     <option value="20"{{ $perPage == 20 ? ' selected' : '' }}>20</option>
                 </select>
@@ -142,7 +70,7 @@
                 @if ($books->onFirstPage())
                     <span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>
                 @else
-                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->previousPageUrl() }}"><ion-icon name="chevron-back-outline"></ion-icon></a>
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->previousPageUrl() }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->previousPageUrl() }}')"><ion-icon name="chevron-back-outline"></ion-icon></a>
                 @endif
 
                 @php
@@ -153,7 +81,7 @@
                 @endphp
 
                 @if ($start > 1)
-                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url(1) }}">1</a>
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url(1) }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url(1) }}')">1</a>
                     @if ($start > 2)
                         <span>...</span>
                     @endif
@@ -163,7 +91,7 @@
                     @if ($i == $current)
                         <span class="active">{{ $i }}</span>
                     @else
-                        <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($i) }}">{{ $i }}</a>
+                        <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($i) }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($i) }}')">{{ $i }}</a>
                     @endif
                 @endfor
 
@@ -171,11 +99,11 @@
                     @if ($end < $last - 1)
                         <span>...</span>
                     @endif
-                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($last) }}">{{ $last }}</a>
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($last) }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($last) }}')">{{ $last }}</a>
                 @endif
 
                 @if ($books->hasMorePages())
-                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->nextPageUrl() }}"><ion-icon name="chevron-forward-outline"></ion-icon></a>
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->nextPageUrl() }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->nextPageUrl() }}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>
                 @else
                     <span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>
                 @endif
@@ -188,34 +116,105 @@
 
 @section('scripts')
 <script>
-function openForm() {
-    document.getElementById("bookForm").style.display = "block";
-}
+    function openForm() {
+        document.getElementById("bookForm").style.display = "block";
+    }
 
-function closeForm() {
-    document.getElementById("bookForm").style.display = "none";
-}
+    function closeForm() {
+        document.getElementById("bookForm").style.display = "none";
+    }
 
-function openEditForm(id) {
-    document.getElementById(`editForm${id}`).style.display = "block";
-}
+    function openEditForm(id) {
+        document.getElementById(`editForm${id}`).style.display = "block";
+    }
 
-function closeEditForm(id) {
-    document.getElementById(`editForm${id}`).style.display = "none";
-}
+    function closeEditForm(id) {
+        document.getElementById(`editForm${id}`).style.display = "none";
+    }
 
-document.getElementById('search-input').addEventListener('input', function() {
-    document.getElementById('search-form').submit();
-});
+    document.getElementById('search-input').addEventListener('input', function() {
+        submitSearchForm();
+    });
 
-function restrictToNumbers(element) {
-    element.value = element.value.replace(/[^0-9]/g, '');
-}
+    function restrictToNumbers(element) {
+        element.value = element.value.replace(/[^0-9]/g, '');
+    }
+
+    function submitSearchForm() {
+        let form = document.getElementById('search-form');
+        let formData = new FormData(form);
+        let searchQuery = new URLSearchParams(formData).toString();
+
+        fetch(`{{ route('buku') }}?${searchQuery}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('table-container').innerHTML = data.html;
+            updatePaginationLinks(data);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function submitPaginationForm() {
+        let form = document.getElementById('pagination-form');
+        let formData = new FormData(form);
+        let searchQuery = new URLSearchParams(formData).toString();
+
+        fetch(`{{ route('buku') }}?${searchQuery}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('table-container').innerHTML = data.html;
+            updatePaginationLinks(data);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function fetchPage(event, url) {
+        event.preventDefault();
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('table-container').innerHTML = data.html;
+            updatePaginationLinks(data);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function updatePaginationLinks(data) {
+        // Update pagination info
+        document.querySelector('.pagination-info').innerText = `Halaman ${data.currentPage} dari ${data.lastPage}`;
+
+        // Rebuild pagination links
+        let paginationLinks = '';
+        for (let i = 1; i <= data.lastPage; i++) {
+            if (i === data.currentPage) {
+                paginationLinks += `<span class="active">${i}</span>`;
+            } else {
+                paginationLinks += `<a href="${data.url}${i}" onclick="fetchPage(event, '${data.url}${i}')">${i}</a>`;
+            }
+        }
+        document.querySelector('.pagination-links').innerHTML = paginationLinks;
+    }
 </script>
+
 @endsection
 
-
 <style>
+/* Add your styles here */
 .content {
     display: flex;
     flex-direction: column;
@@ -267,11 +266,12 @@ function restrictToNumbers(element) {
 .table th, .table td {
     padding: 8px;
     border: 1px solid #ddd;
-    text-align: left;
+
 }
 
 .table th {
     background-color: #f2f2f2;
+    text-align: center;
 }
 
 .table tbody tr:hover {
@@ -468,5 +468,14 @@ function restrictToNumbers(element) {
 .pagination-links .disabled {
     color: #ccc;
     pointer-events: none;
+}
+
+#loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-size: 18px;
+    color: #007bff;
 }
 </style>

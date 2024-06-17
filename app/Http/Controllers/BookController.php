@@ -154,9 +154,20 @@ class BookController extends Controller
         $books = $query->orderBy('id', 'desc')->paginate($perPage);
         $categories = Category::all();
     
-        return view('admin.buku', compact('books', 'categories', 'perPage', 'search'));
+        // Render the partial view into HTML
+        $html = view('partial.book_table', compact('books', 'categories'))->render();
+    
+        if ($request->ajax()) {
+            // Return JSON response with the HTML view
+            return response()->json([
+                'currentPage' => $books->currentPage(),
+                'lastPage' => $books->lastPage(),
+                'url' => $books->url(1), // Base URL for pagination links
+                'html' => $html]);
+        }
+    
+        // Return the regular Blade view with data for non-AJAX requests
+        return view('admin.buku', compact('books', 'categories', 'perPage', 'search', 'html'));
     }
-    
-    
-    
+      
 }
