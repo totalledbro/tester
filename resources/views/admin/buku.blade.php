@@ -52,6 +52,10 @@
         <h2>Daftar Buku</h2>
         <div class="table-responsive" id="table-container">
             {!! isset($html) ? $html : '' !!}
+            <div id="loading-spinner" style="display: none;">
+                <div class="spinner"></div>
+                Loading...
+            </div>
         </div>
 
         <div class="pagination-controls">
@@ -116,101 +120,109 @@
 
 @section('scripts')
 <script>
-    function openForm() {
-        document.getElementById("bookForm").style.display = "block";
-    }
+function openForm() {
+    document.getElementById("bookForm").style.display = "block";
+}
 
-    function closeForm() {
-        document.getElementById("bookForm").style.display = "none";
-    }
+function closeForm() {
+    document.getElementById("bookForm").style.display = "none";
+}
 
-    function openEditForm(id) {
-        document.getElementById(`editForm${id}`).style.display = "block";
-    }
+function openEditForm(id) {
+    document.getElementById(`editForm${id}`).style.display = "block";
+}
 
-    function closeEditForm(id) {
-        document.getElementById(`editForm${id}`).style.display = "none";
-    }
+function closeEditForm(id) {
+    document.getElementById(`editForm${id}`).style.display = "none";
+}
 
-    document.getElementById('search-input').addEventListener('input', function() {
-        submitSearchForm();
-    });
+document.getElementById('search-input').addEventListener('input', function() {
+    submitSearchForm();
+});
 
-    function restrictToNumbers(element) {
-        element.value = element.value.replace(/[^0-9]/g, '');
-    }
+function restrictToNumbers(input) {
+    input.value = input.value.replace(/\D/g, '');
+}
 
-    function submitSearchForm() {
-        let form = document.getElementById('search-form');
-        let formData = new FormData(form);
-        let searchQuery = new URLSearchParams(formData).toString();
+function showLoadingSpinner() {
+    document.getElementById('loading-spinner').style.display = 'flex';
+}
 
-        fetch(`{{ route('buku') }}?${searchQuery}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('table-container').innerHTML = data.html;
-            updatePaginationLinks(data);
-        })
-        .catch(error => console.error('Error:', error));
-    }
+function hideLoadingSpinner() {
+    document.getElementById('loading-spinner').style.display = 'none';
+}
 
-    function submitPaginationForm() {
-        let form = document.getElementById('pagination-form');
-        let formData = new FormData(form);
-        let searchQuery = new URLSearchParams(formData).toString();
+function submitSearchForm() {
+    let form = document.getElementById('search-form');
+    let formData = new FormData(form);
+    let searchQuery = new URLSearchParams(formData).toString();
 
-        fetch(`{{ route('buku') }}?${searchQuery}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('table-container').innerHTML = data.html;
-            updatePaginationLinks(data);
-        })
-        .catch(error => console.error('Error:', error));
-    }
+    showLoadingSpinner();
 
-    function fetchPage(event, url) {
-        event.preventDefault();
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('table-container').innerHTML = data.html;
-            updatePaginationLinks(data);
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    function updatePaginationLinks(data) {
-        // Update pagination info
-        document.querySelector('.pagination-info').innerText = `Halaman ${data.currentPage} dari ${data.lastPage}`;
-
-        // Rebuild pagination links
-        let paginationLinks = '';
-        for (let i = 1; i <= data.lastPage; i++) {
-            if (i === data.currentPage) {
-                paginationLinks += `<span class="active">${i}</span>`;
-            } else {
-                paginationLinks += `<a href="${data.url}${i}" onclick="fetchPage(event, '${data.url}${i}')">${i}</a>`;
-            }
+    fetch(`{{ route('buku') }}?${searchQuery}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
         }
-        document.querySelector('.pagination-links').innerHTML = paginationLinks;
-    }
-</script>
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('table-container').innerHTML = data.html;
+        updatePaginationLinks(data, searchQuery);
+        hideLoadingSpinner();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        hideLoadingSpinner();
+    });
+}
 
+function fetchPage(event, url, searchQuery = '') {
+    event.preventDefault();
+    showLoadingSpinner();
+
+    fetch(`${url}&${searchQuery}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('table-container').innerHTML = data.html;
+        updatePaginationLinks(data, searchQuery);
+        hideLoadingSpinner();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        hideLoadingSpinner();
+    });
+}
+
+function updatePaginationLinks(data, searchQuery) {
+    document.querySelector('.pagination-info').innerText = `Halaman ${data.currentPage} dari ${data.lastPage}`;
+    
+    let paginationLinks = '';
+    if (data.currentPage > 1) {
+        paginationLinks += `<a href="${data.url + '&page=' + (data.currentPage - 1)}" onclick="fetchPage(event, '${data.url}&page=${data.currentPage - 1}', '${searchQuery}')"><ion-icon name="chevron-back-outline"></ion-icon></a>`;
+    } else {
+        paginationLinks += `<span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>`;
+    }
+    
+    if (data.currentPage < data.lastPage) {
+        paginationLinks += `<a href="${data.url + '&page=' + (data.currentPage + 1)}" onclick="fetchPage(event, '${data.url}&page=${data.currentPage + 1}', '${searchQuery}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>`;
+    } else {
+        paginationLinks += `<span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>`;
+    }
+    
+    document.querySelector('.pagination-links').innerHTML = paginationLinks;
+}
+
+function submitPaginationForm() {
+    let form = document.getElementById('pagination-form');
+    form.submit();
+}
+</script>
 @endsection
 
 <style>
@@ -255,6 +267,7 @@
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+    position: relative; /* Added for spinner positioning */
 }
 
 .table {
@@ -477,5 +490,24 @@
     padding: 20px;
     font-size: 18px;
     color: #007bff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3; 
+    border-top: 4px solid #3498db; 
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>

@@ -135,7 +135,7 @@ class BookController extends Controller
 
     public function showAllBooks(Request $request)
     {
-        $perPage = $request->get('perPage', 10); // Default to 10 items per page
+        $perPage = $request->get('perPage', 10);
         $search = $request->get('search', '');
     
         $query = Book::with('category');
@@ -163,11 +163,13 @@ class BookController extends Controller
                 'currentPage' => $books->currentPage(),
                 'lastPage' => $books->lastPage(),
                 'url' => $books->url(1), // Base URL for pagination links
-                'html' => $html]);
+                'html' => $html
+            ]);
         }
     
         // Return the regular Blade view with data for non-AJAX requests
         return view('admin.buku', compact('books', 'categories', 'perPage', 'search', 'html'));
     }
+    
       
 }
