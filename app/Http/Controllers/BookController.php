@@ -135,11 +135,11 @@ class BookController extends Controller
 
     public function showAllBooks(Request $request)
     {
-        $perPage = $request->get('perPage', 10);
+        $perPage = (int) $request->get('perPage', 10);
         $search = $request->get('search', '');
-    
+        
         $query = Book::with('category');
-    
+        
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', '%' . $search . '%')
@@ -150,26 +150,28 @@ class BookController extends Controller
                   });
             });
         }
-    
+        
         $books = $query->orderBy('id', 'desc')->paginate($perPage);
         $categories = Category::all();
-    
+        
         // Render the partial view into HTML
         $html = view('partial.book_table', compact('books', 'categories'))->render();
-    
+        
         if ($request->ajax()) {
             // Return JSON response with the HTML view
             return response()->json([
                 'currentPage' => $books->currentPage(),
                 'lastPage' => $books->lastPage(),
-                'url' => $books->url(1), // Base URL for pagination links
+                'url' => route('buku'), // Base URL for pagination links
                 'html' => $html
             ]);
         }
-    
+        
         // Return the regular Blade view with data for non-AJAX requests
         return view('admin.buku', compact('books', 'categories', 'perPage', 'search', 'html'));
     }
+    
+    
     
       
 }

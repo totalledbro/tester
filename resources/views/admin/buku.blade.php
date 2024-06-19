@@ -7,7 +7,7 @@
         <div class="header">
             <button class="add-btn" onclick="openForm()">Tambah Buku</button>
             <form method="GET" action="{{ route('buku') }}" id="search-form">
-                <input type="text" name="search" id="search-input" placeholder="Cari buku..." value="{{ $search ?? '' }}">
+                <input type="text" name="search" id="search-input" placeholder="Cari buku..." value="{{ $search ?? '' }}" autocomplete="off">
             </form>
         </div>
 
@@ -74,7 +74,7 @@
                 @if ($books->onFirstPage())
                     <span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>
                 @else
-                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->previousPageUrl() }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->previousPageUrl() }}')"><ion-icon name="chevron-back-outline"></ion-icon></a>
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->previousPageUrl() }}"><ion-icon name="chevron-back-outline"></ion-icon></a>
                 @endif
 
                 @php
@@ -85,7 +85,7 @@
                 @endphp
 
                 @if ($start > 1)
-                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url(1) }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url(1) }}')">1</a>
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url(1) }}">1</a>
                     @if ($start > 2)
                         <span>...</span>
                     @endif
@@ -95,7 +95,7 @@
                     @if ($i == $current)
                         <span class="active">{{ $i }}</span>
                     @else
-                        <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($i) }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($i) }}')">{{ $i }}</a>
+                        <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($i) }}">{{ $i }}</a>
                     @endif
                 @endfor
 
@@ -103,11 +103,11 @@
                     @if ($end < $last - 1)
                         <span>...</span>
                     @endif
-                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($last) }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($last) }}')">{{ $last }}</a>
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->url($last) }}">{{ $last }}</a>
                 @endif
 
                 @if ($books->hasMorePages())
-                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->nextPageUrl() }}" onclick="fetchPage(event, '{{ $books->appends(['search' => $search, 'perPage' => $perPage])->nextPageUrl() }}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>
+                    <a href="{{ $books->appends(['search' => $search, 'perPage' => $perPage])->nextPageUrl() }}"><ion-icon name="chevron-forward-outline"></ion-icon></a>
                 @else
                     <span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>
                 @endif
@@ -120,108 +120,155 @@
 
 @section('scripts')
 <script>
-function openForm() {
-    document.getElementById("bookForm").style.display = "block";
-}
+document.addEventListener('DOMContentLoaded', function() {
+    function openForm() {
+        document.getElementById("bookForm").style.display = "block";
+    }
 
-function closeForm() {
-    document.getElementById("bookForm").style.display = "none";
-}
+    function closeForm() {
+        document.getElementById("bookForm").style.display = "none";
+    }
 
-function openEditForm(id) {
-    document.getElementById(`editForm${id}`).style.display = "block";
-}
+    function restrictToNumbers(input) {
+        input.value = input.value.replace(/\D/g, '');
+    }
 
-function closeEditForm(id) {
-    document.getElementById(`editForm${id}`).style.display = "none";
-}
+    function showLoadingSpinner() {
+        let spinner = document.getElementById('loading-spinner');
+        if (spinner) {
+            spinner.style.display = 'flex';
+        }
+    }
 
-document.getElementById('search-input').addEventListener('input', function() {
-    submitSearchForm();
+    function hideLoadingSpinner() {
+        let spinner = document.getElementById('loading-spinner');
+        if (spinner) {
+            spinner.style.display = 'none';
+        }
+    }
+
+    function submitSearchForm() {
+        let form = document.getElementById('search-form');
+        let formData = new FormData(form);
+        let searchQuery = new URLSearchParams(formData).toString();
+
+        showLoadingSpinner();
+
+        fetch(`{{ route('buku') }}?${searchQuery}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('table-container').innerHTML = data.html;
+            updatePaginationLinks(data, searchQuery);
+            hideLoadingSpinner();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoadingSpinner();
+        });
+    }
+
+    function fetchPage(event, url) {
+        event.preventDefault();
+
+        let searchQuery = document.getElementById('search-input').value;
+        let perPage = document.getElementById('perPage').value;
+        if (searchQuery) {
+            url += `&search=${searchQuery}`;
+        }
+
+        showLoadingSpinner();
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('table-container').innerHTML = data.html;
+            updatePaginationLinks(data, searchQuery, perPage);
+            hideLoadingSpinner();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoadingSpinner();
+        });
+    }
+
+    function updatePaginationLinks(data, searchQuery, perPage) {
+        document.querySelector('.pagination-info').innerText = `Halaman ${data.currentPage} dari ${data.lastPage}`;
+
+        let paginationLinks = '';
+        let baseUrl = data.url;
+
+        if (data.currentPage > 1) {
+            paginationLinks += `<a href="${baseUrl}?page=${data.currentPage - 1}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${data.currentPage - 1}&search=${searchQuery}&perPage=${perPage}')"><ion-icon name="chevron-back-outline"></ion-icon></a>`;
+        } else {
+            paginationLinks += `<span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>`;
+        }
+
+        for (let i = 1; i <= data.lastPage; i++) {
+            if (i === data.currentPage) {
+                paginationLinks += `<span class="current">${i}</span>`;
+            } else {
+                paginationLinks += `<a href="${baseUrl}?page=${i}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${i}&search=${searchQuery}&perPage=${perPage}')">${i}</a>`;
+            }
+        }
+
+        if (data.currentPage < data.lastPage) {
+            paginationLinks += `<a href="${baseUrl}?page=${data.currentPage + 1}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${data.currentPage + 1}&search=${searchQuery}&perPage=${perPage}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>`;
+        } else {
+            paginationLinks += `<span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>`;
+        }
+
+        document.querySelector('.pagination-links').innerHTML = paginationLinks;
+    }
+
+    document.getElementById('search-input').addEventListener('input', debounce(submitSearchForm, 300));
+    document.getElementById('pagination-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitPaginationForm();
+    });
+
+    function submitPaginationForm() {
+        let form = document.getElementById('pagination-form');
+        let formData = new FormData(form);
+        let paginationQuery = new URLSearchParams(formData).toString();
+
+        showLoadingSpinner();
+
+        fetch(`{{ route('buku') }}?${paginationQuery}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('table-container').innerHTML = data.html;
+            updatePaginationLinks(data, paginationQuery);
+            hideLoadingSpinner();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoadingSpinner();
+        });
+    }
+
+    function debounce(func, delay) {
+        let debounceTimer;
+        return function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func.apply(this, arguments), delay);
+        };
+    }
 });
-
-function restrictToNumbers(input) {
-    input.value = input.value.replace(/\D/g, '');
-}
-
-function showLoadingSpinner() {
-    document.getElementById('loading-spinner').style.display = 'flex';
-}
-
-function hideLoadingSpinner() {
-    document.getElementById('loading-spinner').style.display = 'none';
-}
-
-function submitSearchForm() {
-    let form = document.getElementById('search-form');
-    let formData = new FormData(form);
-    let searchQuery = new URLSearchParams(formData).toString();
-
-    showLoadingSpinner();
-
-    fetch(`{{ route('buku') }}?${searchQuery}`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('table-container').innerHTML = data.html;
-        updatePaginationLinks(data, searchQuery);
-        hideLoadingSpinner();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        hideLoadingSpinner();
-    });
-}
-
-function fetchPage(event, url, searchQuery = '') {
-    event.preventDefault();
-    showLoadingSpinner();
-
-    fetch(`${url}&${searchQuery}`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('table-container').innerHTML = data.html;
-        updatePaginationLinks(data, searchQuery);
-        hideLoadingSpinner();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        hideLoadingSpinner();
-    });
-}
-
-function updatePaginationLinks(data, searchQuery) {
-    document.querySelector('.pagination-info').innerText = `Halaman ${data.currentPage} dari ${data.lastPage}`;
-    
-    let paginationLinks = '';
-    if (data.currentPage > 1) {
-        paginationLinks += `<a href="${data.url + '&page=' + (data.currentPage - 1)}" onclick="fetchPage(event, '${data.url}&page=${data.currentPage - 1}', '${searchQuery}')"><ion-icon name="chevron-back-outline"></ion-icon></a>`;
-    } else {
-        paginationLinks += `<span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>`;
-    }
-    
-    if (data.currentPage < data.lastPage) {
-        paginationLinks += `<a href="${data.url + '&page=' + (data.currentPage + 1)}" onclick="fetchPage(event, '${data.url}&page=${data.currentPage + 1}', '${searchQuery}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>`;
-    } else {
-        paginationLinks += `<span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>`;
-    }
-    
-    document.querySelector('.pagination-links').innerHTML = paginationLinks;
-}
-
-function submitPaginationForm() {
-    let form = document.getElementById('pagination-form');
-    form.submit();
-}
 </script>
 @endsection
 
@@ -279,7 +326,6 @@ function submitPaginationForm() {
 .table th, .table td {
     padding: 8px;
     border: 1px solid #ddd;
-
 }
 
 .table th {
