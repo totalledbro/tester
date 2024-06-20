@@ -75,3 +75,13 @@
     </div>
     @endforeach
 </div>
+
+<script>
+    function openEditForm(id) {
+    document.getElementById(`editForm${id}`).style.display = "block";
+}
+
+function closeEditForm(id) {
+    document.getElementById(`editForm${id}`).style.display = "none";
+}
+</script>

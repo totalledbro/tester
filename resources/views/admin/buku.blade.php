@@ -6,11 +6,13 @@
     <div class="content">
         <div class="header">
             <button class="add-btn" onclick="openForm()">Tambah Buku</button>
-            <form method="GET" action="{{ route('buku') }}" id="search-form">
+            
+        </div>
+        <div class="search-box">
+        <form method="GET" action="{{ route('buku') }}" id="search-form">
                 <input type="text" name="search" id="search-input" placeholder="Cari buku..." value="{{ $search ?? '' }}" autocomplete="off">
             </form>
         </div>
-
         <div class="form-popup" id="bookForm">
             <div class="form-box add">
                 <span class="close-btn material-symbols-rounded" onclick="closeForm()">close</span>
@@ -120,6 +122,110 @@
 
 @section('scripts')
 <script>
+async function submitPaginationForm() {
+    let form = document.getElementById('pagination-form');
+    let formData = new FormData(form);
+    let paginationQuery = new URLSearchParams(formData).toString();
+
+    showLoadingSpinner();
+
+    try {
+        let response = await fetch(`{{ route('buku') }}?${paginationQuery}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        let data = await response.json();
+        updateTableAndPagination(data);
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        hideLoadingSpinner();
+    }
+}
+
+function showLoadingSpinner() {
+    let spinner = document.getElementById('loading-spinner');
+    if (spinner) {
+        spinner.style.display = 'flex';
+    }
+}
+
+function hideLoadingSpinner() {
+    let spinner = document.getElementById('loading-spinner');
+    if (spinner) {
+        spinner.style.display = 'none';
+    }
+}
+
+async function fetchPage(event, url) {
+    event.preventDefault();
+
+    showLoadingSpinner();
+
+    try {
+        let response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        let data = await response.json();
+        updateTableAndPagination(data);
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        hideLoadingSpinner();
+    }
+}
+
+function updateTableAndPagination(data) {
+    document.getElementById('table-container').innerHTML = data.html;
+    updatePaginationLinks(data);
+}
+
+function updatePaginationLinks(data) {
+    document.querySelector('.pagination-info').innerText = `Halaman ${data.currentPage} dari ${data.lastPage}`;
+
+    let paginationLinks = '';
+    let baseUrl = data.url;
+    let searchQuery = document.getElementById('search-input').value;
+    let perPage = document.getElementById('perPage').value;
+
+    if (data.currentPage > 1) {
+        paginationLinks += `<a href="${baseUrl}?page=${data.currentPage - 1}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${data.currentPage - 1}&search=${searchQuery}&perPage=${perPage}')"><ion-icon name="chevron-back-outline"></ion-icon></a>`;
+    } else {
+        paginationLinks += `<span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>`;
+    }
+
+    for (let i = 1; i <= data.lastPage; i++) {
+        if (i === data.currentPage) {
+            paginationLinks += `<span class="current">${i}</span>`;
+        } else {
+            paginationLinks += `<a href="${baseUrl}?page=${i}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${i}&search=${searchQuery}&perPage=${perPage}')">${i}</a>`;
+        }
+    }
+
+    if (data.currentPage < data.lastPage) {
+        paginationLinks += `<a href="${baseUrl}?page=${data.currentPage + 1}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${data.currentPage + 1}&search=${searchQuery}&perPage=${perPage}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>`;
+    } else {
+        paginationLinks += `<span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>`;
+    }
+
+    document.querySelector('.pagination-links').innerHTML = paginationLinks;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     function openForm() {
         document.getElementById("bookForm").style.display = "block";
@@ -133,101 +239,32 @@ document.addEventListener('DOMContentLoaded', function() {
         input.value = input.value.replace(/\D/g, '');
     }
 
-    function showLoadingSpinner() {
-        let spinner = document.getElementById('loading-spinner');
-        if (spinner) {
-            spinner.style.display = 'flex';
-        }
-    }
-
-    function hideLoadingSpinner() {
-        let spinner = document.getElementById('loading-spinner');
-        if (spinner) {
-            spinner.style.display = 'none';
-        }
-    }
-
-    function submitSearchForm() {
+    async function submitSearchForm() {
         let form = document.getElementById('search-form');
         let formData = new FormData(form);
         let searchQuery = new URLSearchParams(formData).toString();
 
         showLoadingSpinner();
 
-        fetch(`{{ route('buku') }}?${searchQuery}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+        try {
+            let response = await fetch(`{{ route('buku') }}?${searchQuery}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('table-container').innerHTML = data.html;
-            updatePaginationLinks(data, searchQuery);
-            hideLoadingSpinner();
-        })
-        .catch(error => {
+
+            let data = await response.json();
+            updateTableAndPagination(data);
+        } catch (error) {
             console.error('Error:', error);
+        } finally {
             hideLoadingSpinner();
-        });
-    }
-
-    function fetchPage(event, url) {
-        event.preventDefault();
-
-        let searchQuery = document.getElementById('search-input').value;
-        let perPage = document.getElementById('perPage').value;
-        if (searchQuery) {
-            url += `&search=${searchQuery}`;
         }
-
-        showLoadingSpinner();
-
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('table-container').innerHTML = data.html;
-            updatePaginationLinks(data, searchQuery, perPage);
-            hideLoadingSpinner();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            hideLoadingSpinner();
-        });
-    }
-
-    function updatePaginationLinks(data, searchQuery, perPage) {
-        document.querySelector('.pagination-info').innerText = `Halaman ${data.currentPage} dari ${data.lastPage}`;
-
-        let paginationLinks = '';
-        let baseUrl = data.url;
-
-        if (data.currentPage > 1) {
-            paginationLinks += `<a href="${baseUrl}?page=${data.currentPage - 1}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${data.currentPage - 1}&search=${searchQuery}&perPage=${perPage}')"><ion-icon name="chevron-back-outline"></ion-icon></a>`;
-        } else {
-            paginationLinks += `<span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>`;
-        }
-
-        for (let i = 1; i <= data.lastPage; i++) {
-            if (i === data.currentPage) {
-                paginationLinks += `<span class="current">${i}</span>`;
-            } else {
-                paginationLinks += `<a href="${baseUrl}?page=${i}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${i}&search=${searchQuery}&perPage=${perPage}')">${i}</a>`;
-            }
-        }
-
-        if (data.currentPage < data.lastPage) {
-            paginationLinks += `<a href="${baseUrl}?page=${data.currentPage + 1}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${data.currentPage + 1}&search=${searchQuery}&perPage=${perPage}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>`;
-        } else {
-            paginationLinks += `<span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>`;
-        }
-
-        document.querySelector('.pagination-links').innerHTML = paginationLinks;
     }
 
     document.getElementById('search-input').addEventListener('input', debounce(submitSearchForm, 300));
@@ -236,30 +273,9 @@ document.addEventListener('DOMContentLoaded', function() {
         submitPaginationForm();
     });
 
-    function submitPaginationForm() {
-        let form = document.getElementById('pagination-form');
-        let formData = new FormData(form);
-        let paginationQuery = new URLSearchParams(formData).toString();
-
-        showLoadingSpinner();
-
-        fetch(`{{ route('buku') }}?${paginationQuery}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('table-container').innerHTML = data.html;
-            updatePaginationLinks(data, paginationQuery);
-            hideLoadingSpinner();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            hideLoadingSpinner();
-        });
-    }
+    document.getElementById('perPage').addEventListener('change', function() {
+        submitPaginationForm();
+    });
 
     function debounce(func, delay) {
         let debounceTimer;
@@ -271,6 +287,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+
+
+
+
+
 
 <style>
 /* Add your styles here */
@@ -417,6 +438,10 @@ document.addEventListener('DOMContentLoaded', function() {
     z-index: 8;
 }
 
+.search-box {
+    width: 100%;
+}
+
 .action-buttons {
     display: flex;
     justify-content: space-between;
@@ -465,10 +490,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .close-btn:hover {
     color: #000;
-}
-
-.book-entry {
-    /* Removed animation for simplicity */
 }
 
 .pagination-controls {
