@@ -118,22 +118,40 @@ class LoanController extends Controller
 
     public function showAllLoans(Request $request)
     {
-        $sortColumn = $request->get('sort', 'loan_date');
-        $sortDirection = $request->get('direction', 'desc');
-        $perPage = $request->get('perPage', 10);
-
-        $loans = Loan::with('user', 'book')
-                     ->orderBy($sortColumn, $sortDirection)
-                     ->paginate($perPage);
-    
+        $perPage = (int) $request->get('perPage', 10);
+        $search = $request->get('search', '');
+        
+        $query = Loan::with('user', 'book');
+        
+        if ($search) {
+            $query->whereHas('user', function ($query) use ($search) {
+                $query->where('first_name', 'like', '%' . $search . '%')
+                      ->orWhere('last_name', 'like', '%' . $search . '%');
+            })->orWhereHas('book', function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%');
+            });
+        }
+        
+        $loans = $query->orderBy('loan_date', 'desc')->paginate($perPage);
+        
+        // Render the partial view into HTML
+        $html = view('partial.loan_table', compact('loans'))->render();
+        
         if ($request->ajax()) {
+            // Return JSON response with the HTML view
             return response()->json([
-                'html' => view('admin.loan_table_rows', compact('loans'))->render()
+                'currentPage' => $loans->currentPage(),
+                'lastPage' => $loans->lastPage(),
+                'url' => route('datapinjam'), // Base URL for pagination links
+                'html' => $html
             ]);
         }
-    
-        return view('admin.datapinjam', compact('loans', 'sortColumn', 'sortDirection', 'perPage'));
+        
+        // Return the regular Blade view with data for non-AJAX requests
+        return view('admin.datapinjam', compact('loans', 'perPage', 'search', 'html'));
     }
+    
+    
     
     public function adminDashboard()
     {

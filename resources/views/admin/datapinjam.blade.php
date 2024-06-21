@@ -2,11 +2,22 @@
 
 @section('content')
 <div class="main active">
+    <!-- Spinner -->
+    <div id="loading-spinner" class="spinner" style="display: none;">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    
     <h1>History Peminjaman</h1>
     <div class="content">
         <button id="print-button" onclick="openPrintModal()">Print</button>
-        <input type="text" id="search-input" placeholder="Cari data peminjaman..." oninput="filterLoans()">
-        <div class="table-responsive">
+        
+        <form method="GET" action="{{ url('datapinjam') }}" id="search-form">
+            <input type="text" name="search" id="search-input" placeholder="Cari data peminjaman..." value="{{ request('search') }}" autocomplete="off">
+        </form>
+        
+        <div class="table-responsive" id="table-container">
             <table class="table" id="loan-table">
                 <thead>
                     <tr>
@@ -18,54 +29,17 @@
                     </tr>
                 </thead>
                 <tbody id="loan-list">
-                    @foreach ($loans as $loan)
-                        <tr class="loan-entry" data-name="{{ strtolower($loan->user->first_name . ' ' . $loan->user->last_name) ?? 'Tidak ada data' }}" data-book="{{ strtolower($loan->book->title ?? 'Tidak ada data') }}" data-loan-date="{{ $loan->loan_date }}">
-                            <td>
-                                @if ($loan->user && $loan->user->first_name && $loan->user->last_name)
-                                    {{ ucwords($loan->user->first_name) . ' ' . ucwords($loan->user->last_name) }}
-                                @else
-                                    <span class="missing-data">Tidak ada data</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($loan->book && $loan->book->title)
-                                    {{ ucwords($loan->book->title) }}
-                                @else
-                                    <span class="missing-data">Tidak ada data</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($loan->loan_date)
-                                    {{ \Carbon\Carbon::parse($loan->loan_date)->translatedFormat('j F Y') }}
-                                @else
-                                    <span class="missing-data">Tidak ada data</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($loan->limit_date)
-                                    {{ \Carbon\Carbon::parse($loan->limit_date)->translatedFormat('j F Y') }}
-                                @else
-                                    <span class="missing-data">Tidak ada data</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($loan->return_date)
-                                    {{ \Carbon\Carbon::parse($loan->return_date)->translatedFormat('j F Y') }}
-                                @else
-                                    Buku belum dikembalikan
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
+                    @include('partial.loan_table', ['loans' => $loans])
                 </tbody>
             </table>
         </div>
 
         <!-- Pagination Controls -->
         <div class="pagination-controls">
-            <form method="GET" action="{{ url('datapinjam') }}">
+            <form method="GET" action="{{ url('datapinjam') }}" id="pagination-form">
+                <input type="hidden" name="search" value="{{ request('search') }}">
                 <label for="perPage">Tampilkan:</label>
-                <select name="perPage" id="perPage" onchange="this.form.submit()">
+                <select name="perPage" id="perPage" onchange="submitPaginationForm()">
                     <option value="10"{{ $perPage == 10 ? ' selected' : '' }}>10</option>
                     <option value="20"{{ $perPage == 20 ? ' selected' : '' }}>20</option>
                 </select>
@@ -74,48 +48,47 @@
                 Halaman {{ $loans->currentPage() }} dari {{ $loans->lastPage() }}
             </div>
             <div class="pagination-links">
-            @if ($loans->onFirstPage())
-                <span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>
-            @else
-                <a href="{{ $loans->previousPageUrl() }}"><ion-icon name="chevron-back-outline"></ion-icon></a>
-            @endif
-
-            @php
-                $current = $loans->currentPage();
-                $last = $loans->lastPage();
-                $start = max(1, $current - 2);
-                $end = min($last, $current + 2);
-            @endphp
-
-            @if ($start > 1)
-                <a href="{{ $loans->url(1) }}">1</a>
-                @if ($start > 2)
-                    <span>...</span>
-                @endif
-            @endif
-
-            @for ($page = $start; $page <= $end; $page++)
-                @if ($page == $current)
-                    <span class="current">{{ $page }}</span>
+                @if ($loans->onFirstPage())
+                    <span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>
                 @else
-                    <a href="{{ $loans->url($page) }}">{{ $page }}</a>
+                    <a href="{{ $loans->previousPageUrl() }}" onclick="fetchPage(event, '{{ $loans->previousPageUrl() }}')"><ion-icon name="chevron-back-outline"></ion-icon></a>
                 @endif
-            @endfor
 
-            @if ($end < $last)
-                @if ($end < $last - 1)
-                    <span>...</span>
+                @php
+                    $current = $loans->currentPage();
+                    $last = $loans->lastPage();
+                    $start = max(1, $current - 2);
+                    $end = min($last, $current + 2);
+                @endphp
+
+                @if ($start > 1)
+                    <a href="{{ $loans->url(1) }}" onclick="fetchPage(event, '{{ $loans->url(1) }}')">1</a>
+                    @if ($start > 2)
+                        <span>...</span>
+                    @endif
                 @endif
-                <a href="{{ $loans->url($last) }}">{{ $last }}</a>
-            @endif
 
-            @if ($loans->hasMorePages())
-                <a href="{{ $loans->nextPageUrl() }}"><ion-icon name="chevron-forward-outline"></ion-icon></a>
-            @else
-                <span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>
-            @endif
-        </div>
+                @for ($page = $start; $page <= $end; $page++)
+                    @if ($page == $current)
+                        <span class="current">{{ $page }}</span>
+                    @else
+                        <a href="{{ $loans->url($page) }}" onclick="fetchPage(event, '{{ $loans->url($page) }}')">{{ $page }}</a>
+                    @endif
+                @endfor
 
+                @if ($end < $last)
+                    @if ($end < $last - 1)
+                        <span>...</span>
+                    @endif
+                    <a href="{{ $loans->url($last) }}" onclick="fetchPage(event, '{{ $loans->url($last) }}')">{{ $last }}</a>
+                @endif
+
+                @if ($loans->hasMorePages())
+                    <a href="{{ $loans->nextPageUrl() }}" onclick="fetchPage(event, '{{ $loans->nextPageUrl() }}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>
+                @else
+                    <span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>
+                @endif
+            </div>
         </div>
     </div>
 </div>
@@ -139,20 +112,141 @@
 
 @section('scripts')
 <script>
-function filterLoans() {
-    const keyword = document.getElementById('search-input').value.toLowerCase();
-    const rows = document.querySelectorAll('.loan-entry');
+async function submitPaginationForm() {
+    let form = document.getElementById('pagination-form');
+    let formData = new FormData(form);
+    let paginationQuery = new URLSearchParams(formData).toString();
 
-    rows.forEach(row => {
-        const name = row.getAttribute('data-name');
-        const book = row.getAttribute('data-book');
-        if (name.includes(keyword) || book.includes(keyword)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+    showLoadingSpinner();
+
+    try {
+        let response = await fetch(`{{ url('datapinjam') }}?${paginationQuery}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
-    });
+
+        let data = await response.json();
+        updateTableAndPagination(data);
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        hideLoadingSpinner();
+    }
 }
+
+async function fetchPage(event, url) {
+    event.preventDefault();
+
+    showLoadingSpinner();
+
+    try {
+        let response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        let data = await response.json();
+        updateTableAndPagination(data);
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        hideLoadingSpinner();
+    }
+}
+
+function updateTableAndPagination(data) {
+    document.getElementById('loan-list').innerHTML = data.html;
+    updatePaginationLinks(data);
+}
+
+function updatePaginationLinks(data) {
+    document.querySelector('.pagination-info').innerText = `Halaman ${data.currentPage} dari ${data.lastPage}`;
+
+    let paginationLinks = '';
+    let baseUrl = data.url;
+    let searchQuery = document.getElementById('search-input').value;
+    let perPage = document.getElementById('perPage').value;
+
+    if (data.currentPage > 1) {
+        paginationLinks += `<a href="${baseUrl}?page=${data.currentPage - 1}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${data.currentPage - 1}&search=${searchQuery}&perPage=${perPage}')"><ion-icon name="chevron-back-outline"></ion-icon></a>`;
+    } else {
+        paginationLinks += `<span class="disabled"><ion-icon name="chevron-back-outline"></ion-icon></span>`;
+    }
+
+    for (let i = 1; i <= data.lastPage; i++) {
+        if (i === data.currentPage) {
+            paginationLinks += `<span class="current">${i}</span>`;
+        } else {
+            paginationLinks += `<a href="${baseUrl}?page=${i}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${i}&search=${searchQuery}&perPage=${perPage}')">${i}</a>`;
+        }
+    }
+
+    if (data.currentPage < data.lastPage) {
+        paginationLinks += `<a href="${baseUrl}?page=${data.currentPage + 1}&search=${searchQuery}&perPage=${perPage}" onclick="fetchPage(event, '${baseUrl}?page=${data.currentPage + 1}&search=${searchQuery}&perPage=${perPage}')"><ion-icon name="chevron-forward-outline"></ion-icon></a>`;
+    } else {
+        paginationLinks += `<span class="disabled"><ion-icon name="chevron-forward-outline"></ion-icon></span>`;
+    }
+
+    document.querySelector('.pagination-links').innerHTML = paginationLinks;
+}
+
+function showLoadingSpinner() {
+    let spinner = document.getElementById('loading-spinner');
+    if (spinner) {
+        spinner.style.display = 'flex';
+    }
+}
+
+function hideLoadingSpinner() {
+    let spinner = document.getElementById('loading-spinner');
+    if (spinner) {
+        spinner.style.display = 'none';
+    }
+}
+
+document.getElementById('search-input').addEventListener('input', async function () {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(async () => {
+        let query = this.value;
+        let form = document.getElementById('search-form');
+        let formData = new FormData(form);
+        let searchQuery = new URLSearchParams(formData).toString();
+
+        showLoadingSpinner();
+
+        try {
+            let response = await fetch(`{{ url('datapinjam') }}?${searchQuery}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            let data = await response.json();
+            updateTableAndPagination(data);
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            hideLoadingSpinner();
+        }
+    }, 500);
+});
 
 function openPrintModal() {
     document.getElementById('printModal').style.display = 'block';
@@ -162,166 +256,49 @@ function closePrintModal() {
     document.getElementById('printModal').style.display = 'none';
 }
 
-function printTable() {
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
+async function printTable() {
+    let startDate = document.getElementById('startDate').value;
+    let endDate = document.getElementById('endDate').value;
 
-    if (startDate && endDate && startDate > endDate) {
+    if (startDate > endDate) {
         document.getElementById('dateError').style.display = 'block';
         return;
-    } else {
-        document.getElementById('dateError').style.display = 'none';
     }
 
-    const params = new URLSearchParams();
-    if (startDate) params.append('startDate', startDate);
-    if (endDate) params.append('endDate', endDate);
+    document.getElementById('dateError').style.display = 'none';
 
-    const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
-    if (!csrfTokenElement) {
-        console.error('CSRF token not found');
-        return;
-    }
-    const csrfToken = csrfTokenElement.getAttribute('content');
-
-    fetch(`/print?${params.toString()}`, {
-        headers: {
-            'X-CSRF-TOKEN': csrfToken
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(loans => {
-        console.log('Loans fetched:', loans);
-
-        // Sort loans based on loan date
-        loans.sort((a, b) => new Date(a.loan_date) - new Date(b.loan_date));
-
-        const filteredRows = loans.map(loan => {
-            const userFirstName = loan.user ? loan.user.first_name.toLowerCase() : 'tidak ada data';
-            const userLastName = loan.user ? loan.user.last_name.toLowerCase() : 'tidak ada data';
-            const bookTitle = loan.book ? loan.book.title.toLowerCase() : 'tidak ada data';
-            const loanDate = loan.loan_date || '';
-            const limitDate = loan.limit_date || '';
-            const returnDate = loan.return_date || 'Buku belum dikembalikan';
-
-            return `
-                <tr class="loan-entry" data-name="${userFirstName} ${userLastName}" data-book="${bookTitle}" data-loan-date="${loanDate}">
-                    <td>${loan.user ? ucwords(loan.user.first_name) + ' ' + ucwords(loan.user.last_name) : '<span class="missing-data">Tidak ada data</span>'}</td>
-                    <td>${loan.book ? ucwords(loan.book.title) : '<span class="missing-data">Tidak ada data</span>'}</td>
-                    <td>${loanDate ? new Date(loanDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '<span class="missing-data">Tidak ada data</span>'}</td>
-                    <td>${limitDate ? new Date(limitDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '<span class="missing-data">Tidak ada data</span>'}</td>
-                    <td>${loan.return_date ? new Date(returnDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Buku belum dikembalikan'}</td>
-                </tr>
-            `;
-        }).join('');
-
-        const printWindow = window.open('', '_blank');
-        const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-
-        let periodText = startDate && endDate ? ` Data Peminjaman Buku Tanggal ${new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} Hingga ${new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`
-            : startDate ? `Tanggal ${new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`
-            : 'Semua Periode';
-
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Print Data Peminjaman</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                        }
-                        h1 {
-                            text-align: center;
-                            font-size: 24px;
-                        }
-                        h2 {
-                            text-align: center;
-                            font-size: 18px;
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                        }
-                        th, td {
-                            border: 1px solid black;
-                            padding: 8px;
-                            text-align: left;
-                        }
-                        th {
-                            background-color: #f2f2f2;
-                            text-align: center;
-                        }
-                        tr {
-                            page-break-inside: avoid;
-                        }
-                        .missing-data {
-                            color: red;
-                        }
-                        .header {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            margin-bottom: 20px;
-                        }
-                        .header .title {
-                            font-size: 32px;
-                            text-align: center;
-                            width: 100%;
-                        }
-                        .header .date {
-                            font-size: 14px;
-                            text-align: right;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <div class="title">Perpustakaan Digital Kalinganyar</div>
-                    </div>
-                    <h2>${periodText}</h2>
-                    <div class="date">Dicetak Pada ${today}</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nama</th>
-                                <th>Buku</th>
-                                <th>Tanggal Pinjam</th>
-                                <th>Tanggal Batas</th>
-                                <th>Tanggal Kembali</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filteredRows}
-                        </tbody>
-                    </table>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
-        printWindow.onafterprint = function() {
-            window.location.reload();
-        };
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-function ucwords(str) {
-    return str.replace(/^(.)|\s+(.)/g, function (letter) {
-        return letter.toUpperCase();
-    });
+    let printUrl = '{{ url("printPinjam") }}?startDate=' + startDate + '&endDate=' + endDate;
+    let printWindow = window.open(printUrl, '_blank');
+    printWindow.print();
 }
 </script>
 @endsection
 
+
 <style>
+/* Spinner Styles */
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border: 0.25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border .75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+/* Existing Styles */
 .content {
     display: flex;
     flex-direction: column;
@@ -373,7 +350,7 @@ function ucwords(str) {
 }
 
 .table tbody tr:hover {
-    background-color: #e0e0e0; /* Highlight color */
+    background-color: #e0e0e0;
 }
 
 .missing-data {
