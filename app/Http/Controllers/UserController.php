@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -42,12 +43,26 @@ class UserController extends Controller
      */
     public function register(StoreUserRequest $request)
     {
-        $validatedData = $request->validated();
-        $validatedData['first_name'] = Str::lower($validatedData['first_name']);
-        $validatedData['last_name'] = Str::lower($validatedData['last_name']);
-        $validatedData['email'] = Str::lower($validatedData['email']);
-        $user = User::create($validatedData);
-        return redirect()->route('dash');
+        try {
+            $validatedData = $request->validated();
+            Log::info('Validation passed', $validatedData);
+
+            $validatedData['first_name'] = Str::lower($validatedData['first_name']);
+            $validatedData['last_name'] = Str::lower($validatedData['last_name']);
+            $validatedData['email'] = Str::lower($validatedData['email']);
+            $validatedData['password'] = Hash::make($validatedData['password']);
+
+            $user = User::create($validatedData);
+            Log::info('User created', ['user_id' => $user->id]);
+
+            $user->sendEmailVerificationNotification();
+            Log::info('Email verification sent', ['user_id' => $user->id]);
+
+            return response()->json(['success' => true, 'message' => 'Registration successful. Please check your email to verify your account.']);
+        } catch (\Exception $e) {
+            Log::error('Error in registration', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Registration failed. Please try again later.']);
+        }
     }
 
     /**

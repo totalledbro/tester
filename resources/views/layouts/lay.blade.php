@@ -301,9 +301,9 @@
 
     $(document).ready(function() {
         // Function to handle form submission
+
         $("#signup-form").submit(function(event) {
-            // Prevent default form submission
-            event.preventDefault();
+            event.preventDefault(); // Prevent default form submission
 
             // Serialize form data
             var formData = $(this).serialize();
@@ -316,7 +316,8 @@
                 success: function(response) {
                     // If registration is successful, display the popup
                     if (response.success) {
-                        $(".success-popup").fadeIn(); // You can customize this class or style
+                        $(".form-popup").hide(); // Hide the form popup
+                        $(".success-popup").fadeIn(); // Show the success popup
                     } else {
                         // If there's an error, log it to the console
                         console.log(response.message);
