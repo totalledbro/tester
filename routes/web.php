@@ -82,7 +82,7 @@ Route::get('/email/verify', function () {
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
 
-    return redirect('/home');
+    return redirect('/');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {
@@ -102,6 +102,10 @@ Route::get('/admins', function () {
 
 Route::post('/', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');
+Route::get('/login', function () {
+    $books = Book::with('category')->orderBy('id', 'desc')->limit(3)->get();
+    return view('auth.dashboardawal',compact('books'));
+})->name('login');
 
 Route::post('/users', [UserController::class, 'register'])->name('register');
 Route::post('/change-password', [UserController::class, 'changePassword'])->name('changePassword');
