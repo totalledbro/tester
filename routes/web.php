@@ -103,8 +103,7 @@ Route::get('/admins', function () {
 Route::post('/', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');
 Route::get('/login', function () {
-    $books = Book::with('category')->orderBy('id', 'desc')->limit(3)->get();
-    return view('auth.dashboardawal',compact('books'));
+    return redirect()->route('dash');
 })->name('login');
 
 Route::post('/users', [UserController::class, 'register'])->name('register');
