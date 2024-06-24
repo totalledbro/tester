@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Loan;
@@ -103,9 +104,9 @@ Route::get('/admins', function () {
 Route::post('/', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');
 Route::get('/login', function () {
-    return redirect()->route('dash');
+    return view('auth.verify');
 })->name('login');
-
+Route::post('/verify-login', [VerificationController::class, 'verifyAndLogin'])->name('verify.login');
 Route::post('/users', [UserController::class, 'register'])->name('register');
 Route::post('/change-password', [UserController::class, 'changePassword'])->name('changePassword');
 
