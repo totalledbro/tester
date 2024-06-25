@@ -63,7 +63,7 @@ class CategoryController extends Controller
     public function show($slug)
     {
         $category = Category::where('slug', $slug)->firstOrFail();
-        $books = $category->books()->with('category')->get(); // Assuming you have a relationship set up
+        $books = $category->books()->with('category')->get(); 
 
         return view('auth.isikategori', compact('category', 'books'));
     }

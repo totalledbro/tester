@@ -45,7 +45,6 @@ body {
   align-items: center;
   justify-content: space-between;
   height: 60px;
-  padding: 0 10px;
   color: var(--white);
   position: relative; /* Added to position icons absolutely */
 }
@@ -60,7 +59,6 @@ body {
   cursor: pointer;
   color: var(--white);
   position: absolute;
-  left: 10px; /* Default left position for collapsed state */
   transition: left 0.5s;
 }
 

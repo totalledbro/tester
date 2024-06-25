@@ -51,9 +51,6 @@ $(document).ready(function() {
             return char.toUpperCase();
         });
     }
-    categories.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-    });
     // Initial display of categories
     displayCategories(categories);
 });
