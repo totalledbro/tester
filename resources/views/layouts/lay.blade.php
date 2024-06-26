@@ -76,7 +76,7 @@
                                 <ion-icon name="eye-off-outline" id="toggle-login-password"></ion-icon>
                             </span>
                         </div>
-                        <a href="#" class="forgot-pass-link">Forgot password?</a>
+                        <a href="#" class="forgot-pass-link" id="forgot-pass-link">Forgot password?</a>
                         <button type="submit">Login</button>
                     </form>
                     <div class="bottom-link">
@@ -124,6 +124,22 @@
                     </div>
                 </div>
             </div>
+            <div class="form-box forgot-password">
+            <div class="form-content">
+                <h2>FORGOT PASSWORD</h2>
+                <form id="forgot-password-form" method="POST" >
+                    @csrf
+                    <div class="input-field">
+                        <input type="email" name="email" autocomplete="email" required>
+                        <label>Email</label>
+                    </div>
+                    <button type="submit">Send Password Reset Link</button>
+                </form>
+                <div class="bottom-link">
+                    Remembered your password? <a href="#" id="login-link">Login</a>
+                </div>
+            </div>
+        </div>
         </div>
         <div class="success-popup" style="display: none;">
             <h3>Registration Successful!</h3>
@@ -161,6 +177,7 @@
                 </form>
             </div>
         </div>
+
         @yield('content')
     </div>
 </div>

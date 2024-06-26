@@ -378,11 +378,14 @@ form button:hover {
 }
 
 .form-popup .signup,
-.form-popup.show-signup .login {
+.form-popup .forgot-password,
+.form-popup.show-signup .login,
+.form-popup.show-forgot-password .login {
     display: none;
 }
 
-.form-popup.show-signup .signup {
+.form-popup.show-signup .signup, 
+.form-popup.show-forgot-password .forgot-password {
     display: flex;
 }
 

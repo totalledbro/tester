@@ -5,6 +5,7 @@ const showPopupBtn = document.querySelector(".login-btn");
 const formPopup = document.querySelector(".form-popup");
 const hidePopupBtn = formPopup.querySelector(".close-btn");
 const signupLoginLink = formPopup.querySelectorAll(".bottom-link a");
+const forgotPasswordLink = formPopup.querySelector(".forgot-pass-link");
 
 // Show mobile menu
 hamburgerBtn.addEventListener("click", () => {
@@ -12,7 +13,7 @@ hamburgerBtn.addEventListener("click", () => {
 });
 
 // Hide mobile menu
-hideMenuBtn.addEventListener("click", () =>  hamburgerBtn.click());
+hideMenuBtn.addEventListener("click", () => hamburgerBtn.click());
 
 // Show login popup
 showPopupBtn.addEventListener("click", () => {
@@ -26,6 +27,19 @@ hidePopupBtn.addEventListener("click", () => showPopupBtn.click());
 signupLoginLink.forEach(link => {
     link.addEventListener("click", (e) => {
         e.preventDefault();
-        formPopup.classList[link.id === 'signup-link' ? 'add' : 'remove']("show-signup");
+        if (link.id === 'signup-link') {
+            formPopup.classList.add("show-signup");
+            formPopup.classList.remove("show-forgot-password");
+        } else if (link.id === 'login-link') {
+            formPopup.classList.remove("show-signup");
+            formPopup.classList.remove("show-forgot-password");
+        }
     });
+});
+
+// Show or hide forgot password form
+forgotPasswordLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    formPopup.classList.add("show-forgot-password");
+    formPopup.classList.remove("show-signup");
 });
