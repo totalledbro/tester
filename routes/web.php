@@ -113,6 +113,12 @@ Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('acti
 
 Route::post('/users', [UserController::class, 'register'])->name('register');
 Route::post('/change-password', [UserController::class, 'changePassword'])->name('changePassword');
+Route::post('/forgot-password', [UserController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [UserController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [UserController::class, 'reset'])->name('password.update');
+Route::get('/reset-berhasil', function () {
+    return view('auth.resetberhasil');
+})->name('resetberhasil');
 
 Route::get('/categories', [CategoryController::class, 'index'])->name('products.index');
 Route::post('/categories', [CategoryController::class, 'add'])->name('addcategory');

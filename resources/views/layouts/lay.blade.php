@@ -120,29 +120,29 @@
                         <button type="submit" id="signup-btn">Sign Up</button>
                     </form>
                     <div class="bottom-link">
-                        Already have an account? <a href="#" id="login-link">Login</a>
+                        Sudah punya akun? <a href="#" id="login-link">Login</a>
                     </div>
                 </div>
             </div>
             <div class="form-box forgot-password">
             <div class="form-content">
-                <h2>FORGOT PASSWORD</h2>
-                <form id="forgot-password-form" method="POST" >
+                <h2>Reset Password</h2>
+                <form id="forgot-password-form" method="POST" action="{{ route('password.email') }}">
                     @csrf
                     <div class="input-field">
                         <input type="email" name="email" autocomplete="email" required>
                         <label>Email</label>
                     </div>
-                    <button type="submit">Send Password Reset Link</button>
+                    <button type="submit">Kirim Link Reset Password</button>
                 </form>
                 <div class="bottom-link">
-                    Remembered your password? <a href="#" id="login-link">Login</a>
+                    Sudah ingat akun? <a href="#" id="login-link">Login</a>
                 </div>
             </div>
         </div>
         </div>
         <div class="success-popup" style="display: none;">
-            <h3>Registration Successful!</h3>
+            <h3>Pendaftaran Berhasil</h3>
             <!-- Add any additional content or styling for the popup -->
         </div>
         <div id="ubah-password-modal" class="modal">
@@ -152,14 +152,14 @@
                     @csrf
                     <div class="input-field">
                         <input type="password" name="current_password" id="current-password" required>
-                        <label>Current Password</label>
+                        <label>Password Lama</label>
                         <span class="toggle-password">
                             <ion-icon name="eye-off-outline" id="toggle-current-password"></ion-icon>
                         </span>
                     </div>
                     <div class="input-field">
                         <input type="password" name="new_password" id="new-password" required>
-                        <label>New Password</label>
+                        <label>Password Baru</label>
                         <span class="toggle-password">
                             <ion-icon name="eye-off-outline" id="toggle-new-password"></ion-icon>
                         </span>
@@ -167,13 +167,13 @@
                     </div>
                     <div class="input-field">
                         <input type="password" name="new_password_confirmation" id="new-password-confirmation" required>
-                        <label>Confirm New Password</label>
+                        <label>Konfirmasi Password Baru</label>
                         <span class="toggle-password">
                             <ion-icon name="eye-off-outline" id="toggle-new-password-confirmation"></ion-icon>
                         </span>
                         <p id="newPasswordError2" style="color: red; display: none;">Password tidak sesuai.</p>
                     </div>
-                    <button type="submit">Change Password</button>
+                    <button type="submit">Ubah Password</button>
                 </form>
             </div>
         </div>
