@@ -53,6 +53,12 @@ class UserController extends Controller
             $validatedData['email'] = Str::lower($validatedData['email']);
             $validatedData['password'] = Hash::make($validatedData['password']);
 
+            // Check if the email already exists
+            if (User::where('email', $validatedData['email'])->exists()) {
+                Log::error('Email already exists', ['email' => $validatedData['email']]);
+                return response()->json(['success' => false, 'message' => 'email_taken'], 422);
+            }
+
             $user = User::create($validatedData);
             Log::info('User created', ['user_id' => $user->id]);
 

@@ -191,6 +191,15 @@
     </div>
 </div>
 
+<div id="emailErrorModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+        </div>
+        <p>Email telah digunakan!</p>
+    </div>
+</div>
+
 <!-- Modal for login error -->
 <div id="loginErrorModal" class="modal">
     <div class="modal-content">
@@ -355,15 +364,33 @@
                     // If registration is successful, display the email verification modal
                     $("#emailVerifyModal").fadeIn();
                 } else {
-                    // If there's an error, log it to the console
-                    console.log(response.message);
+                    if (response.message === 'email_taken') {
+                        // Show the email taken error modal
+                        $("#emailErrorModal").fadeIn();
+                    } else {
+                        console.log(response.message);
+                    }
                 }
             },
             error: function(xhr, status, error) {
-                // Handle error, if any
-                console.log(error);
+                if (xhr.status === 422) {
+                    // Show the email taken error modal if the error message matches
+                    $("#emailErrorModal").fadeIn();
+                } else {
+                    console.log('Error:', error);
+                }
             }
         });
+    });
+
+    // Close modals when clicking outside of modal content
+    $(window).click(function(event) {
+        if (event.target == $("#emailErrorModal")[0]) {
+            $("#emailErrorModal").fadeOut();
+        }
+        if (event.target == $("#emailVerifyModal")[0]) {
+            $("#emailVerifyModal").fadeOut();
+        }
     });
 
         // Dropdown button functionality
