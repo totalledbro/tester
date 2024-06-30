@@ -6,17 +6,19 @@
     <h2>Buku yang Telah Dipinjam</h2>
 </div>
 
-<hr>
-<div class="limit">
-    <p><strong>Sisa Limit Pinjaman Anda:</strong> {{ $loanLimit }}</p>
-    <p><strong>Buku yang Saat Ini Dipinjam:</strong> <span id="current-loans-count">{{ $loans->count() }}</span></p>
-</div>
+<div class="fade-in">
+    <hr>
+    <div class="limit">
+        <p><strong>Sisa Limit Pinjaman Anda:</strong> {{ $loanLimit }}</p>
+        <p><strong>Buku yang Saat Ini Dipinjam:</strong> <span id="current-loans-count">{{ $loans->count() }}</span></p>
+    </div>
 
-<!-- Search Box -->
-<div class="search-box">
-    <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
+    <!-- Search Box -->
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
+    </div>
+    <div id="book-list" class="book-list" style="display: none;"></div>
 </div>
-<div id="book-list" class="book-list" style="display: none;"></div>
 
 <!-- Confirmation Modal -->
 <div id="confirmReturnModal" class="modal">
@@ -27,7 +29,6 @@
         <button id="cancelReturnBtn">Batal</button>
     </div>
 </div>
-
 @endsection
 
 @section('scripts')
@@ -185,11 +186,44 @@
                 $('#confirmReturnModal').css('display', 'none');
             });
         });
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        const elements = document.querySelectorAll('.fade-in');
+        elements.forEach(el => observer.observe(el));
     });
 </script>
 @endsection
 
 <style>
+@keyframes grow {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+/* Welcome Section */
+.welcome-section {
+    text-align: center;
+    margin-top: 20px;
+    animation: grow 1s ease-out;
+    will-change: transform, opacity;
+}
+
+.welcome-section h1, .welcome-section h2 {
+    margin-bottom: 10px;
+    color: white;
+}    
 /* Limit section */
 .limit {
     text-align: center;
@@ -351,5 +385,63 @@
 
 #confirmReturnBtn:hover, #cancelReturnBtn:hover {
     background-color: #0056b3;
+}
+.fade-in {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .cover {
+        width: 30%;
+        margin-right: 10px;
+    }
+
+    .book-details {
+        margin-left: 10px;
+    }
+
+    .book-actions {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .search-box input[type="text"] {
+        width: 90%;
+    }
+
+    .modal-content {
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    .cover {
+        width: 50%;
+        margin-right: 10px;
+    }
+
+    .book-details, .book-details h3{
+        margin: 0 0 10px;
+        text-align: center;
+    }
+
+    .book-item {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .book-actions {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
 }
 </style>

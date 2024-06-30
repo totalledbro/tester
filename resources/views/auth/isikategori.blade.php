@@ -6,17 +6,16 @@
     <h2>Daftar Buku dalam Kategori</h2>
 </div>
 
-<hr>
+<div class="fade-in">
+    <hr>
 
-<!-- Messages Section -->
-<div id="messages"></div>
-
-<!-- Search Box -->
-<div class="search-box">
-    <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
+    <!-- Search Box -->
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
+    </div>
+    <div id="book-list" class="book-list" style="display: none;"></div>
+    
 </div>
-<div id="book-list" class="book-list" style="display: none;"></div>
-
 <!-- Modal Form for Loan -->
 <div id="loanModal" class="modal">
     <div class="modal-content">
@@ -220,6 +219,19 @@ $(document).ready(function() {
             $('#messages').empty();
         }, 5000);
     }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+
+    const elements = document.querySelectorAll('.fade-in');
+    elements.forEach(el => observer.observe(el));
+
 });
 </script>
 @endsection
@@ -228,6 +240,28 @@ $(document).ready(function() {
 @endsection
 
 <style>
+@keyframes grow {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+/* Welcome Section */
+.welcome-section {
+    text-align: center;
+    margin-top: 20px;
+    animation: grow 1s ease-out;
+    will-change: transform, opacity;
+}
+
+.welcome-section h1, .welcome-section h2 {
+    margin-bottom: 10px;
+    color: white;
+}      
 .search-box {
     text-align: center;
     margin: 20px 0;
@@ -395,6 +429,17 @@ $(document).ready(function() {
 .error-message {
     color: red;
     text-align: center;
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 @media (max-width: 600px) {

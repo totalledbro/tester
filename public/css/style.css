@@ -35,17 +35,6 @@ body::after {
     z-index: -1; /* Ensure the pseudo-element is behind the content */
 }
 
-/* Welcome Section */
-.welcome-section {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.welcome-section h1, .welcome-section h2 {
-    margin-bottom: 10px;
-    color: white;
-}
-
 hr {
     margin: 20px 0;
     border: 0;

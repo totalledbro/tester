@@ -122,6 +122,18 @@
 
 @section('scripts')
 <script>
+function openForm() {
+    document.getElementById("bookForm").style.display = "block";
+}
+
+function closeForm() {
+    document.getElementById("bookForm").style.display = "none";
+}
+
+function restrictToNumbers(input) {
+    input.value = input.value.replace(/\D/g, '');
+}
+
 async function submitPaginationForm() {
     let form = document.getElementById('pagination-form');
     let formData = new FormData(form);
@@ -227,18 +239,6 @@ function updatePaginationLinks(data) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    function openForm() {
-        document.getElementById("bookForm").style.display = "block";
-    }
-
-    function closeForm() {
-        document.getElementById("bookForm").style.display = "none";
-    }
-
-    function restrictToNumbers(input) {
-        input.value = input.value.replace(/\D/g, '');
-    }
-
     async function submitSearchForm() {
         let form = document.getElementById('search-form');
         let formData = new FormData(form);

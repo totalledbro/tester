@@ -6,6 +6,7 @@
     <h2>Mari Jelajahi Dunia Pengetahuan di Perpustakaan Digital</h2>
 </div>
 
+<div class="fade-in">
 <hr>
 
 <h3>Koleksi Terbaru</h3>
@@ -20,13 +21,14 @@
                 <p class="book-year">{{ $book->year }}</p>
             </div>
         </div>
-    @endforeach
+     @endforeach
 </div>
 
 <hr>
+</div>
 
 <div class="info-section">
-    <div class="map-box">
+    <div class="map-box fade-in">
         <iframe 
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d253488.46258826382!2d115.22165987150804!3d-6.919600167820184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2ddaa486f0484a57%3A0x7b1ed6efa51aa6ea!2sPulau%20Kangean!5e0!3m2!1sid!2sid!4v1717815170595!5m2!1sid!2sid" 
             width="100%" 
@@ -37,17 +39,14 @@
             referrerpolicy="no-referrer-when-downgrade" 
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
         </iframe>
-
     </div>
-    <div class="about-us">
+    <div class="about-us fade-in">
         <h3>Tentang Kami</h3>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.</p>
-        <p><a href="#">Situs Desa Kalinganyar</a></p>
+        <p style="text-align: center;">Perpustakaan Digital Kalinganyar adalah portal pengetahuan untuk semua masyarakat. Kami berkomitmen untuk menyediakan akses mudah dan cepat ke berbagai koleksi buku, jurnal, dan artikel digital yang relevan dan bermanfaat. Kami percaya bahwa pengetahuan adalah kunci kemajuan bangsa, dan dengan adanya perpustakaan digital ini, kami berharap untuk dapat mendukung pendidikan dan pengembangan diri bagi semua kalangan. Mari bergabung dan manfaatkan perpustakaan digital ini untuk masa depan yang lebih baik.</p>
+        <p><a href="https://sidesa.kalinganyar.id">Situs Desa Kalinganyar</a></p>
         <div class="contact-info">
-            <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-            <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-            <a href="#"><ion-icon name="logo-whatsapp"></ion-icon></a>
-            <a href="#"><ion-icon name="call"></ion-icon></a>
+            <a href="mailto:desakalinganyarkangean@gmail.com"><ion-icon name="mail-outline"></ion-icon> desakalinganyarkangean@gmail.com</a>
+            <a href="https://maps.app.goo.gl/L9QfqxectzywQiGv6"><ion-icon name="location-outline"></ion-icon> JL.Lorong Dalem-Kalianyar Arjasa Sumenep</a>
         </div>
     </div>
 </div>
@@ -61,18 +60,43 @@
                 this.querySelector('.book-info').classList.toggle('show-info');
             });
         });
+        
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+
+    const elements = document.querySelectorAll('.fade-in');
+    elements.forEach(el => observer.observe(el));    
     });
 </script>
 
 <style>
+    @keyframes grow {
+        from {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
     /* Welcome Section */
     .welcome-section {
         text-align: center;
         margin-top: 20px;
+        animation: grow 1s ease-out;
+        will-change: transform, opacity;
     }
 
     .welcome-section h1, .welcome-section h2 {
         margin-bottom: 10px;
+        color: white;
     }
 
     hr {
@@ -145,6 +169,7 @@
         margin: 20px auto;
         max-width: 1200px;
         text-align: left;
+        animation: grow 1s ease-out;
     }
 
     .about-us {
@@ -171,15 +196,17 @@
     }
 
     .contact-info {
+        display: flex;
+        flex-direction: column;
         margin-top: 20px;
     }
 
     .contact-info a {
         display: inline-block;
-        margin-right: 10px;
+        margin-bottom: 10px;
         color: #333;
         text-decoration: none;
-        font-size: 1.5rem;
+        font-size: 1rem;
     }
 
     .contact-info a:hover {
@@ -193,6 +220,16 @@
         overflow: hidden;
     }
 
+    .fade-in {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .fade-in.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
     /* Responsive Styles */
     @media (max-width: 768px) {
         .info-section {

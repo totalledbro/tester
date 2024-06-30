@@ -5,13 +5,13 @@
     <h1>Kategori Buku</h1>
     <h2>Jelajahi Buku Berdasarkan Kategori</h2>
 </div>
+<div class="fade-in">
 
-<hr>
+    <hr>
 
-<!-- Messages Section -->
-<div id="messages"></div>
+    <div id="category-list" class="category-list"></div>
 
-<div id="category-list" class="category-list"></div>
+</div>
 @endsection
 
 @section('scripts')
@@ -53,6 +53,18 @@ $(document).ready(function() {
     }
     // Initial display of categories
     displayCategories(categories);
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+
+    const elements = document.querySelectorAll('.fade-in');
+    elements.forEach(el => observer.observe(el));
 });
 </script>
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
@@ -60,6 +72,29 @@ $(document).ready(function() {
 @endsection
 
 <style>
+@keyframes grow {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+/* Welcome Section */
+.welcome-section {
+    text-align: center;
+    margin-top: 20px;
+    animation: grow 1s ease-out;
+    will-change: transform, opacity;
+}
+
+.welcome-section h1, .welcome-section h2 {
+    margin-bottom: 10px;
+    color: white;
+}    
+
 .category-list {
     padding: 20px;
 }
@@ -139,6 +174,17 @@ $(document).ready(function() {
 
 .view-category-button:hover {
     background-color: #0056b3;
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* Responsive Styles */

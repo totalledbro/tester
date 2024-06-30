@@ -6,50 +6,48 @@
     <h2>Temukan Buku Dari Koleksi</h2>
 </div>
 
-<hr>
+<div class="fade-in">
+    <hr>
 
-<!-- Messages Section -->
-<div id="messages"></div>
+    <!-- Search Box -->
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
+    </div>
+    <div id="book-list" class="book-list" style="display: none;"></div>
 
-<!-- Search Box -->
-<div class="search-box">
-    <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
-</div>
-<div id="book-list" class="book-list" style="display: none;"></div>
+    <!-- Modal Form for Loan -->
+    <div id="loanModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="loanForm" method="POST">
+                @csrf
+                <input type="hidden" id="user_id" name="user_id" value="{{ Auth::check() ? Auth::user()->id : '' }}">
+                
+                <input type="hidden" id="book_id" name="book_id">
+                <!--<div class="book-info">-->
+                    <div id="book-cover" class="cover"></div>
+                    <div id="loan-details">
+                        <p><strong>Judul:</strong> <span id="book-title"></span></p>
+                        <p><strong>Penulis:</strong> <span id="book-author"></span></p>
+                        <p><strong>Tahun:</strong> <span id="book-year"></span></p>
+                        <p><strong>Kategori:</strong> <span id="book-category"></span></p>
+                        <p><strong>Tanggal Sekarang:</strong> <span id="today-date"></span></p>
+                        <p><strong>Tanggal Batas:</strong> <span id="date-limit"></span></p>
+                    </div>
+                    <button type="submit" id="pinjam-button">Pinjam</button>
+                <!--</div>-->
+            </form>
+        </div>
+    </div>
 
-<!-- Modal Form for Loan -->
-<div id="loanModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <form id="loanForm" method="POST">
-            @csrf
-            <input type="hidden" id="user_id" name="user_id" value="{{ Auth::check() ? Auth::user()->id : '' }}">
-            
-            <input type="hidden" id="book_id" name="book_id">
-            <!--<div class="book-info">-->
-                <div id="book-cover" class="cover"></div>
-                <div id="loan-details">
-                    <p><strong>Judul:</strong> <span id="book-title"></span></p>
-                    <p><strong>Penulis:</strong> <span id="book-author"></span></p>
-                    <p><strong>Tahun:</strong> <span id="book-year"></span></p>
-                    <p><strong>Kategori:</strong> <span id="book-category"></span></p>
-                    <p><strong>Tanggal Sekarang:</strong> <span id="today-date"></span></p>
-                    <p><strong>Tanggal Batas:</strong> <span id="date-limit"></span></p>
-                </div>
-                <button type="submit" id="pinjam-button">Pinjam</button>
-            <!--</div>-->
-        </form>
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="success-message" class="success-message"></p>
+        </div>
     </div>
 </div>
-
-<!-- Success Modal -->
-<div id="successModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <p id="success-message" class="success-message"></p>
-    </div>
-</div>
-
 @endsection
 
 @section('scripts')
@@ -200,7 +198,7 @@ $(document).ready(function() {
             data: bookData,
             success: function(response) {
                 // Handle success response here
-                displayMessage('Loan request submitted successfully!', 'success');
+                displayMessage('Peminjaman buku ditambahkan', 'success');
                 // Optionally, update the UI to reflect the loan
             },
             error: function(xhr, status, error) {
@@ -231,11 +229,47 @@ $(document).ready(function() {
     if (books.length > 0) {
         displayBooks(books);
     }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+
+    const elements = document.querySelectorAll('.fade-in');
+    elements.forEach(el => observer.observe(el));    
+
 });
 </script>
 @endsection
 
 <style>
+
+@keyframes grow {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+/* Welcome Section */
+.welcome-section {
+    text-align: center;
+    margin-top: 20px;
+    animation: grow 1s ease-out;
+    will-change: transform, opacity;
+}
+
+.welcome-section h1, .welcome-section h2 {
+    margin-bottom: 10px;
+    color: white;
+}    
 .search-box {
     text-align: center;
     margin: 20px 0;
@@ -398,6 +432,17 @@ $(document).ready(function() {
 .error-message {
     color: red;
     text-align: center;
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in.show {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 @media (max-width: 600px) {
