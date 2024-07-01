@@ -18,24 +18,21 @@
     <!-- Modal Form for Loan -->
     <div id="loanModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
             <form id="loanForm" method="POST">
                 @csrf
                 <input type="hidden" id="user_id" name="user_id" value="{{ Auth::check() ? Auth::user()->id : '' }}">
                 
                 <input type="hidden" id="book_id" name="book_id">
-                <!--<div class="book-info">-->
-                    <div id="book-cover" class="cover"></div>
-                    <div id="loan-details">
-                        <p><strong>Judul:</strong> <span id="book-title"></span></p>
-                        <p><strong>Penulis:</strong> <span id="book-author"></span></p>
-                        <p><strong>Tahun:</strong> <span id="book-year"></span></p>
-                        <p><strong>Kategori:</strong> <span id="book-category"></span></p>
-                        <p><strong>Tanggal Sekarang:</strong> <span id="today-date"></span></p>
-                        <p><strong>Tanggal Batas:</strong> <span id="date-limit"></span></p>
-                    </div>
-                    <button type="submit" id="pinjam-button">Pinjam</button>
-                <!--</div>-->
+                <div id="book-cover" class="cover"></div>
+                <div id="loan-details">
+                    <p><strong>Judul:</strong> <span id="book-title"></span></p>
+                    <p><strong>Penulis:</strong> <span id="book-author"></span></p>
+                    <p><strong>Tahun:</strong> <span id="book-year"></span></p>
+                    <p><strong>Kategori:</strong> <span id="book-category"></span></p>
+                    <p><strong>Tanggal Sekarang:</strong> <span id="today-date"></span></p>
+                    <p><strong>Tanggal Batas:</strong> <span id="date-limit"></span></p>
+                </div>
+                <button type="submit" id="pinjam-button">Pinjam</button>
             </form>
         </div>
     </div>
@@ -43,7 +40,6 @@
     <!-- Success Modal -->
     <div id="successModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
             <p id="success-message" class="success-message"></p>
         </div>
     </div>
@@ -56,7 +52,6 @@
 $(document).ready(function() {
     let books = @json($books); // Initially fetched books
 
-    // Function to display books
     function displayBooks(books) {
         $('#book-list').empty().show();
         if (books.length === 0) {
@@ -89,14 +84,12 @@ $(document).ready(function() {
         }
     }
 
-    // Function to capitalize words
     function capitalizeWords(str) {
         return str.replace(/\b\w/g, function(char) {
             return char.toUpperCase();
         });
     }
 
-    // Function to lazy load images
     function lazyLoadImages() {
         const images = document.querySelectorAll('img[data-src]');
         const config = {
@@ -133,10 +126,8 @@ $(document).ready(function() {
         }
     }
 
-    // Initially hide the book list
     $('#book-list').hide();
 
-    // Show modal when "Pinjam" button is clicked
     $(document).on('click', '.pinjam-button', function(e) {
         e.preventDefault();
         let bookData = $(this).data('book');
@@ -163,26 +154,46 @@ $(document).ready(function() {
         $('#loanModal').css('display', 'block');
     });
 
-    // Close modal when close button is clicked
-    $(document).on('click', '.close', function() {
-        $(this).closest('.modal').css('display', 'none');
-        // Clear previous details
-        $('#book-cover').empty();
-        $('#today-date').empty();
-        $('#date-limit').empty();
-        $('#book-title').empty();
-        $('#book-author').empty();
-        $('#book-year').empty();
-        $('#book-category').empty();
+    $(window).on('click', function(e) {
+        if ($(e.target).hasClass('modal')) {
+            $('.modal').css('display', 'none');
+            $('#book-cover').empty();
+            $('#today-date').empty();
+            $('#date-limit').empty();
+            $('#book-title').empty();
+            $('#book-author').empty();
+            $('#book-year').empty();
+            $('#book-category').empty();
+        }
     });
 
-    // Function to display success message
     function displayMessage(message, type) {
-        $('#success-message').text(message).addClass(type === 'success' ? 'success-message' : 'error-message');
+        let successMessage = $('#success-message');
+
+        // Remove existing success or error class
+        successMessage.removeClass('success-message error-message');
+
+        // Log the type to ensure it's being passed correctly
+        console.log('Message type:', type);
+
+        // Add the appropriate class
+        if (type === 'success') {
+            successMessage.addClass('success-message');
+        } else if (type === 'error') {
+            successMessage.addClass('error-message');
+        }
+
+        // Log the class list to verify class application
+        console.log('Class list after adding class:', successMessage.attr('class'));
+
+        // Set the message text
+        successMessage.text(message);
+
+        // Show the modal
         $('#successModal').css('display', 'block');
     }
 
-    // Submit the form when it's submitted
+
     $('#loanForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -192,26 +203,36 @@ $(document).ready(function() {
             user_id: $('#user_id').val()
         };
 
+        console.log('Submitting loan request:', bookData);
+
         $.ajax({
             type: 'POST',
             url: '{{ route("addloan") }}',
             data: bookData,
-            success: function(response) {
-                // Handle success response here
-                displayMessage('Peminjaman buku ditambahkan', 'success');
-                // Optionally, update the UI to reflect the loan
+            dataType: 'json',
+            success: function(response, status, xhr) {
+                if (xhr.status === 200) {
+                    displayMessage('Peminjaman buku ditambahkan', 'success');
+                } else if (xhr.status === 400) {
+                    displayMessage(response.message, 'error');
+                }
             },
             error: function(xhr, status, error) {
-                // Handle error response here
-                let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred while submitting the loan request.';
-                displayMessage(errorMessage, 'error');
+                if (xhr.status === 400) {
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        displayMessage(xhr.responseJSON.message, 'error');
+                    } else {
+                        displayMessage('An error occurred while submitting the loan request.', 'error');
+                    }
+                } else {
+                    displayMessage('Unexpected error status: ' + xhr.status, 'error');
+                }
             }
         });
 
         $('#loanModal').css('display', 'none');
     });
 
-    // Search input event handler
     $('#search-input').on('input', function() {
         let keyword = $(this).val().toLowerCase();
         if (keyword.length > 0) {
@@ -225,7 +246,6 @@ $(document).ready(function() {
         }
     });
 
-    // Initial display (if needed)
     if (books.length > 0) {
         displayBooks(books);
     }
@@ -241,13 +261,12 @@ $(document).ready(function() {
 
     const elements = document.querySelectorAll('.fade-in');
     elements.forEach(el => observer.observe(el));    
-
 });
 </script>
+
 @endsection
 
 <style>
-
 @keyframes grow {
     from {
         transform: scale(0.5);
@@ -378,20 +397,6 @@ $(document).ready(function() {
     max-width: 500px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     text-align: left;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
 }
 
 .book-info {

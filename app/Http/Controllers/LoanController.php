@@ -21,30 +21,30 @@ class LoanController extends Controller
             'user_id' => 'required|exists:users,id',
             'book_id' => 'required|exists:books,id',
         ]);
-    
+
         $user = User::findOrFail($validatedData['user_id']);
         $book = Book::findOrFail($validatedData['book_id']);
-    
+
         // Check if the user has reached their loan limit
         $currentLoans = Loan::where('user_id', $user->id)->whereNull('return_date')->count();
         if ($currentLoans >= $user->limit) {
-            return redirect()->route('jelajahi')->with('error', 'User has reached their loan limit.');
+            return response()->json(['message' => 'Anda sudah mencapai limit pinjam.'], 400);
         }
-    
+
         // Check if the book is in stock
         if ($book->stock <= 0) {
-            return redirect()->route('jelajahi')->with('error', 'Book is out of stock.');
+            return response()->json(['message' => 'Buku ini sedang habis dipinjam, coba lagi nanti.'], 400);
         }
-    
+
         // Check if the book is already loaned and not yet returned
-        $existingLoan = Loan::where('book_id', $book->id)->whereNull('return_date')->first();
+        $existingLoan = Loan::where('book_id', $book->id)->where('user_id', $user->id)->whereNull('return_date')->first();
         if ($existingLoan) {
-            return redirect()->route('jelajahi')->with('error', 'This book is already loaned out.');
+            return response()->json(['message' => 'Anda telah meminjam buku ini.'], 400);
         }
-    
+
         // Decrease the book stock
         $book->decrement('stock');
-    
+
         // Create the loan
         $loan = Loan::create([
             'user_id' => $validatedData['user_id'],
@@ -52,12 +52,13 @@ class LoanController extends Controller
             'loan_date' => Carbon::today(),
             'limit_date' => Carbon::today()->addWeek(),
         ]);
-    
+
         // Decrease the user's loan limit
         $user->decrement('limit');
-    
-        return redirect()->route('jelajahi')->with('success', 'Loan created successfully.');
+
+        return response()->json(['message' => 'Peminjaman buku berhasil ditambahkan'], 200);
     }
+
     public function returnBook($id)
     {
         $loan = Loan::findOrFail($id);

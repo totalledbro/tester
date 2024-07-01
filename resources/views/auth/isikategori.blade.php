@@ -19,7 +19,6 @@
 <!-- Modal Form for Loan -->
 <div id="loanModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
         <form id="loanForm" method="POST">
             @csrf
             <input type="hidden" id="user_id" name="user_id" value="{{ Auth::check() ? Auth::user()->id : '' }}">
@@ -36,19 +35,22 @@
             <button type="submit" id="pinjam-button">Submit</button>
         </form>
     </div>
+
+</div>
+<!-- Success Modal -->
+<div id="successModal" class="modal">
+    <div class="modal-content">
+        <p id="success-message" class="success-message"></p>
+    </div>
 </div>
 @endsection
 
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-@section('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
 $(document).ready(function() {
     let books = @json($books);
 
-    // Function to display books
     function displayBooks(books) {
         $('#book-list').empty().show();
         if (books.length === 0) {
@@ -64,8 +66,8 @@ $(document).ready(function() {
                         </div>
                         <div class="book-details">
                             <h3>${capitalizeWords(book.title)}</h3>
-                            <p><strong>Penulis</strong> ${capitalizeWords(book.author)}</p>
-                            <p><strong>Tahun</strong> ${book.year}</p>
+                            <p><strong>Penulis:</strong> ${capitalizeWords(book.author)}</p>
+                            <p><strong>Tahun:</strong> ${book.year}</p>
                         </div>
                         <div class="book-action">
                             @auth
@@ -81,14 +83,12 @@ $(document).ready(function() {
         }
     }
 
-    // Function to capitalize words
     function capitalizeWords(str) {
         return str.replace(/\b\w/g, function(char) {
             return char.toUpperCase();
         });
     }
 
-    // Function to lazy load images
     function lazyLoadImages() {
         const images = document.querySelectorAll('img[data-src]');
         const config = {
@@ -125,10 +125,8 @@ $(document).ready(function() {
         }
     }
 
-    // Initially hide the book list
     $('#book-list').hide();
 
-    // Show modal when "Pinjam" button is clicked
     $(document).on('click', '.pinjam-button', function(e) {
         e.preventDefault();
         let bookData = $(this).data('book');
@@ -147,27 +145,28 @@ $(document).ready(function() {
         $('#date-limit').text(limitDateString);
 
         $('#book_id').val(bookData.id);
-        $('#book-title').text(bookData.title);
-        $('#book-author').text(bookData.author);
+        $('#book-title').text(capitalizeWords(bookData.title));
+        $('#book-author').text(capitalizeWords(bookData.author));
         $('#book-year').text(bookData.year);
-        $('#book-category').text(bookData.category.name);
+        $('#book-category').text(capitalizeWords(bookData.category.name));
 
         $('#loanModal').css('display', 'block');
     });
 
-    // Close modal when close button is clicked
-    $(document).on('click', '.close', function() {
-        $('#loanModal').css('display', 'none');
-        $('#book-cover').empty();
-        $('#today-date').empty();
-        $('#date-limit').empty();
-        $('#book-title').empty();
-        $('#book-author').empty();
-        $('#book-year').empty();
-        $('#book-category').empty();
+    $(window).on('click', function(event) {
+        if ($(event.target).is('#loanModal') || $(event.target).is('#successModal')) {
+            $('#loanModal').css('display', 'none');
+            $('#successModal').css('display', 'none');
+            $('#book-cover').empty();
+            $('#today-date').empty();
+            $('#date-limit').empty();
+            $('#book-title').empty();
+            $('#book-author').empty();
+            $('#book-year').empty();
+            $('#book-category').empty();
+        }
     });
 
-    // Submit the form when it's submitted
     $('#loanForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -181,19 +180,32 @@ $(document).ready(function() {
             type: 'POST',
             url: '{{ route("addloan") }}',
             data: bookData,
-            success: function(response) {
-                displayMessage('Loan request submitted successfully!', 'success');
+            dataType: 'json',
+            success: function(response, status, xhr) {
+                if (xhr.status === 200) {
+                    displayMessage('Peminjaman buku ditambahkan', 'success');
+                } else if (xhr.status === 400) {
+                    displayMessage(response.message, 'error');
+                }
             },
             error: function(xhr, status, error) {
-                let errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred while submitting the loan request.';
-                displayMessage(errorMessage, 'error');
+                if (xhr.status === 400) {
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        displayMessage(xhr.responseJSON.message, 'error');
+                    } else {
+                        displayMessage('An error occurred while submitting the loan request.', 'error');
+                    }
+                } else {
+                    displayMessage('Unexpected error status: ' + xhr.status, 'error');
+                }
             }
         });
+
+
 
         $('#loanModal').css('display', 'none');
     });
 
-    // Search input event handler
     $('#search-input').on('input', function() {
         let keyword = $(this).val().toLowerCase();
         if (keyword.length > 0) {
@@ -207,18 +219,32 @@ $(document).ready(function() {
         }
     });
 
-    // Initial display (if needed)
     if (books.length > 0) {
         displayBooks(books);
     }
 
-    // Function to display messages
     function displayMessage(message, type) {
-        $('#messages').html(`<div class="${type}">${message}</div>`);
-        setTimeout(function() {
-            $('#messages').empty();
-        }, 5000);
+        let successMessage = $('#success-message');
+
+        // Remove existing success or error class
+        successMessage.removeClass('success-message error-message');
+
+        // Add the appropriate class
+        if (type === 'success') {
+            successMessage.addClass('success-message');
+        } else if (type === 'error') {
+            successMessage.addClass('error-message');
+        }
+
+        // Set the message text
+        successMessage.text(message);
+
+        // Show the modal
+        $('#successModal').css('display', 'block');
     }
+
+
+
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -231,13 +257,10 @@ $(document).ready(function() {
 
     const elements = document.querySelectorAll('.fade-in');
     elements.forEach(el => observer.observe(el));
-
 });
 </script>
 @endsection
 
-</script>
-@endsection
 
 <style>
 @keyframes grow {
@@ -375,20 +398,6 @@ $(document).ready(function() {
 .modal-content .cover {
     text-align: center; /* Center the content horizontally */
     margin-bottom: 20px;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
 }
 
 .book-info {
