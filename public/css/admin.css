@@ -15,6 +15,8 @@
   background: var(--gray);
 }
 
+
+
 body {
   min-height: 100vh;
   overflow-x: hidden;
@@ -172,4 +174,138 @@ body {
   font-size: 1.5rem;
   font-weight: 500;
   color: var(--black1);
+}
+
+.form-popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9;
+  width: 80%; /* Reduced width */
+  max-width: 400px; /* Reduced max-width */
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  overflow: hidden; /* Ensure the content fits within the popup */
+}
+
+.form-popup.active {
+  display: block;
+}
+
+.form-content {
+  padding: 20px;
+}
+
+.input-field {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-field input,
+.input-field select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+}
+
+.input-field label {
+  position: absolute;
+  top: -5px;
+  left: 10px;
+  background: white;
+  padding: 0 5px;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.modals {
+  display: none; /* Hide the modals initially */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: white;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.modals-content {
+  position: relative;
+}
+
+.modals-content h2 {
+  margin-bottom: 20px;
+}
+
+.modals-content .input-field {
+  margin-bottom: 15px;
+}
+
+.modals-content .input-field input {
+  width: calc(100% - 40px); /* Adjust width to accommodate icon */
+  padding: 10px;
+  padding-right: 40px; /* Adjust padding to make room for icon */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.modals-content .input-field label {
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  background: white;
+  padding: 0 5px;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.modals-content .input-field .toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.modals-content button {
+  background: var(--blue);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modals-content button[type="button"] {
+  background: #ddd;
+  color: #333;
+  margin-left: 10px;
+}
+
+.modals-content button[type="button"]:hover {
+  background: #ccc;
+}
+
+.modals-content button:hover {
+  background: var(--black2);
+}
+.overlays {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 8;
 }

@@ -10,9 +10,6 @@
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.0.1/css/ionicons.min.css">
-    <style>
-        @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap");
-    </style>
 </head>
 <body>
     <div class="container">
@@ -27,7 +24,7 @@
                 <li class="nav-item"><a href="{{ url('/buku') }}"><span class="icon"><ion-icon name="book-outline"></ion-icon></span><span class="title">Buku</span></a></li>
                 <li class="nav-item"><a href="{{ url('/datakategori') }}"><span class="icon"><ion-icon name="bookmarks-outline"></ion-icon></span><span class="title">Kategori</span></a></li>
                 <li class="nav-item"><a href="{{ url('/datapinjam') }}"><span class="icon"><ion-icon name="time-outline"></ion-icon></span><span class="title">Data Pinjam</span></a></li>
-                <li class="nav-item"><a href="#"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
+                <li class="nav-item"><a href="#" id="ubah-password-link"><span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span><span class="title">Password</span></a></li>
                 <li class="nav-item"><a href="{{ route('actionlogout') }}"><span class="icon"><ion-icon name="log-out-outline"></ion-icon></span><span class="title">Sign Out</span></a></li>
             </ul>
         </div>
@@ -37,6 +34,40 @@
             </div>
             @yield('content')
         </div>
+        <div id="ubah-password-modals" class="modals" style="display: none;">
+                <div class="modals-content">
+                    <h2>Ubah Password</h2>
+                    <form id="ubah-password-form" method="POST" action="{{ route('changePassword') }}">
+                        @csrf
+                        <div class="input-field">
+                            <input type="password" name="current_password" id="current-password" required>
+                            <label>Password Lama</label>
+                            <span class="toggle-password">
+                                <ion-icon name="eye-off-outline" id="toggle-current-password"></ion-icon>
+                            </span>
+                        </div>
+                        <div class="input-field">
+                            <input type="password" name="new_password" id="new-password" required>
+                            <label>Password Baru</label>
+                            <span class="toggle-password">
+                                <ion-icon name="eye-off-outline" id="toggle-new-password"></ion-icon>
+                            </span>
+                            <p id="PasswordError1" style="color: red; display: none;">Password setidaknya harus 8 karakter.</p>
+                        </div>
+                        <div class="input-field">
+                            <input type="password" name="new_password_confirmation" id="new-password-confirmation" required>
+                            <label>Konfirmasi Password Baru</label>
+                            <span class="toggle-password">
+                                <ion-icon name="eye-off-outline" id="toggle-new-password-confirmation"></ion-icon>
+                            </span>
+                            <p id="PasswordError2" style="color: red; display: none;">Password tidak sesuai.</p>
+                        </div>
+                        <button type="submit">Ubah Password</button>
+                        <button type="button" onclick="closeForms()">Cancel</button>
+                    </form>
+                </div>
+            </div>
+            <div class="overlays" id="overlays"></div>
     </div>
     <script src="assets/js/main.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
@@ -50,7 +81,6 @@
         const adminIcon = document.querySelector(".admin-icon");
         const greeting = document.getElementById('greeting');
 
-        // Function to add 'hovered' class to active link
         function activeLink() {
             list.forEach(item => item.classList.remove("hovered"));
             this.classList.add("hovered");
@@ -85,7 +115,6 @@
             }
         };
 
-        // Highlight the current page
         const currentPage = window.location.pathname;
         list.forEach(item => {
             const link = item.querySelector('a').getAttribute('href');
@@ -95,7 +124,6 @@
             }
         });
 
-        // Set greeting text
         const currentHour = new Date().getHours();
         let greetingText;
         if (currentHour < 12) {
@@ -108,10 +136,68 @@
             greetingText = 'Selamat Malam';
         }
 
-        // Assuming the user's last name is available in a JavaScript variable
         const userLastName = '{{ ucwords(Auth::user()->last_name) }}';
         greeting.innerText = `${greetingText}, ${userLastName}`;
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input && icon) {
+                icon.addEventListener('click', function () {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    icon.setAttribute('name', type === 'password' ? 'eye-off-outline' : 'eye-outline');
+                });
+            }
+        }
+
+        togglePasswordVisibility('current-password', 'toggle-current-password');
+        togglePasswordVisibility('new-password', 'toggle-new-password');
+        togglePasswordVisibility('new-password-confirmation', 'toggle-new-password-confirmation');
+    });
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const passwordInput = document.getElementById('new-password');
+        const confirmPasswordInput = document.getElementById('new-password-confirmation');
+        const passwordError1 = document.getElementById('PasswordError1');
+        const passwordError2 = document.getElementById('PasswordError2');
+
+        function validatePassword1() {
+            if (passwordInput.value.length < 8) {
+                passwordError1.style.display = 'block';
+                passwordInput.setCustomValidity('Password must be at least 8 characters long.');
+            } else {
+                passwordError1.style.display = 'none';
+                passwordInput.setCustomValidity('');
+            }
+        }
+
+        function validatePassword2() {
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                passwordError2.style.display = 'block';
+                confirmPasswordInput.setCustomValidity('Passwords do not match.');
+            } else {
+                passwordError2.style.display = 'none';
+                confirmPasswordInput.setCustomValidity('');
+            }
+        }
+
+        passwordInput.addEventListener('input', validatePassword1);
+        confirmPasswordInput.addEventListener('input', validatePassword2);
+    });
+
+    document.getElementById('ubah-password-link').addEventListener('click', function (event) {
+        event.preventDefault();
+        document.getElementById('ubah-password-modals').style.display = 'block';
+        document.getElementById('overlays').style.display = 'block'; // Show overlay
+    });
+
+    function closeForms() {
+        document.getElementById('ubah-password-modals').style.display = 'none';
+        document.getElementById('overlays').style.display = 'none'; // Hide overlay
+    }
     </script>
     @yield('scripts')
 </body>

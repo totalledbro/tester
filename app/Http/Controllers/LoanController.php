@@ -213,7 +213,7 @@ class LoanController extends Controller
     {
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
-
+        Carbon::setLocale('id');
         $query = Loan::with('user', 'book');
 
         if ($startDate && $endDate) {
@@ -222,7 +222,11 @@ class LoanController extends Controller
 
         $loans = $query->get();
 
-        return response()->json($loans);
+        return view('partial.printview', [
+            'loans' => $loans,
+            'startDate' => $startDate,
+            'endDate' => $endDate
+        ]);
     }
     
 }

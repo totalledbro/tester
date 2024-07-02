@@ -124,10 +124,12 @@
 <script>
 function openForm() {
     document.getElementById("bookForm").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
 }
 
 function closeForm() {
     document.getElementById("bookForm").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
 }
 
 function restrictToNumbers(input) {
@@ -287,11 +289,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
-
-
-
-
-
 
 <style>
 /* Add your styles here */
@@ -549,7 +546,16 @@ document.addEventListener('DOMContentLoaded', function() {
     color: #ccc;
     pointer-events: none;
 }
-
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 8;
+}
 #loading-spinner {
     display: flex;
     justify-content: center;

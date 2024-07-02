@@ -11,7 +11,7 @@
         
         <div class="form-popup" id="categoryForm">
             <div class="form-box add">
-                <span class="close-btn material-symbols-rounded" onClick="closeForm()">close</span>
+                <span class="close-btn material-symbols-rounded" onClick="closeForm()" style="display: none;">close</span>
                 <div class="form-content">
                     <h2>Tambah Kategori</h2>
                     <form id="add-form" method="POST" action="{{ route('addcategory') }}" enctype="multipart/form-data">

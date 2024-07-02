@@ -267,7 +267,7 @@ async function printTable() {
 
     document.getElementById('dateError').style.display = 'none';
 
-    let printUrl = '{{ url("printPinjam") }}?startDate=' + startDate + '&endDate=' + endDate;
+    let printUrl = '{{ url("print") }}?startDate=' + startDate + '&endDate=' + endDate;
     let printWindow = window.open(printUrl, '_blank');
     printWindow.print();
 }
