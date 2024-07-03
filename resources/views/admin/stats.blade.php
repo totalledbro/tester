@@ -18,7 +18,9 @@
 
     <!-- Loan Counter Chart Section -->
     <div class="chart-container">
-        <button id="back-btn" class="back-btn" style="display: none;">Kembali Ke Data Bulanan</button>
+        <button id="prev-year-btn" class="year-btn">Previous Year</button>
+        <button id="next-year-btn" class="year-btn">Next Year</button>
+        <button id="back-btn" class="year-btn" style="display:none;">Kembali ke Tahunan</button>
         <canvas id="loanChart"></canvas>
     </div>
 
@@ -50,12 +52,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ctx = document.getElementById('loanChart').getContext('2d');
     const loanModal = document.getElementById('loanModal');
-
     const loanDetails = document.getElementById('loanDetails');
     const modalHeader = document.getElementById('modalHeader');
     const backbtn = document.getElementById('back-btn');
-
-
+    const prevYearBtn = document.getElementById('prev-year-btn');
+    const nextYearBtn = document.getElementById('next-year-btn');
 
     window.onclick = function(event) {
         if (event.target == loanModal) {
@@ -66,26 +67,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const monthLabels = {!! json_encode($loanMonths) !!}.map(month => {
-        const date = new Date(month);
-        return date.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-    });
+    const yearlyData = {!! json_encode($yearlyData) !!};
+    let currentYearIndex = yearlyData.length - 1;
 
-    const initialChartData = {
-        labels: monthLabels,
-        datasets: [{
-            label: 'Jumlah Peminjaman',
-            data: {!! json_encode($loanCounts) !!},
-            borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            fill: true,
-            tension: 0
-        }]
+    function updateChart(yearIndex) {
+        const yearData = yearlyData[yearIndex];
+        loanChart.data.labels = yearData.months;
+        loanChart.data.datasets[0].data = yearData.counts;
+        loanChart.update();
+        backbtn.style.display = 'none';
+        prevYearBtn.style.display = 'inline-block';
+        nextYearBtn.style.display = 'inline-block';
+    }
+
+    const months = {
+        'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5, 'Juni': 6,
+        'Juli': 7, 'Agustus': 8, 'September': 9, 'Oktober': 10, 'November': 11, 'Desember': 12
     };
 
     const loanChart = new Chart(ctx, {
         type: 'line',
-        data: initialChartData,
+        data: {
+            labels: yearlyData[currentYearIndex].months,
+            datasets: [{
+                label: 'Jumlah Peminjaman',
+                data: yearlyData[currentYearIndex].counts,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+                tension: 0
+            }]
+        },
         options: {
             responsive: true,
             scales: {
@@ -114,34 +126,42 @@ document.addEventListener('DOMContentLoaded', () => {
             onClick: async (event, elements) => {
                 if (elements.length > 0) {
                     const index = elements[0].index;
-                    const selectedMonth = monthLabels[index];
-                    const selectedMonthDate = new Date({!! json_encode($loanMonths) !!}[index]);
-                    const year = selectedMonthDate.getFullYear();
-                    const month = selectedMonthDate.getMonth() + 1;
+                    const selectedMonth = yearlyData[currentYearIndex].months[index];
+                    const selectedYear = yearlyData[currentYearIndex].year;
+
+                    const month = selectedMonth.split(' ')[0];
 
                     try {
-                        const response = await fetch(`/daily-loans?year=${year}&month=${month}`);
+                        const response = await fetch(`/daily-loans?year=${selectedYear}&month=${month}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
                         const dailyData = await response.json();
 
-                        const dailyLabels = dailyData.days.map(day => `${day} ${selectedMonthDate.toLocaleString('id-ID', { month: 'long' })}`);
+                        const dailyLabels = dailyData.days.map(day => `${day} ${selectedMonth}`);
                         const dailyCounts = dailyData.data;
 
                         loanChart.data.labels = dailyLabels;
                         loanChart.data.datasets[0].data = dailyCounts;
                         loanChart.update();
 
-                        backbtn.style.display = 'block';
+                        backbtn.style.display = 'inline-block';
+                        prevYearBtn.style.display = 'none';
+                        nextYearBtn.style.display = 'none';
 
                         loanChart.options.onClick = async (event, elements) => {
                             if (elements.length > 0) {
                                 const dayIndex = elements[0].index;
                                 const selectedDay = dailyLabels[dayIndex];
-                                const selectedDate = `${year}-${month.toString().padStart(2, '0')}-${(dayIndex + 1).toString().padStart(2, '0')}`;
+                                const selectedDate = `${selectedYear}-${months[month].toString().padStart(2, '0')}-${(dayIndex + 1).toString().padStart(2, '0')}`;
 
-                                modalHeader.textContent = `Rincian Peminjaman ${selectedDay} ${year}`;
+                                modalHeader.textContent = `Rincian Peminjaman ${selectedDay}`;
 
                                 try {
                                     const response = await fetch(`/daily-loan-details?date=${selectedDate}`);
+                                    if (!response.ok) {
+                                        throw new Error(`HTTP error! status: ${response.status}`);
+                                    }
                                     const loanDetailsData = await response.json();
 
                                     function capitalizeWords(str) {
@@ -174,24 +194,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.getElementById('prev-year-btn').addEventListener('click', () => {
+        if (currentYearIndex > 0) {
+            currentYearIndex--;
+            updateChart(currentYearIndex);
+        }
+    });
+
+    document.getElementById('next-year-btn').addEventListener('click', () => {
+        if (currentYearIndex < yearlyData.length - 1) {
+            currentYearIndex++;
+            updateChart(currentYearIndex);
+        }
+    });
+
     backbtn.addEventListener('click', () => {
-        loanChart.data.labels = monthLabels;
-        loanChart.data.datasets[0].data = {!! json_encode($loanCounts) !!};
-        loanChart.update();
+        updateChart(currentYearIndex);
         backbtn.style.display = 'none';
         loanChart.options.onClick = async (event, elements) => {
             if (elements.length > 0) {
                 const index = elements[0].index;
-                const selectedMonth = monthLabels[index];
-                const selectedMonthDate = new Date({!! json_encode($loanMonths) !!}[index]);
-                const year = selectedMonthDate.getFullYear();
-                const month = selectedMonthDate.getMonth() + 1;
+                const selectedMonth = yearlyData[currentYearIndex].months[index];
+                const selectedYear = yearlyData[currentYearIndex].year;
+
+                const month = selectedMonth.split(' ')[0];
 
                 try {
-                    const response = await fetch(`/daily-loans?year=${year}&month=${month}`);
+                    const response = await fetch(`/daily-loans?year=${selectedYear}&month=${month}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     const dailyData = await response.json();
 
-                    const dailyLabels = dailyData.days.map(day => `${day} ${selectedMonthDate.toLocaleString('id-ID', { month: 'long' })}`);
+                    const dailyLabels = dailyData.days.map(day => `${day} ${selectedMonth}`);
                     const dailyCounts = dailyData.data;
 
                     loanChart.data.labels = dailyLabels;
@@ -199,17 +234,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     loanChart.update();
 
                     backbtn.style.display = 'block';
+                    prevYearBtn.style.display = 'none';
+                    nextYearBtn.style.display = 'none';
 
                     loanChart.options.onClick = async (event, elements) => {
                         if (elements.length > 0) {
                             const dayIndex = elements[0].index;
                             const selectedDay = dailyLabels[dayIndex];
-                            const selectedDate = `${year}-${month.toString().padStart(2, '0')}-${(dayIndex + 1).toString().padStart(2, '0')}`;
+                            const selectedDate = `${selectedYear}-${months[month].toString().padStart(2, '0')}-${(dayIndex + 1).toString().padStart(2, '0')}`;
 
-                            modalHeader.textContent = `Rincian Peminjaman ${selectedDay} ${year}`;
+                            modalHeader.textContent = `Rincian Peminjaman ${selectedDay}`;
 
                             try {
                                 const response = await fetch(`/daily-loan-details?date=${selectedDate}`);
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
                                 const loanDetailsData = await response.json();
 
                                 function capitalizeWords(str) {
@@ -241,8 +281,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     });
 });
+
+
+
 </script>
 @endsection
+
+
+
+
+
+
 
 <style>
 /* Add your custom styles here */
@@ -282,6 +331,16 @@ document.addEventListener('DOMContentLoaded', () => {
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.year-btn {
+    padding: 10px 20px;
+    background-color: var(--blue);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
 }
 .back-btn {
     padding: 10px 20px;
@@ -290,8 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    display: block; /* Ensure this is set to block for proper display */
-    margin-bottom: 20px; /* Add some space between the button and the chart */
+    display: block;
+    margin-bottom: 20px;
 }
 /* Modal Styles */
 .modal {

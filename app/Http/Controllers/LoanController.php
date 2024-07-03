@@ -155,59 +155,92 @@ class LoanController extends Controller
     
     
     public function adminDashboard()
-    {
-        $books = Book::all();
-        $userCount = User::where('role', 'anggota')->count();
+{
+    $books = Book::all();
+    $userCount = User::where('role', 'anggota')->count();
 
-        // Prepare data for the chart
+    $years = range(date('Y') - 4, date('Y'));
+    $yearlyData = [];
+    $monthsIndonesian = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    foreach ($years as $year) {
         $loanData = Loan::selectRaw('COUNT(*) as count, DATE_FORMAT(loan_date, "%Y-%m") as month')
+            ->whereYear('loan_date', $year)
             ->groupBy('month')
             ->orderBy('month', 'asc')
-            ->take(6)
             ->get();
 
-        $loanMonths = $loanData->pluck('month');
-        $loanCounts = $loanData->pluck('count');
-
-        return view('admin.stats', compact('books', 'userCount', 'loanMonths', 'loanCounts'));
-    }
-
-    public function getDailyLoans(Request $request)
-    {
-        $year = $request->input('year');
-        $month = $request->input('month');
-
-        // Query to get daily loans for the specified month and year
-        $dailyLoans = Loan::selectRaw('DAY(loan_date) as day, COUNT(*) as count')
-            ->whereYear('loan_date', $year)
-            ->whereMonth('loan_date', $month)
-            ->groupBy('day')
-            ->get()
-            ->keyBy('day');
-
-        $daysInMonth = Carbon::createFromDate($year, $month, 1)->daysInMonth;
-        $data = [];
-        for ($day = 1; $day <= $daysInMonth; $day++) {
-            $data[] = $dailyLoans->get($day, (object) ['count' => 0])->count;
+        $data = collect();
+        foreach ($loanData as $loan) {
+            $data->put($loan->month, $loan->count);
         }
 
-        return response()->json([
-            'days' => range(1, $daysInMonth),
-            'data' => $data
-        ]);
+        $months = collect();
+        $counts = collect();
+        for ($i = 1; $i <= 12; $i++) {
+            $month = sprintf('%s %d', $monthsIndonesian[$i - 1], $year);
+            $months->push($month);
+            $counts->push($data->get(sprintf('%d-%02d', $year, $i), 0));
+        }
+
+        $yearlyData[] = [
+            'year' => $year,
+            'months' => $months,
+            'counts' => $counts
+        ];
     }
 
-    public function getDailyLoanDetails(Request $request)
-    {
-        $date = $request->input('date');
+    return view('admin.stats', compact('books', 'userCount', 'yearlyData'));
+}
 
-        // Query to get loans for the specified date
-        $loans = Loan::with('user', 'book')
-            ->whereDate('loan_date', $date)
-            ->get();
+public function getDailyLoans(Request $request)
+{
+    $year = $request->input('year');
+    $monthName = $request->input('month');
 
-        return response()->json($loans);
+    $months = [
+        'Januari' => 1, 'Februari' => 2, 'Maret' => 3, 'April' => 4, 'Mei' => 5, 'Juni' => 6, 
+        'Juli' => 7, 'Agustus' => 8, 'September' => 9, 'Oktober' => 10, 'November' => 11, 'Desember' => 12
+    ];
+
+    if (!isset($months[$monthName])) {
+        return response()->json(['error' => 'Invalid month name'], 400);
     }
+    $month = $months[$monthName];
+
+    $dailyLoans = Loan::selectRaw('DAY(loan_date) as day, COUNT(*) as count')
+        ->whereYear('loan_date', $year)
+        ->whereMonth('loan_date', $month)
+        ->groupBy('day')
+        ->get()
+        ->keyBy('day');
+
+    $daysInMonth = Carbon::createFromDate($year, $month, 1)->daysInMonth;
+    $data = [];
+    for ($day = 1; $day <= $daysInMonth; $day++) {
+        $data[] = $dailyLoans->get($day, (object) ['count' => 0])->count;
+    }
+
+    return response()->json([
+        'days' => range(1, $daysInMonth),
+        'data' => $data
+    ]);
+}
+
+public function getDailyLoanDetails(Request $request)
+{
+    $date = $request->input('date');
+
+    $loans = Loan::with('user', 'book')
+        ->whereDate('loan_date', $date)
+        ->get();
+
+    return response()->json($loans);
+}
+
 
     public function printLoans(Request $request)
     {
