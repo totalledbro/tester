@@ -11,11 +11,14 @@
     
     <h1>History Peminjaman</h1>
     <div class="content">
+        <div class="header">
         <button id="print-button" onclick="openPrintModal()">Print</button>
-        
+        </div>
+        <div class="search">
         <form method="GET" action="{{ url('datapinjam') }}" id="search-form">
             <input type="text" name="search" id="search-input" placeholder="Cari data peminjaman..." value="{{ request('search') }}" autocomplete="off">
         </form>
+        </div>
         
         <div class="table-responsive" id="table-container">
             <table class="table" id="loan-table">
@@ -306,6 +309,18 @@ async function printTable() {
     padding: 20px;
 }
 
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search{
+    width: 100%;
+}
+
 #search-input {
     padding: 10px;
     border: 1px solid #ddd;
@@ -321,7 +336,6 @@ async function printTable() {
     color: white;
     border-radius: 5px;
     cursor: pointer;
-    margin-bottom: 20px;
 }
 
 #print-button:hover {

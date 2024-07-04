@@ -6,9 +6,8 @@
     <div class="content">
         <div class="category">
             <button class="add-btn" onClick="openForm()">Tambah Kategori</button>
-            <input type="text" id="search-input" placeholder="Cari kategori..." oninput="filterCategories()">
         </div>
-        
+        <input type="text" id="search-input" placeholder="Cari kategori..." oninput="filterCategories()">
         <div class="form-popup" id="categoryForm">
             <div class="form-box add">
                 <span class="close-btn material-symbols-rounded" onClick="closeForm()" style="display: none;">close</span>
@@ -186,7 +185,8 @@
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    width: 200px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .table {

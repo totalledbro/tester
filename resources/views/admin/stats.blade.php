@@ -18,8 +18,8 @@
 
     <!-- Loan Counter Chart Section -->
     <div class="chart-container">
-        <button id="prev-year-btn" class="year-btn">Previous Year</button>
-        <button id="next-year-btn" class="year-btn">Next Year</button>
+        <button id="prev-year-btn" class="year-btn"><ion-icon name="chevron-back-outline"></ion-icon></button>
+        <button id="next-year-btn" class="year-btn"><ion-icon name="chevron-forward-outline"></ion-icon></button>
         <button id="back-btn" class="year-btn" style="display:none;">Kembali ke Tahunan</button>
         <canvas id="loanChart"></canvas>
     </div>
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     loanChart.data.datasets[0].data = dailyCounts;
                     loanChart.update();
 
-                    backbtn.style.display = 'block';
+                    backbtn.style.display = 'inline-block';
                     prevYearBtn.style.display = 'none';
                     nextYearBtn.style.display = 'none';
 

@@ -208,7 +208,7 @@ $(document).ready(function() {
 
     $('#search-input').on('input', function() {
         let keyword = $(this).val().toLowerCase();
-        if (keyword.length > 0) {
+        if (keyword.length >= 0) {
             let filteredBooks = books.filter(book =>
                 book.title.toLowerCase().includes(keyword) ||
                 book.author.toLowerCase().includes(keyword)
