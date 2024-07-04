@@ -76,7 +76,7 @@
                                 <ion-icon name="eye-off-outline" id="toggle-login-password"></ion-icon>
                             </span>
                         </div>
-                        <a href="#" class="forgot-pass-link" id="forgot-pass-link">Lupa Password?</a>
+                        <a href="#" class="forgot-pass-link" id="forgot-pass-link">Forgot password?</a>
                         <button type="submit">Login</button>
                     </form>
                     <div class="bottom-link">
