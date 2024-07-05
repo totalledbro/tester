@@ -31,7 +31,7 @@
                     <li><a href="{{ url('/') }}">Beranda</a></li>
                     <li><a href="{{ url('/jelajahi') }}">Jelajahi</a></li>
                     <li><a href="{{ url('/kategori') }}">Kategori</a></li>
-                    <li><a href="#">About us</a></li>
+                    <li><a href="{{ url('/tentang-kami') }}">Tentang Kami</a></li>
                     <li>
                         @auth
                         <a href="{{ url('/pinjaman') }}">Pinjamanku</a>

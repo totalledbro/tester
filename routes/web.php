@@ -33,6 +33,10 @@ Route::middleware([RedirectIfAdministrator::class])->group(function () {
         $categories = Category::all();
         return view('auth.kategori', compact('categories'));
     })->name('kategori');
+
+    Route::get('/tentang-kami', function(){
+        return view('auth.tentangkami');
+    })->name('tentangkami');
 });
 
 Route::middleware([AdminMiddleware::class])->group(function () {

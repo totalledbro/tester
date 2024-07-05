@@ -42,7 +42,7 @@
     </div>
     <div class="about-us fade-in">
         <h3>Tentang Kami</h3>
-        <p style="text-align: center;">Perpustakaan Digital Kalinganyar adalah portal pengetahuan untuk semua masyarakat. Kami berkomitmen untuk menyediakan akses mudah dan cepat ke berbagai koleksi buku, jurnal, dan artikel digital yang relevan dan bermanfaat. Kami percaya bahwa pengetahuan adalah kunci kemajuan bangsa, dan dengan adanya perpustakaan digital ini, kami berharap untuk dapat mendukung pendidikan dan pengembangan diri bagi semua kalangan. Mari bergabung dan manfaatkan perpustakaan digital ini untuk masa depan yang lebih baik.</p>
+        <p style="text-align:justify">Perpustakaan Digital Kalinganyar adalah portal pengetahuan untuk semua masyarakat. Kami berkomitmen untuk menyediakan akses mudah dan cepat ke berbagai koleksi buku, jurnal, dan artikel digital yang relevan dan bermanfaat. Kami percaya bahwa pengetahuan adalah kunci kemajuan bangsa, dan dengan adanya perpustakaan digital ini, kami berharap untuk dapat mendukung pendidikan dan pengembangan diri bagi semua kalangan. Mari bergabung dan manfaatkan perpustakaan digital ini untuk masa depan yang lebih baik.</p>
         <p><a href="https://sidesa.kalinganyar.id">Situs Desa Kalinganyar</a></p>
         <div class="contact-info">
             <a href="mailto:desakalinganyarkangean@gmail.com"><ion-icon name="mail-outline"></ion-icon> desakalinganyarkangean@gmail.com</a>
