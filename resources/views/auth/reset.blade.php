@@ -84,7 +84,7 @@
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">New Password</label>
                 <input id="password" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
                 @error('password')
                     <span class="invalid-feedback" role="alert">
@@ -94,7 +94,7 @@
             </div>
 
             <div class="form-group">
-                <label for="password-confirm">Confirm Password</label>
+                <label for="password-confirm">Confirm New Password</label>
                 <input id="password-confirm" type="password" name="password_confirmation" required autocomplete="new-password">
             </div>
 

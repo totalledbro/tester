@@ -200,6 +200,16 @@
     </div>
 </div>
 
+<!-- Modal for email not found -->
+<div id="emailNotFoundModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+        </div>
+        <p>Email tidak ditemukan!</p>
+    </div>
+</div>
+
 <!-- Modal for login error -->
 <div id="loginErrorModal" class="modal">
     <div class="modal-content">
@@ -481,6 +491,47 @@
             $(".form-popup").removeClass("blur-and-disable");
         }
     });
+    $(document).ready(function() {
+    $("#forgot-password-form").submit(function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        // Serialize form data
+        var formData = $(this).serialize();
+
+        // Send form data to the server using Ajax
+        $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    // Show the check email modal
+                    $("#emailVerifyModal").fadeIn();
+                } else {
+                    // Show the email not found modal
+                    $("#emailNotFoundModal").fadeIn();
+                }
+                setTimeout(function() {
+                    location.reload();
+                }, 3000);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+
+        // Close modals when clicking outside of modal content
+        $(window).click(function(event) {
+            if (event.target == $("#emailVerifyModal")[0]) {
+                $("#emailVerifyModal").fadeOut();
+            }
+            if (event.target == $("#emailNotFoundModal")[0]) {
+                $("#emailNotFoundModal").fadeOut();
+            }
+        });
+    });
+
 </script>
 @yield('scripts')
 </body>
