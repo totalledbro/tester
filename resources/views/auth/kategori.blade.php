@@ -6,11 +6,8 @@
     <h2>Jelajahi Buku Berdasarkan Kategori</h2>
 </div>
 <div class="fade-in">
-
     <hr>
-
     <div id="category-list" class="category-list"></div>
-
 </div>
 @endsection
 
@@ -30,7 +27,7 @@ $(document).ready(function() {
             categories.forEach(function(category) {
                 list += `
                     <div class="category-card">
-                        <div class="category-background" style="background-image: url('{{ asset('storage') }}/${category.image_url}');"></div>
+                        <div class="category-background lazy-load" data-src="{{ asset('storage') }}/${category.image_url}"></div>
                         <div class="category-content">
                             <h3>${capitalizeWords(category.name)}</h3>
                             <a href="{{ url('/kategori') }}/${category.slug}" class="view-category-button">
@@ -43,6 +40,7 @@ $(document).ready(function() {
             list += '</div>';
             $('#category-list').append(list);
         }
+        lazyLoadImages(); // Call lazy loading function
     }
 
     // Function to capitalize words
@@ -51,6 +49,25 @@ $(document).ready(function() {
             return char.toUpperCase();
         });
     }
+
+    // Function to lazy load images
+    function lazyLoadImages() {
+        const lazyImages = document.querySelectorAll('.lazy-load');
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.style.backgroundImage = `url(${img.getAttribute('data-src')})`;
+                    img.classList.remove('lazy-load');
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        lazyImages.forEach(img => observer.observe(img));
+    }
+
     // Initial display of categories
     displayCategories(categories);
 
@@ -93,7 +110,7 @@ $(document).ready(function() {
 .welcome-section h1, .welcome-section h2 {
     margin-bottom: 10px;
     color: white;
-}    
+}
 
 .category-list {
     padding: 20px;

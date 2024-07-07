@@ -29,7 +29,11 @@
 <body>
     <h1>Data Peminjaman Perpustakaan Digital Kalinganyar</h1>
     @if($startDate && $endDate)
-        <h3>Periode tanggal {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} hingga {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}</h3>
+        @if(\Carbon\Carbon::parse($startDate)->eq(\Carbon\Carbon::parse($endDate)))
+            <h3>Periode tanggal {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }}</h3>
+        @else
+            <h3>Periode tanggal {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} hingga {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}</h3>
+        @endif
     @endif
     <h4>Dicetak pada {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</h4>
     <table class="table" id="loan-table">
