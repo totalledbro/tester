@@ -76,11 +76,11 @@
                                 <ion-icon name="eye-off-outline" id="toggle-login-password"></ion-icon>
                             </span>
                         </div>
-                        <a href="#" class="forgot-pass-link" id="forgot-pass-link">Forgot password?</a>
+                        <a href="#" class="forgot-pass-link" id="forgot-pass-link">Lupa password?</a>
                         <button type="submit">Login</button>
                     </form>
                     <div class="bottom-link">
-                        Don't have an account? <a href="#" id="signup-link">Signup</a>
+                        Belum punya akun? <a href="#" id="signup-link">Daftar</a>
                     </div>
                 </div>
             </div>
@@ -91,19 +91,19 @@
                         @csrf
                         <div class="input-field">
                             <input type="text" name="first_name" value="{{ old('first_name') }}" required>
-                            <label>Enter your first name</label>
+                            <label>Nama Depan</label>
                         </div>
                         <div class="input-field">
                             <input type="text" name="last_name" value="{{ old('last_name') }}" required>
-                            <label>Enter your last name</label>
+                            <label>Nama Belakang</label>
                         </div>
                         <div class="input-field">
                             <input type="email" name="email" value="{{ old('email') }}" required>
-                            <label>Enter your email</label>
+                            <label>Email</label>
                         </div>
                         <div class="input-field">
                             <input type="password" id="password1" name="password" required>
-                            <label>Create password</label>
+                            <label>Password</label>
                             <span class="toggle-password">
                                 <ion-icon name="eye-off-outline" id="toggle-password1"></ion-icon>
                             </span>
@@ -111,7 +111,7 @@
                         </div>
                         <div class="input-field">
                             <input type="password" id="password2" name="password_confirmation" required>
-                            <label>Confirm password</label>
+                            <label>Konfirmasi Password</label>
                             <span class="toggle-password">
                                 <ion-icon name="eye-off-outline" id="toggle-password2"></ion-icon>
                             </span>
@@ -187,7 +187,7 @@
         <div class="modal-icon">
             <ion-icon name="mail-outline"></ion-icon>
         </div>
-        <p>Check your email to verify your account!</p>
+        <p>Email Telah Dikirim, Silahkan Periksa Email Anda.</p>
     </div>
 </div>
 
@@ -196,7 +196,7 @@
         <div class="modal-icon">
             <ion-icon name="alert-circle-outline"></ion-icon>
         </div>
-        <p>Email telah digunakan!</p>
+        <p>Email Telah Digunakan!</p>
     </div>
 </div>
 
@@ -206,7 +206,7 @@
         <div class="modal-icon">
             <ion-icon name="alert-circle-outline"></ion-icon>
         </div>
-        <p>Email tidak ditemukan!</p>
+        <p>Email Tidak Ditemukan!</p>
     </div>
 </div>
 
@@ -228,7 +228,7 @@
             <ion-icon name="checkmark-circle-outline"></ion-icon>
         </div>
         <p>Password Berhasil Diubah!</p>
-        <p>Silakan login kembali.</p>
+        <p>Silahkan login kembali.</p>
     </div>
 </div>
 

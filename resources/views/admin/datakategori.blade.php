@@ -53,13 +53,13 @@
                         <td>
                             <div class="action-buttons">
                                 <button class="edit-btn" onClick="openEditForm({{ $category->id }})">
-                                    <ion-icon name="create-outline"></ion-icon> Edit
+                                    <ion-icon name="create-outline"></ion-icon> 
                                 </button>
                                 <form action="{{ route('deletecategory', $category->id) }}" method="POST" class="delete-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="delete-btn">
-                                        <ion-icon name="trash-bin-outline"></ion-icon> Delete
+                                        <ion-icon name="trash-bin-outline"></ion-icon> 
                                     </button>
                                 </form>
                             </div>
@@ -97,16 +97,16 @@
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const entries = document.querySelectorAll('.category-entry');
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     const entries = document.querySelectorAll('.category-entry');
 
-        // Add fade-in effect
-        entries.forEach((entry, index) => {
-            setTimeout(() => {
-                entry.classList.add('show');
-            }, index * 100); // Adjust the delay here (in milliseconds)
-        });
-    });
+    //     // Add fade-in effect
+    //     entries.forEach((entry, index) => {
+    //         setTimeout(() => {
+    //             entry.classList.add('show');
+    //         }, index * 100); // Adjust the delay here (in milliseconds)
+    //     });
+    // });
 
     function filterCategories() {
         const keyword = document.getElementById('search-input').value.toLowerCase();
@@ -342,13 +342,13 @@
 }
 
 /* Fade-in effect */
-.category-entry {
+/* .category-entry {
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
 }
 
 .category-entry.show {
     opacity: 1;
-}
+} */
 </style>
 

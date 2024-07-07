@@ -19,21 +19,22 @@
             <a href="mailto:desakalinganyarkangean@gmail.com"><ion-icon name="mail-outline"></ion-icon> desakalinganyarkangean@gmail.com</a>
             <a href="https://maps.app.goo.gl/L9QfqxectzywQiGv6"><ion-icon name="location-outline"></ion-icon> JL.Lorong Dalem-Kalianyar Arjasa Sumenep</a>
         </div>
+        <div class="map-box fade-in">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63260.869420111665!2d115.3584246!3d-6.9324915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2ddabd69c53ff509%3A0x99b46bd9d20e02fc!2sKalinganyar%2C%20Kalianyar%2C%20Arjasa%2C%20Kabupaten%20Sumenep%2C%20Jawa%20Timur!5e0!3m2!1sid!2sid!4v1720139672257!5m2!1sid!2sid" 
+                width="100%" 
+                height="300" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade" 
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+            </iframe>
+        </div>
     </div>
 </div>
 </div>
-<div class="map-box fade-in">
-    <iframe 
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63260.869420111665!2d115.3584246!3d-6.9324915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2ddabd69c53ff509%3A0x99b46bd9d20e02fc!2sKalinganyar%2C%20Kalianyar%2C%20Arjasa%2C%20Kabupaten%20Sumenep%2C%20Jawa%20Timur!5e0!3m2!1sid!2sid!4v1720139672257!5m2!1sid!2sid" 
-        width="100%" 
-        height="300" 
-        style="border:0;" 
-        allowfullscreen="" 
-        loading="lazy" 
-        referrerpolicy="no-referrer-when-downgrade" 
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
-    </iframe>
-</div>
+
 @endsection
 
 <script>
