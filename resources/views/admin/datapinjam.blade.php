@@ -108,6 +108,7 @@
             <input type="date" id="endDate" name="endDate">
             <button type="button" onclick="printTable()">Print</button>
             <p id="dateError" style="color: red; display: none;">"Mulai Tanggal" harus lebih awal dari "Sampai Tanggal".</p>
+            <p id="missingDateError" style="color: red; display: none;">Harap isi kedua tanggal.</p>
         </form>
     </div>
 </div>
@@ -263,12 +264,20 @@ async function printTable() {
     let startDate = document.getElementById('startDate').value;
     let endDate = document.getElementById('endDate').value;
 
+    if (!startDate || !endDate) {
+        document.getElementById('missingDateError').style.display = 'block';
+        document.getElementById('dateError').style.display = 'none';
+        return;
+    }
+
     if (startDate > endDate) {
         document.getElementById('dateError').style.display = 'block';
+        document.getElementById('missingDateError').style.display = 'none';
         return;
     }
 
     document.getElementById('dateError').style.display = 'none';
+    document.getElementById('missingDateError').style.display = 'none';
 
     let printUrl = '{{ url("print") }}?startDate=' + startDate + '&endDate=' + endDate;
     let printWindow = window.open(printUrl, '_blank');

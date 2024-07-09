@@ -4,6 +4,20 @@
 <div class="main active">
     <h1>Data Kategori</h1>
     <div class="content">
+
+        <!-- Display Success and Error Messages -->
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="category">
             <button class="add-btn" onClick="openForm()">Tambah Kategori</button>
         </div>
@@ -55,7 +69,7 @@
                                 <button class="edit-btn" onClick="openEditForm({{ $category->id }})">
                                     <ion-icon name="create-outline"></ion-icon> 
                                 </button>
-                                <form action="{{ route('deletecategory', $category->id) }}" method="POST" class="delete-form">
+                                <form action="{{ route('deletecategory', $category->id) }}" method="POST" class="delete-form" onsubmit="return checkCategoryUsage(event, {{ $category->id }}, '{{ ucwords($category->name) }}');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="delete-btn">
@@ -97,16 +111,29 @@
 
 @section('scripts')
 <script>
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     const entries = document.querySelectorAll('.category-entry');
+    async function checkCategoryUsage(event, categoryId, categoryName) {
+        event.preventDefault(); // Prevent the default form submission
 
-    //     // Add fade-in effect
-    //     entries.forEach((entry, index) => {
-    //         setTimeout(() => {
-    //             entry.classList.add('show');
-    //         }, index * 100); // Adjust the delay here (in milliseconds)
-    //     });
-    // });
+        try {
+            const response = await fetch(`/category/${categoryId}/check`);
+            const data = await response.json();
+
+            if (!data.canDelete) {
+                alert('Ada buku yang menggunakan kategori ini.');
+                return false;
+            }
+
+            if (confirm(`Hapus ${categoryName}?`)) {
+                // Submit the form programmatically
+                document.querySelector(form[action$="/category/${categoryId}"]).submit();
+            } else {
+                return false;
+            }
+        } catch (error) {
+            console.error('Error checking category usage:', error);
+            return false;
+        }
+    }
 
     function filterCategories() {
         const keyword = document.getElementById('search-input').value.toLowerCase();

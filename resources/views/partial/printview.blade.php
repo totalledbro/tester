@@ -53,9 +53,15 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ ucwords($loan->user->first_name) . ' ' . ucwords($loan->user->last_name) }}</td>
                     <td>{{ ucwords($loan->book->title) }}</td>
-                    <td>{{ \Carbon\Carbon::parse($loan->loan_date)->format('d-m-Y') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($loan->limit_date)->format('d-m-Y') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($loan->return_date)->format('d-m-Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($loan->loan_date)->translatedFormat('d F Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($loan->limit_date)->translatedFormat('d F Y') }}</td>
+                    <td>
+                        @if($loan->return_date)
+                            {{ \Carbon\Carbon::parse($loan->return_date)->translatedFormat('d F Y') }}
+                        @else
+                            Buku belum dikembalikan
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>

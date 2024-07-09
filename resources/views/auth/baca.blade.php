@@ -145,7 +145,11 @@ document.addEventListener('DOMContentLoaded', function() {
             pageNum = num;
             queueRenderPage(pageNum);
             modal.style.display = 'none';
-        }
+        } else if (num >= pdfDoc.numPages) {
+            pageNum = pdfDoc.numPages;
+            queueRenderPage(pageNum);
+            modal.style.display = 'none';
+        } 
     });
 
     window.addEventListener('click', (e) => {

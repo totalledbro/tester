@@ -130,6 +130,7 @@ Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->
 Route::post('/categories/{category}', [CategoryController::class, 'update'])->name('updatecategory');
 Route::delete('/categories/{category}', [CategoryController::class, 'delete'])->name('deletecategory');
 Route::get('/kategori/{slug}', [CategoryController::class, 'show'])->name('categories.show');
+Route::get('/category/{id}/check', [CategoryController::class, 'checkCategoryUsage'])->name('checkcategory');
 
 Route::get('/books',[BookController::class, 'index'])->name('books.index');
 Route::post('/books',[BookController::class, 'add'])->name('addbook');

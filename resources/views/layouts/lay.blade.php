@@ -86,7 +86,7 @@
             </div>
             <div class="form-box signup">
                 <div class="form-content">
-                    <h2>SIGNUP</h2>
+                    <h2>DAFTAR</h2>
                     <form id="signup-form" method="POST" action="{{ route('register') }}">
                         @csrf
                         <div class="input-field">
@@ -117,7 +117,7 @@
                             </span>
                             <p id="passwordError2" style="color: red; display: none;">Password tidak sesuai.</p>
                         </div>
-                        <button type="submit" id="signup-btn">Sign Up</button>
+                        <button type="submit" id="signup-btn">Daftar</button>
                     </form>
                     <div class="bottom-link">
                         Sudah punya akun? <a href="#" id="login-link">Login</a>

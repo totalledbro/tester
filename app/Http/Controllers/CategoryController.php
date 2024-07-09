@@ -29,7 +29,7 @@ class CategoryController extends Controller
         }
 
         $category = Category::create($validatedData);
-        return redirect()->route('datakategori')->with('success', 'Category added successfully.');
+        return redirect()->route('datakategori')->with('success');
     }
 
     public function update(Category $category, StoreCategoryRequest $request)
@@ -48,17 +48,41 @@ class CategoryController extends Controller
         }
 
         $category->update($validatedData);
-        return redirect()->route('datakategori')->with('success', 'Category updated successfully.');
+        return redirect()->route('datakategori')->with('success');
+    }
+// app/Http/Controllers/CategoryController.php
+
+    public function checkCategoryUsage($id)
+    {
+        $category = Category::findOrFail($id);
+
+        if ($category->books()->count() > 0) {
+            return response()->json(['canDelete' => false]);
+        }
+
+        return response()->json(['canDelete' => true]);
     }
 
     public function delete(Category $category)
     {
+        // Check if there are any books associated with this category
+        if ($category->books()->count() > 0) {
+            // Redirect back with an error message
+            return redirect()->route('datakategori')->with('error');
+        }
+    
+        // Delete the category's image if it exists
         if ($category->image_url) {
             Storage::disk('public')->delete($category->image_url);
         }
+    
+        // Delete the category
         $category->delete();
-        return redirect()->route('datakategori')->with('success', 'Category deleted successfully.');
+    
+        // Redirect back with a success message
+        return redirect()->route('datakategori')->with('success');
     }
+    
 
     public function show($slug)
     {

@@ -21,7 +21,7 @@
             <td>
                 <div class="action-buttons">
                     <button class="edit-btn" onclick="openEditForm({{ $book->id }})"><ion-icon name="create-outline"></ion-icon></button>
-                    <form class="delete-form" action="{{ route('deletebook', $book->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this book?');">
+                    <form class="delete-form" action="{{ route('deletebook', $book->id) }}" method="POST" onsubmit="return confirmDelete(this, '{{ ucwords($book->title) }}');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="delete-btn"><ion-icon name="trash-outline"></ion-icon></button>
@@ -77,6 +77,14 @@
 </div>
 
 <script>
+    function confirmDelete(form, bookTitle) {
+        const message = `Hapus ${bookTitle}?`;
+        if (confirm(message)) {
+            form.submit();
+        }
+        return false; // Prevent the default form submission
+    }
+
     function openEditForm(id) {
     document.getElementById(`editForm${id}`).style.display = "block";
 }

@@ -238,7 +238,8 @@ $(document).ready(function() {
         if (keyword.length >= 0) {
             let filteredBooks = books.filter(book =>
                 book.title.toLowerCase().includes(keyword) ||
-                book.author.toLowerCase().includes(keyword)
+                book.author.toLowerCase().includes(keyword)|| 
+                book.year.toString().includes(keyword)
             );
             displayBooks(filteredBooks);
         } else {
