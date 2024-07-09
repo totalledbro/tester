@@ -93,7 +93,7 @@ header {
 }
 
 .navbar .logo {
-    gap: 10px;
+    gap: 15px;
     display: flex;
     align-items: center;
     text-decoration: none;
@@ -120,9 +120,15 @@ header {
 
 .navbar .links {
     display: flex;
-    gap: 35px;
     list-style: none;
     align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar .links li {
+    flex-grow: 1; /* Distribute available space equally */
+    text-align: center; /* Center align the text */
 }
 
 .navbar .close-btn {
@@ -135,12 +141,16 @@ header {
 }
 
 .navbar .links a {
+    flex-grow: 1; /* Distribute available space equally */
+    text-align: center; /* Center align the text */
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 500;
     text-decoration: none;
     transition: 0.1s ease;
+    padding: 10px 15px; /* Adjust padding as needed */
 }
+
 
 .navbar .links a:hover {
     color: #19e8ff;
@@ -397,7 +407,7 @@ form button:hover {
     margin: 15% auto; /* 15% from the top and centered */
     padding: 20px;
     border: 1px solid #888;
-    width: 40%; /* Could be more or less, depending on screen size */
+    width: 80%; /* Could be more or less, depending on screen size */
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     border-radius: 8px;
     text-align: center;
@@ -430,7 +440,7 @@ form button:hover {
 }
 
 /* Responsive Styles */
-@media (max-width: 950px) {
+@media (max-width: 951px) {
     .navbar :is(.hamburger-btn, .close-btn) {
         display: block;
     }
@@ -444,7 +454,7 @@ form button:hover {
     }
 
     .navbar .logo h2 {
-        font-size: 1.4rem;
+        font-size: 1rem;
     }
 
     .navbar .links {
@@ -481,7 +491,32 @@ form button:hover {
         font-size: 0.9rem;
         padding: 7px 10px;
     }
+
+    .desktop-auth {
+        display: none;
+    }
+
+    .mobile-auth {
+        display: block;
+        margin-top: 20px;
+    }
 }
+
+/* Desktop Styles */
+@media (min-width: 951px) {
+    .mobile-auth {
+        display: none;
+    }
+
+    .desktop-auth {
+        display: block;
+    }
+    .desktop-auth .greeting {
+        display: inline-block;
+        margin-right: 10px;
+    }
+}
+
 
 @media (max-width: 768px) {
     .main {

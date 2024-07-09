@@ -18,45 +18,69 @@
 <body>
 <div class="container">
     <div class="main active">
-        <header>
-            <nav class="navbar">
-                <span class="hamburger-btn material-symbols-rounded">menu</span>
-                <a href="{{ url('/') }}" class="logo">
-                    <img src="{{ asset('img/logodesa.png') }}" alt="logo">
-                    <h2></h2>
-                    <h3>PERPUSTAKAAN DIGITAL</h3>
-                </a>
-                <ul class="links">
-                    <span class="close-btn material-symbols-rounded">close</span>
-                    <li><a href="{{ url('/') }}">Beranda</a></li>
-                    <li><a href="{{ url('/jelajahi') }}">Jelajahi</a></li>
-                    <li><a href="{{ url('/kategori') }}">Kategori</a></li>
-                    <li><a href="{{ url('/tentang-kami') }}">Tentang Kami</a></li>
-                    <li>
-                        @auth
-                        <a href="{{ url('/pinjaman') }}">Pinjamanku</a>
-                        @endauth
-                    </li>
-                </ul>
+    <header>
+        <nav class="navbar">
+            <span class="hamburger-btn material-symbols-rounded">menu</span>
+            <a href="{{ url('/') }}" class="logo">
+                <img src="{{ asset('img/logodesa.png') }}" alt="logo">
+                <h2></h2>
+                <h3>PERPUSTAKAAN DIGITAL KALINGANYAR</h3>
+            </a>
+            <ul class="links">
+                <span class="close-btn material-symbols-rounded">close</span>
+                <li><a href="{{ url('/') }}">Beranda</a></li>
+                <li><a href="{{ url('/jelajahi') }}">Jelajahi</a></li>
+                <li><a href="{{ url('/kategori') }}">Kategori</a></li>
+                <li><a href="{{ url('/tentang-kami') }}">Tentang Kami</a></li>
+                <li>
+                    @auth
+                    <a href="{{ url('/pinjaman') }}">Pinjamanku</a>
+                    @endauth
+                </li>
+                <li class="mobile-auth">
+                    @guest
+                    <button class="login-btn">LOGIN</button>
+                    @else
+                    <div class="dropdown">
+                        <div class="greeting">{{ ucwords(Auth::user()->last_name) }}</div>
+                        <button id="dropdown-buttonmob" class="dropbtn">
+                            <span class="icon"><ion-icon name="caret-down-outline"></ion-icon></span>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#" id="ubah-password-link">Ubah password</a>
+                            <a href="{{ route('actionlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                        </div>
+                    </div>
+                    <form id="logout-form" action="{{ route('actionlogout') }}" method="GET" style="display: none;">
+                        @csrf
+                    </form>
+                    @endguest
+                </li>
+            </ul>
+            <div class="desktop-auth">
                 @guest
                 <button class="login-btn">LOGIN</button>
                 @else
-                <div class="dropdown">
-                    <div class="greeting" id="greeting">{{ ucwords(Auth::user()->last_name) }}</div>
-                    <button id="dropdown-button" class="dropbtn">
-                        <span class="icon"><ion-icon name="caret-down-outline"></ion-icon></span>
-                    </button>
-                    <div class="dropdown-content">
-                        <a href="#" id="ubah-password-link">Ubah password</a>
-                        <a href="{{ route('actionlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                    <div class="dropdown">
+                        <div class="greeting">{{ ucwords(Auth::user()->last_name) }}</div>
+                        <button id="dropdown-buttondes"  class="dropbtn">
+                            <span class="icon"><ion-icon name="caret-down-outline"></ion-icon></span>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#" id="ubah-password-link">Ubah password</a>
+                            <a href="{{ route('actionlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                        </div>
                     </div>
-                </div>
-                <form id="logout-form" action="{{ route('actionlogout') }}" method="GET" style="display: none;">
-                    @csrf
-                </form>
+                    <form id="logout-form" action="{{ route('actionlogout') }}" method="GET" style="display: none;">
+                        @csrf
+                    </form>
                 @endguest
-            </nav>
-        </header>
+            </div>
+            <span class="hamburger-btn material-symbols-rounded" style="opacity: 0;">menu</span>
+        </nav>
+    </header>
+
+
         <div class="blur-bg-overlay"></div>
         <div class="form-popup">
             <span class="close-btn material-symbols-rounded">close</span>
@@ -234,25 +258,29 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Get the current hour
-        const currentHour = new Date().getHours();
+    // Get the current hour
+    const currentHour = new Date().getHours();
 
-        // Define the greetings based on the time of day
-        let greeting;
-        if (currentHour < 12) {
-            greeting = 'Selamat Pagi';
-        } else if(currentHour < 15){
-            greeting = 'Selamat Siang';
-        } else if (currentHour < 18) {
-            greeting = 'Selamat Sore';
-        } else {
-            greeting = 'Selamat Malam';
-        }
+    // Define the greetings based on the time of day
+    let greeting;
+    if (currentHour < 12) {
+        greeting = 'Selamat Pagi';
+    } else if (currentHour < 15) {
+        greeting = 'Selamat Siang';
+    } else if (currentHour < 18) {
+        greeting = 'Selamat Sore';
+    } else {
+        greeting = 'Selamat Malam';
+    }
 
-        // Update the greeting in the DOM
-        const userLastName = document.querySelector('.greeting').innerText.trim();
-        document.getElementById('greeting').innerText = `${greeting}, ${userLastName}`;
+    // Update all greeting elements in the DOM
+    const greetingElements = document.querySelectorAll('.greeting');
+    greetingElements.forEach(element => {
+        const userLastName = element.innerText.trim();
+        element.innerText = `${greeting}, ${userLastName}`;
     });
+});
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const passwordInput = document.getElementById('password1');
@@ -404,9 +432,9 @@
     });
 
         // Dropdown button functionality
-        $("#dropdown-button").click(function(event) {
+        $("#dropdown-buttonmob, #dropdown-buttondes").click(function(event) {
             event.stopPropagation();
-            $(".dropdown-content").toggleClass("show");
+            $(this).siblings(".dropdown-content").toggleClass("show");
         });
 
         // Close the dropdown menu if the user clicks outside of it
@@ -417,7 +445,7 @@
         });
 
         // Show the "Ubah Password" modal
-        $("#ubah-password-link").click(function() {
+        $(".ubah-password-link").click(function() {
             $("#ubah-password-modal").fadeIn();
         });
 
