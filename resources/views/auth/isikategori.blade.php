@@ -32,7 +32,7 @@
                 <p><strong>Tanggal Sekarang:</strong> <span id="today-date"></span></p>
                 <p><strong>Tanggal Batas:</strong> <span id="date-limit"></span></p>
             </div>
-            <button type="submit" id="pinjam-button">Submit</button>
+            <button type="submit" id="pinjam-button">Pinjam</button>
         </form>
     </div>
 
@@ -452,7 +452,7 @@ $(document).ready(function() {
     transform: translateY(0);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .book-item {
         padding: 15px;
         display: flex;

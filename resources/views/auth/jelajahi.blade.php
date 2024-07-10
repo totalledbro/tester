@@ -451,7 +451,7 @@ $(document).ready(function() {
     transform: translateY(0);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .book-item {
         padding: 15px;
         display: flex;

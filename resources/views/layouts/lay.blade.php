@@ -39,7 +39,7 @@
                 </li>
                 <li class="mobile-auth">
                     @guest
-                    <button class="login-btn">LOGIN</button>
+                    <button class="login-btn">LOGIN/DAFTAR</button>
                     @else
                     <div class="dropdown">
                         <div class="greeting">{{ ucwords(Auth::user()->last_name) }}</div>
@@ -47,8 +47,8 @@
                             <span class="icon"><ion-icon name="caret-down-outline"></ion-icon></span>
                         </button>
                         <div class="dropdown-content">
-                            <a href="#" id="ubah-password-link">Ubah password</a>
-                            <a href="{{ route('actionlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                            <a href="#" class="ubah-password-link" style="padding: 3px 4px; margin:10px; font-size: 12px;">Ubah password</a>
+                            <a href="{{ route('actionlogout') }}" style="padding: 3px 4px; margin:10px; font-size: 12px;" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
                         </div>
                     </div>
                     <form id="logout-form" action="{{ route('actionlogout') }}" method="GET" style="display: none;">
@@ -59,7 +59,7 @@
             </ul>
             <div class="desktop-auth">
                 @guest
-                <button class="login-btn">LOGIN</button>
+                <button class="login-btn">LOGIN/DAFTAR</button>
                 @else
                     <div class="dropdown">
                         <div class="greeting">{{ ucwords(Auth::user()->last_name) }}</div>
@@ -67,7 +67,7 @@
                             <span class="icon"><ion-icon name="caret-down-outline"></ion-icon></span>
                         </button>
                         <div class="dropdown-content">
-                            <a href="#" id="ubah-password-link">Ubah password</a>
+                            <a href="#" class="ubah-password-link">Ubah password</a>
                             <a href="{{ route('actionlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
                         </div>
                     </div>
@@ -79,7 +79,6 @@
             <span class="hamburger-btn material-symbols-rounded" style="opacity: 0;">menu</span>
         </nav>
     </header>
-
 
         <div class="blur-bg-overlay"></div>
         <div class="form-popup">

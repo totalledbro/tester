@@ -82,8 +82,8 @@
                                 <p><strong>Batas Pinjam:</strong> ${limitDateString}</p>
                             </div>
                             <div class="book-actions">
-                                <a href="${bacaUrl}" class="read-book">Baca Buku</a>
-                                <button class="return-book">Kembalikan Buku</button>
+                                <a href="${bacaUrl}" class="read-book">Baca</a>
+                                <button class="return-book">Kembalikan</button>
                             </div>
                         </li>
                     `;
@@ -422,7 +422,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .cover {
         width: 50%;
         margin-right: 10px;
