@@ -210,7 +210,8 @@
         <div class="modal-icon">
             <ion-icon name="mail-outline"></ion-icon>
         </div>
-        <p>Email Telah Dikirim, Silahkan Periksa Email Anda.</p>
+        <p>Email Verifikasi Telah Dikirim!</p>
+        <p>Silahkan Periksa Kotak Masuk Dan Folder Spam Email Anda.</p>
     </div>
 </div>
 
@@ -540,7 +541,7 @@
                 }
                 setTimeout(function() {
                     location.reload();
-                }, 3000);
+                }, 10000);
                 },
                 error: function(xhr, status, error) {
                     console.log(error);
