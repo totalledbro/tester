@@ -3,7 +3,7 @@
 @section('content')
 <div class="welcome-section">
     <h1>{{ ucwords($category->name) }}</h1>
-    <h2>Daftar Buku dalam Kategori</h2>
+    <h2>Daftar Buku Dalam Kategori {{ ucwords($category->name) }}</h2>
 </div>
 
 <div class="fade-in">
@@ -277,7 +277,7 @@ $(document).ready(function() {
 /* Welcome Section */
 .welcome-section {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 5px;
     animation: grow 1s ease-out;
     will-change: transform, opacity;
 }

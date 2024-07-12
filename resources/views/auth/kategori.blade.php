@@ -102,7 +102,7 @@ $(document).ready(function() {
 /* Welcome Section */
 .welcome-section {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 5px;
     animation: grow 1s ease-out;
     will-change: transform, opacity;
 }
