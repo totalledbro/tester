@@ -333,6 +333,9 @@ document.addEventListener('DOMContentLoaded', () => {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
+.chart-container canvas {
+    max-height: 300px;
+}
 .year-btn {
     padding: 10px 20px;
     background-color: var(--blue);
