@@ -63,7 +63,7 @@ Route::middleware([RedirectIfNotAnggota::class])->group(function () {
     Route::get('/pinjaman', function () {
         $user = Auth::user();
         if (!$user) {
-            return redirect()->route('login')->with('error', 'You need to be logged in to access this page.');
+            return redirect()->route('dash')->with('error', 'You need to be logged in to access this page.');
         }
 
         $loans = Loan::with('book')->where('user_id', $user->id)->get();
@@ -137,8 +137,11 @@ Route::post('/books',[BookController::class, 'add'])->name('addbook');
 Route::post('/books/{book}',[BookController::class, 'update'])->name('updatebook');
 Route::delete('/books/{book}',[BookController::class, 'delete'])->name('deletebook');
 
+
+
 Route::get('/loans',[LoanController::class, 'index'])->name('loans.index');
 Route::post('/loans',[LoanController::class, 'store'])->name('addloan');
+Route::get('/returned-books', [LoanController::class, 'getReturnedBooks']);
 Route::get('/baca/{id}', [LoanController::class, 'readBook'])->name('baca');
 Route::get('/get-book-pdf/{id}', [LoanController::class, 'getBookPdf'])->name('get.book.pdf');
 

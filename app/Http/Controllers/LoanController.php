@@ -85,9 +85,33 @@ class LoanController extends Controller
 
         return view('loans.index', [
             'loans' => $loans,
-            'loanLimit' => $loanLimit
+            'loanLimit' => $loanLimit,
         ]);
     }
+    public function getReturnedBooks()
+    {
+        $user = Auth::user();
+
+        // Fetch returned books for the logged-in user
+        $returnedBooks = Loan::where('user_id', $user->id)
+                            ->whereNotNull('return_date')
+                            ->get();
+
+        // Fetch the books for the returned loans
+        $bookIds = $returnedBooks->pluck('book_id')->unique();
+        $books = Book::whereIn('id', $bookIds)->get()->keyBy('id');
+
+        // Map the books back to the loans
+        $returnedBooks = $returnedBooks->map(function($loan) use ($books) {
+            $loan->book = $books->get($loan->book_id);
+            return $loan;
+        });
+
+        return response()->json([
+            'returnedBooks' => $returnedBooks,
+        ]);
+    }
+
 
     public function readBook($id)
     {

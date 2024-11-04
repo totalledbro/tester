@@ -18,6 +18,8 @@
         <input type="text" id="search-input" placeholder="Cari buku..." autocomplete="off">
     </div>
     <div id="book-list" class="book-list" style="display: none;"></div>
+    <!-- Button to Open Riwayat Modal -->
+    <button id="riwayatButton" class="riwayat-btn">Riwayat Pinjaman</button>
 </div>
 
 <!-- Confirmation Modal -->
@@ -29,6 +31,28 @@
         <button id="cancelReturnBtn">Batal</button>
     </div>
 </div>
+
+<!-- Riwayat Modal -->
+<div id="riwayatModal" class="modal">
+    <div class="modal-content">
+        <span class="close-riwayat">&times;</span>
+        <h2>Riwayat Pinjaman</h2>
+        <table class="riwayat-table">
+            <thead>
+                <tr>
+                    <th>Judul</th>
+                    <th>Penulis</th>
+                    <th>Tahun</th>
+                    <th>Tanggal Kembali</th>
+                </tr>
+            </thead>
+            <tbody id="riwayat-tbody">
+                <!-- Data will be loaded here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -198,6 +222,54 @@
         const elements = document.querySelectorAll('.fade-in');
         elements.forEach(el => observer.observe(el));
     });
+
+        // Handle Riwayat Modal
+        $('#riwayatButton').on('click', function() {
+            $.ajax({
+                url: '/returned-books',
+                method: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    let returnedBooks = response.returnedBooks;
+                    let tbody = $('.riwayat-table tbody');
+                    tbody.empty();
+                    if (returnedBooks.length === 0) {
+                        tbody.append('<tr><td colspan="4" style="text-align:center;">No returned books found.</td></tr>');
+                    } else {
+                        console.log(response.returnedBooks);
+
+                    returnedBooks.forEach(loan => {
+                        if (loan.book) {
+                            let title = loan.book.title.replace(/\b\w/g, char => char.toUpperCase());
+                            let author = loan.book.author.replace(/\b\w/g, char => char.toUpperCase());
+                            let returnDate = new Date(loan.return_date).toLocaleDateString('id-ID', {
+                                year: 'numeric', month: 'long', day: 'numeric'
+                            });
+                            tbody.append(`
+                                <tr>
+                                    <td>${title}</td>
+                                    <td>${author}</td>
+                                    <td>${loan.book.year}</td>
+                                    <td>${returnDate}</td>
+                                </tr>
+                            `);
+                        } else {
+                            console.warn(`Loan ID ${loan.id} has no book data.`);
+                        }
+                    });
+                    }
+                    $('#riwayatModal').css('display', 'block');
+                },
+                error: function(xhr) {
+                    console.error("Failed to fetch returned books:", xhr);
+                }
+            });
+        });
+
+    $('.close-riwayat').on('click', function() {
+        $('#riwayatModal').css('display', 'none');
+    });
+
 </script>
 @endsection
 
@@ -358,7 +430,7 @@
     text-align: center; /* Center-align text in the modal */
 }
 
-.close {
+.close, .close-riwayat {
     color: #aaa;
     float: right;
     font-size: 28px;
@@ -366,7 +438,7 @@
 }
 
 .close:hover,
-.close:focus {
+.close:focus, .close-riwayat:hover, .close-riwayat:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
@@ -396,7 +468,38 @@
     opacity: 1;
     transform: translateY(0);
 }
+.riwayat-btn {
+    background-color: #17a2b8;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    cursor: pointer;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
 
+.riwayat-btn:hover {
+    background-color: #138496;
+}
+.riwayat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.riwayat-table th, .riwayat-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.riwayat-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
 /* Responsive styles */
 @media (max-width: 768px) {
     .cover {
