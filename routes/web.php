@@ -144,5 +144,6 @@ Route::post('/loans',[LoanController::class, 'store'])->name('addloan');
 Route::get('/returned-books', [LoanController::class, 'getReturnedBooks']);
 Route::get('/baca/{id}', [LoanController::class, 'readBook'])->name('baca');
 Route::get('/get-book-pdf/{id}', [LoanController::class, 'getBookPdf'])->name('get.book.pdf');
+Route::get('/popular-books', [LoanController::class, 'popularBooks'])->name('loans.popularBooks');
 
 Route::post('/return-book/{id}', [LoanController::class, 'returnBook'])->name('return.book');

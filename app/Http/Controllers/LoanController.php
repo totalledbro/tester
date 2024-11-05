@@ -285,5 +285,37 @@ public function getDailyLoanDetails(Request $request)
             'endDate' => $endDate
         ]);
     }
+
+    public function popularBooks(Request $request)
+    {
+        $limit = $request->get('limit', 5);
+        $year = $request->get('year');
+        $month = $request->get('month');
+
+        $popularBooksQuery = Loan::select('book_id', \DB::raw('count(*) as loan_count'))
+            ->when($year, function ($query) use ($year) {
+                $query->whereYear('loan_date', $year); // Assuming 'loan_date' is the column for loan dates
+            })
+            ->when($month, function ($query) use ($month) {
+                $query->whereMonth('loan_date', $month); // Filtering by month if provided
+            })
+            ->groupBy('book_id')
+            ->orderByDesc('loan_count')
+            ->take($limit)
+            ->with('book') // Eager load the related book before getting results
+            ->get()
+            ->map(function ($loan) {
+                return [
+                    'title' => $loan->book->title ?? 'Unknown',
+                    'author' => $loan->book->author ?? 'Unknown',
+                    'borrow_count' => $loan->loan_count,
+                ];
+            });
+
+        return response()->json($popularBooksQuery);
+    }
+
+
+
     
 }

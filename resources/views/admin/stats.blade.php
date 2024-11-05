@@ -21,6 +21,8 @@
         <button id="prev-year-btn" class="year-btn"><ion-icon name="chevron-back-outline"></ion-icon></button>
         <button id="next-year-btn" class="year-btn"><ion-icon name="chevron-forward-outline"></ion-icon></button>
         <button id="back-btn" class="year-btn" style="display:none;">Kembali ke Tahunan</button>
+        <!-- popular books popup modal -->
+        <button id="showPopularBooksBtn" class="year-btn">Buku Terpopuler</button>
         <canvas id="loanChart"></canvas>
     </div>
 
@@ -43,6 +45,25 @@
             </div>
         </div>
     </div>
+        <!-- Popular Books Modal -->
+    <div id="popularBooksModal" class="modal">
+        <div class="modal-content">
+            <h2>Buku Terpopuler</h2>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Judul</th>
+                            <th>Penulis</th>
+                            <th>Total Peminjaman</th>
+                        </tr>
+                    </thead>
+                    <tbody id="popularBooksList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -50,6 +71,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Elements
     const ctx = document.getElementById('loanChart').getContext('2d');
     const loanModal = document.getElementById('loanModal');
     const loanDetails = document.getElementById('loanDetails');
@@ -57,28 +79,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const backbtn = document.getElementById('back-btn');
     const prevYearBtn = document.getElementById('prev-year-btn');
     const nextYearBtn = document.getElementById('next-year-btn');
+    const popularBooksModal = document.getElementById('popularBooksModal');
+    const popularBooksList = document.getElementById('popularBooksList');
+    const showPopularBooksBtn = document.getElementById('showPopularBooksBtn');
 
-    window.onclick = function(event) {
-        if (event.target == loanModal) {
-            loanModal.classList.remove('show');
-            setTimeout(() => {
-                loanModal.style.display = "none";
-            }, 300);
-        }
+    // Close modals when clicking outside
+    window.onclick = (event) => {
+        if (event.target === loanModal) closeLoanModal();
+        if (event.target === popularBooksModal) closePopularBooksModal();
     };
+
+    function closeLoanModal() {
+        loanModal.classList.remove('show');
+        setTimeout(() => loanModal.style.display = "none", 300);
+    }
+
+    function closePopularBooksModal() {
+        popularBooksModal.classList.remove('show');
+        setTimeout(() => popularBooksModal.style.display = "none", 300);
+    }
 
     const yearlyData = {!! json_encode($yearlyData) !!};
     let currentYearIndex = yearlyData.length - 1;
-
-    function updateChart(yearIndex) {
-        const yearData = yearlyData[yearIndex];
-        loanChart.data.labels = yearData.months;
-        loanChart.data.datasets[0].data = yearData.counts;
-        loanChart.update();
-        backbtn.style.display = 'none';
-        prevYearBtn.style.display = 'inline-block';
-        nextYearBtn.style.display = 'inline-block';
-    }
+    let selectedMonth = null;  // Initialize selectedMonth
 
     const months = {
         'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5, 'Juni': 6,
@@ -101,190 +124,175 @@ document.addEventListener('DOMContentLoaded', () => {
         options: {
             responsive: true,
             scales: {
-                x: {
-                    beginAtZero: true
-                },
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
-                            return Number.isInteger(value) ? value : null;
-                        },
+                        callback: (value) => Number.isInteger(value) ? value : null,
                         stepSize: 1
                     }
                 }
             },
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
-                },
-                tooltip: {
-                    enabled: true
-                }
+                legend: { display: true, position: 'top' },
+                tooltip: { enabled: true }
             },
-            onClick: async (event, elements) => {
-                if (elements.length > 0) {
-                    const index = elements[0].index;
-                    const selectedMonth = yearlyData[currentYearIndex].months[index];
-                    const selectedYear = yearlyData[currentYearIndex].year;
-
-                    const month = selectedMonth.split(' ')[0];
-
-                    try {
-                        const response = await fetch(`/daily-loans?year=${selectedYear}&month=${month}`);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        const dailyData = await response.json();
-
-                        const dailyLabels = dailyData.days.map(day => `${day} ${selectedMonth}`);
-                        const dailyCounts = dailyData.data;
-
-                        loanChart.data.labels = dailyLabels;
-                        loanChart.data.datasets[0].data = dailyCounts;
-                        loanChart.update();
-
-                        backbtn.style.display = 'inline-block';
-                        prevYearBtn.style.display = 'none';
-                        nextYearBtn.style.display = 'none';
-
-                        loanChart.options.onClick = async (event, elements) => {
-                            if (elements.length > 0) {
-                                const dayIndex = elements[0].index;
-                                const selectedDay = dailyLabels[dayIndex];
-                                const selectedDate = `${selectedYear}-${months[month].toString().padStart(2, '0')}-${(dayIndex + 1).toString().padStart(2, '0')}`;
-
-                                modalHeader.textContent = `Rincian Peminjaman ${selectedDay}`;
-
-                                try {
-                                    const response = await fetch(`/daily-loan-details?date=${selectedDate}`);
-                                    if (!response.ok) {
-                                        throw new Error(`HTTP error! status: ${response.status}`);
-                                    }
-                                    const loanDetailsData = await response.json();
-
-                                    function capitalizeWords(str) {
-                                        return str.replace(/\b\w/g, char => char.toUpperCase());
-                                    }
-
-                                    loanDetails.innerHTML = loanDetailsData.map(loan => `
-                                        <tr>
-                                            <td>${loan.user && loan.user.first_name && loan.user.last_name ? `${capitalizeWords(loan.user.first_name)} ${capitalizeWords(loan.user.last_name)}` : '<span class="missing-data">Tidak ada data</span>'}</td>
-                                            <td>${loan.book && loan.book.title ? capitalizeWords(loan.book.title) : '<span class="missing-data">Tidak ada data</span>'}</td>
-                                            <td>${loan.limit_date ? new Date(loan.limit_date).toLocaleDateString('id-ID') : '<span class="missing-data">Tidak ada data</span>'}</td>
-                                            <td>${loan.return_date ? new Date(loan.return_date).toLocaleDateString('id-ID') : 'Buku belum dikembalikan'}</td>
-                                        </tr>
-                                    `).join('');
-
-                                    loanModal.style.display = "block";
-                                    setTimeout(() => {
-                                        loanModal.classList.add('show');
-                                    }, 0);
-                                } catch (error) {
-                                    console.error('Error fetching loan details:', error);
-                                }
-                            }
-                        };
-                    } catch (error) {
-                        console.error('Error fetching daily data:', error);
-                    }
-                }
-            }
+            onClick: handleMonthClick
         }
     });
 
-    document.getElementById('prev-year-btn').addEventListener('click', () => {
+    // Update the chart for a specific year
+    function updateChart(yearIndex) {
+        const yearData = yearlyData[yearIndex];
+        loanChart.data.labels = yearData.months;
+        loanChart.data.datasets[0].data = yearData.counts;
+        loanChart.update();
+        backbtn.style.display = 'none';
+        prevYearBtn.style.display = 'inline-block';
+        nextYearBtn.style.display = 'inline-block';
+        loanChart.options.onClick = handleMonthClick;
+    }
+
+    // Handle month click to show daily data
+    async function handleMonthClick(event, elements) {
+        if (elements.length === 0) return;
+
+        const index = elements[0].index;
+        selectedMonth = yearlyData[currentYearIndex].months[index];  // Set selectedMonth
+        const selectedYear = yearlyData[currentYearIndex].year;
+        const monthName = selectedMonth.split(' ')[0];
+
+        try {
+            const response = await fetch(`/daily-loans?year=${selectedYear}&month=${monthName}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const dailyData = await response.json();
+            const dailyLabels = dailyData.days.map(day => `${day} ${selectedMonth}`);
+            const dailyCounts = dailyData.data;
+
+            loanChart.data.labels = dailyLabels;
+            loanChart.data.datasets[0].data = dailyCounts;
+            loanChart.update();
+
+            backbtn.style.display = 'inline-block';
+            prevYearBtn.style.display = 'none';
+            nextYearBtn.style.display = 'none';
+            loanChart.options.onClick = (e, elements) => handleDailyClick(e, elements, dailyLabels, selectedYear, monthName);
+
+        } catch (error) {
+            console.error('Error fetching daily data:', error);
+        }
+    }
+
+    // Handle daily click to show loan details in modal
+    async function handleDailyClick(event, elements, dailyLabels, selectedYear, monthName) {
+        if (elements.length === 0) return;
+
+        const dayIndex = elements[0].index;
+        const selectedDay = dailyLabels[dayIndex];
+        const selectedDate = `${selectedYear}-${months[monthName].toString().padStart(2, '0')}-${(dayIndex + 1).toString().padStart(2, '0')}`;
+
+        modalHeader.textContent = `Rincian Peminjaman ${selectedDay}`;
+
+        try {
+            const response = await fetch(`/daily-loan-details?date=${selectedDate}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const loanDetailsData = await response.json();
+            loanDetails.innerHTML = loanDetailsData.map(loan => `
+                <tr>
+                    <td>${loan.user && loan.user.first_name && loan.user.last_name ? `${capitalizeWords(loan.user.first_name)} ${capitalizeWords(loan.user.last_name)}` : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loan.book && loan.book.title ? capitalizeWords(loan.book.title) : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loan.limit_date ? new Date(loan.limit_date).toLocaleDateString('id-ID') : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loan.return_date ? new Date(loan.return_date).toLocaleDateString('id-ID') : 'Buku belum dikembalikan'}</td>
+                </tr>
+            `).join('');
+
+            loanModal.style.display = "block";
+            setTimeout(() => loanModal.classList.add('show'), 0);
+        } catch (error) {
+            console.error('Error fetching loan details:', error);
+        }
+    }
+
+    function capitalizeWords(str) {
+        return str.replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    // Navigation buttons for year changes
+    prevYearBtn.addEventListener('click', () => {
         if (currentYearIndex > 0) {
             currentYearIndex--;
             updateChart(currentYearIndex);
         }
     });
 
-    document.getElementById('next-year-btn').addEventListener('click', () => {
+    nextYearBtn.addEventListener('click', () => {
         if (currentYearIndex < yearlyData.length - 1) {
             currentYearIndex++;
             updateChart(currentYearIndex);
         }
     });
 
+    // Back button to return to yearly data
     backbtn.addEventListener('click', () => {
+        selectedMonth = null;
         updateChart(currentYearIndex);
-        backbtn.style.display = 'none';
-        loanChart.options.onClick = async (event, elements) => {
-            if (elements.length > 0) {
-                const index = elements[0].index;
-                const selectedMonth = yearlyData[currentYearIndex].months[index];
-                const selectedYear = yearlyData[currentYearIndex].year;
-
-                const month = selectedMonth.split(' ')[0];
-
-                try {
-                    const response = await fetch(`/daily-loans?year=${selectedYear}&month=${month}`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const dailyData = await response.json();
-
-                    const dailyLabels = dailyData.days.map(day => `${day} ${selectedMonth}`);
-                    const dailyCounts = dailyData.data;
-
-                    loanChart.data.labels = dailyLabels;
-                    loanChart.data.datasets[0].data = dailyCounts;
-                    loanChart.update();
-
-                    backbtn.style.display = 'inline-block';
-                    prevYearBtn.style.display = 'none';
-                    nextYearBtn.style.display = 'none';
-
-                    loanChart.options.onClick = async (event, elements) => {
-                        if (elements.length > 0) {
-                            const dayIndex = elements[0].index;
-                            const selectedDay = dailyLabels[dayIndex];
-                            const selectedDate = `${selectedYear}-${months[month].toString().padStart(2, '0')}-${(dayIndex + 1).toString().padStart(2, '0')}`;
-
-                            modalHeader.textContent = `Rincian Peminjaman ${selectedDay}`;
-
-                            try {
-                                const response = await fetch(`/daily-loan-details?date=${selectedDate}`);
-                                if (!response.ok) {
-                                    throw new Error(`HTTP error! status: ${response.status}`);
-                                }
-                                const loanDetailsData = await response.json();
-
-                                function capitalizeWords(str) {
-                                    return str.replace(/\b\w/g, char => char.toUpperCase());
-                                }
-
-                                loanDetails.innerHTML = loanDetailsData.map(loan => `
-                                    <tr>
-                                        <td>${loan.user && loan.user.first_name && loan.user.last_name ? `${capitalizeWords(loan.user.first_name)} ${capitalizeWords(loan.user.last_name)}` : '<span class="missing-data">Tidak ada data</span>'}</td>
-                                        <td>${loan.book && loan.book.title ? capitalizeWords(loan.book.title) : '<span class="missing-data">Tidak ada data</span>'}</td>
-                                        <td>${loan.limit_date ? new Date(loan.limit_date).toLocaleDateString('id-ID') : '<span class="missing-data">Tidak ada data</span>'}</td>
-                                        <td>${loan.return_date ? new Date(loan.return_date).toLocaleDateString('id-ID') : 'Buku belum dikembalikan'}</td>
-                                    </tr>
-                                `).join('');
-
-                                loanModal.style.display = "block";
-                                setTimeout(() => {
-                                    loanModal.classList.add('show');
-                                }, 0);
-                            } catch (error) {
-                                console.error('Error fetching loan details:', error);
-                            }
-                        }
-                    };
-                } catch (error) {
-                    console.error('Error fetching daily data:', error);
-                }
-            }
-        };
     });
+
+    // Show popular books
+    showPopularBooksBtn.addEventListener('click', async () => {
+    // Get the current year
+    const currentYear = yearlyData[currentYearIndex].year;
+    let selectedMonthNumber = null;
+    let headerText = `Buku Terpopuler Tahun ${currentYear}`; // Default to yearly header
+
+    if (selectedMonth) {
+        // If a month is selected, convert the month name to the corresponding number
+        const monthName = selectedMonth.split(' ')[0];
+        selectedMonthNumber = months[monthName];
+        headerText = `Buku Terpopuler Bulan ${monthName} ${currentYear}`; // Set header to month and year
+    }
+
+    // Update the modal header text
+    document.querySelector('#popularBooksModal h2').textContent = headerText;
+
+    // If no month is selected, fetch popular books for the entire year
+    const endpoint = selectedMonthNumber
+        ? `/popular-books?year=${currentYear}&month=${selectedMonthNumber}`
+        : `/popular-books?year=${currentYear}`;
+
+    try {
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const booksData = await response.json();
+        if (booksData.length === 0) {
+            popularBooksList.innerHTML = `<tr><td colspan="3">Tidak ada data</td></tr>`;
+        } else {
+            popularBooksList.innerHTML = booksData.map(book => `
+                <tr>
+                    <td>${capitalizeWords(book.title)}</td>
+                    <td>${capitalizeWords(book.author)}</td>
+                    <td>${book.borrow_count}</td>
+                </tr>
+            `).join('');
+        }
+
+        popularBooksModal.style.display = "block";
+        setTimeout(() => popularBooksModal.classList.add('show'), 0);
+    } catch (error) {
+        console.error('Error fetching popular books:', error);
+    }
 });
 
 
-
+});
 </script>
+
+
+
+
+
 @endsection
 
 
@@ -334,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     text-align: center;
 }
 .chart-container canvas {
-    max-height: 300px;
+    max-height: 375px;
 }
 .year-btn {
     padding: 10px 20px;
