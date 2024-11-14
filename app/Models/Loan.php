@@ -25,6 +25,7 @@ class Loan extends Model
         'limit_date',
     ];
 
+
     public function book()
     {
         return $this->belongsTo(Book::class);

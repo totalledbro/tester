@@ -315,6 +315,42 @@ public function getDailyLoanDetails(Request $request)
         return response()->json($popularBooksQuery);
     }
 
+    public function filterLoansByDateRange(Request $request)
+{
+    $start = $request->input('start');
+    $end = $request->input('end');
+
+    // Validate dates
+    if (!$start || !$end) {
+        return response()->json(['error' => 'Start and end dates are required'], 400);
+    }
+
+    // Get the loans between the start and end date
+    $loans = Loan::whereBetween('loan_date', [$start, $end])
+                 ->get()
+                 ->groupBy('loan_date'); // Group by loan date
+
+    // Prepare the response data
+    $labels = $loans->keys()->toArray(); // Use raw date strings
+
+    $data = $loans->map(function ($group) {
+        return $group->count(); // Get the count of loans for each date
+    })->toArray();
+
+    // Return response with the correct format
+    return response()->json([
+        'labels' => $labels,
+        'data' => $data,
+    ]);
+}
+
+
+    
+
+
+
+
+
 
 
     

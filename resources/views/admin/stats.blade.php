@@ -23,6 +23,7 @@
         <button id="back-btn" class="year-btn" style="display:none;">Kembali ke Tahunan</button>
         <!-- popular books popup modal -->
         <button id="showPopularBooksBtn" class="year-btn">Buku Terpopuler</button>
+        <button id="dateRangeBtn" class="year-btn">Pilih berdasarkan tanggal</button>
         <canvas id="loanChart"></canvas>
     </div>
 
@@ -63,6 +64,18 @@
             </div>
         </div>
     </div>
+    <!-- Date Range Modal -->
+    <div id="dateRangeModal" class="modal">
+        <div class="modal-content">
+            <h2>Pilih Tanggal</h2>
+            <label for="startDate">Dari:</label>
+            <input type="date" id="startDate" name="startDate">
+            <label for="endDate">Hingga:</label>
+            <input type="date" id="endDate" name="endDate">
+            <button id="applyDateRangeBtn" class="year-btn">Cari</button>
+        </div>
+    </div>
+
 
 </div>
 @endsection
@@ -82,11 +95,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const popularBooksModal = document.getElementById('popularBooksModal');
     const popularBooksList = document.getElementById('popularBooksList');
     const showPopularBooksBtn = document.getElementById('showPopularBooksBtn');
+    const dateRangeBtn = document.getElementById('dateRangeBtn');
+    const dateRangeModal = document.getElementById('dateRangeModal');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const applyDateRangeBtn = document.getElementById('applyDateRangeBtn');
 
-    // Close modals when clicking outside
+    // Show date range modal
+    dateRangeBtn.addEventListener('click', () => {
+        dateRangeModal.style.display = 'block';
+        setTimeout(() => dateRangeModal.classList.add('show'), 0);
+    });
+
+    function closeDateRangeModal() {
+        dateRangeModal.classList.remove('show');
+        setTimeout(() => dateRangeModal.style.display = "none", 300);
+    }
+
     window.onclick = (event) => {
         if (event.target === loanModal) closeLoanModal();
         if (event.target === popularBooksModal) closePopularBooksModal();
+        if (event.target === dateRangeModal) closeDateRangeModal();
     };
 
     function closeLoanModal() {
@@ -101,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const yearlyData = {!! json_encode($yearlyData) !!};
     let currentYearIndex = yearlyData.length - 1;
-    let selectedMonth = null;  // Initialize selectedMonth
+    let selectedMonth = null;
 
     const months = {
         'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5, 'Juni': 6,
@@ -140,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Update the chart for a specific year
     function updateChart(yearIndex) {
         const yearData = yearlyData[yearIndex];
         loanChart.data.labels = yearData.months;
@@ -152,12 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
         loanChart.options.onClick = handleMonthClick;
     }
 
-    // Handle month click to show daily data
     async function handleMonthClick(event, elements) {
         if (elements.length === 0) return;
 
         const index = elements[0].index;
-        selectedMonth = yearlyData[currentYearIndex].months[index];  // Set selectedMonth
+        selectedMonth = yearlyData[currentYearIndex].months[index];
         const selectedYear = yearlyData[currentYearIndex].year;
         const monthName = selectedMonth.split(' ')[0];
 
@@ -183,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Handle daily click to show loan details in modal
     async function handleDailyClick(event, elements, dailyLabels, selectedYear, monthName) {
         if (elements.length === 0) return;
 
@@ -218,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return str.replace(/\b\w/g, char => char.toUpperCase());
     }
 
-    // Navigation buttons for year changes
     prevYearBtn.addEventListener('click', () => {
         if (currentYearIndex > 0) {
             currentYearIndex--;
@@ -233,73 +258,120 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Back button to return to yearly data
     backbtn.addEventListener('click', () => {
         selectedMonth = null;
         updateChart(currentYearIndex);
     });
 
-    // Show popular books
     showPopularBooksBtn.addEventListener('click', async () => {
-    // Get the current year
-    const currentYear = yearlyData[currentYearIndex].year;
-    let selectedMonthNumber = null;
-    let headerText = `Buku Terpopuler Tahun ${currentYear}`; // Default to yearly header
+        const currentYear = yearlyData[currentYearIndex].year;
+        let selectedMonthNumber = null;
+        let headerText = `Buku Terpopuler Tahun ${currentYear}`;
 
-    if (selectedMonth) {
-        // If a month is selected, convert the month name to the corresponding number
-        const monthName = selectedMonth.split(' ')[0];
-        selectedMonthNumber = months[monthName];
-        headerText = `Buku Terpopuler Bulan ${monthName} ${currentYear}`; // Set header to month and year
-    }
-
-    // Update the modal header text
-    document.querySelector('#popularBooksModal h2').textContent = headerText;
-
-    // If no month is selected, fetch popular books for the entire year
-    const endpoint = selectedMonthNumber
-        ? `/popular-books?year=${currentYear}&month=${selectedMonthNumber}`
-        : `/popular-books?year=${currentYear}`;
-
-    try {
-        const response = await fetch(endpoint);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-        const booksData = await response.json();
-        if (booksData.length === 0) {
-            popularBooksList.innerHTML = `<tr><td colspan="3">Tidak ada data</td></tr>`;
-        } else {
-            popularBooksList.innerHTML = booksData.map(book => `
-                <tr>
-                    <td>${capitalizeWords(book.title)}</td>
-                    <td>${capitalizeWords(book.author)}</td>
-                    <td>${book.borrow_count}</td>
-                </tr>
-            `).join('');
+        if (selectedMonth) {
+            const monthName = selectedMonth.split(' ')[0];
+            selectedMonthNumber = months[monthName];
+            headerText = `Buku Terpopuler Bulan ${monthName} ${currentYear}`;
         }
 
-        popularBooksModal.style.display = "block";
-        setTimeout(() => popularBooksModal.classList.add('show'), 0);
-    } catch (error) {
-        console.error('Error fetching popular books:', error);
-    }
-});
+        document.querySelector('#popularBooksModal h2').textContent = headerText;
 
+        const endpoint = selectedMonthNumber
+            ? `/popular-books?year=${currentYear}&month=${selectedMonthNumber}`
+            : `/popular-books?year=${currentYear}`;
+
+        try {
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const booksData = await response.json();
+            if (booksData.length === 0) {
+                popularBooksList.innerHTML = `<tr><td colspan="3">Tidak ada data</td></tr>`;
+            } else {
+                popularBooksList.innerHTML = booksData.map(book => `
+                    <tr>
+                        <td>${capitalizeWords(book.title)}</td>
+                        <td>${capitalizeWords(book.author)}</td>
+                        <td>${book.borrow_count}</td>
+                    </tr>
+                `).join('');
+            }
+
+            popularBooksModal.style.display = "block";
+            setTimeout(() => popularBooksModal.classList.add('show'), 0);
+        } catch (error) {
+            console.error('Error fetching popular books:', error);
+        }
+    });
+
+    applyDateRangeBtn.addEventListener('click', async () => {
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+
+        if (!startDate || !endDate) {
+            alert("Please select both start and end dates.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/loans?start=${startDate}&end=${endDate}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const loanData = await response.json();
+            if (loanData && loanData.labels && loanData.data) {
+                loanChart.data.labels = loanData.labels;  // Assuming loanData.labels has dates in DD-MM-YYYY format
+                loanChart.data.datasets[0].data = loanData.data;
+                loanChart.update();
+
+                backbtn.style.display = 'inline-block';
+                prevYearBtn.style.display = 'none';
+                nextYearBtn.style.display = 'none';
+                showPopularBooksBtn.style.display = 'none';
+                dateRangeBtn.style.display = 'none';
+
+                // Set onClick to open modal for specific date in date range
+                loanChart.options.onClick = (e, elements) => handleDailyDateRangeClick(e, elements, loanData.labels);
+            }
+
+            closeDateRangeModal();
+        } catch (error) {
+            console.error('Error fetching data by date range:', error);
+        }
+    });
+
+    async function handleDailyDateRangeClick(event, elements, dateLabels) {
+        if (elements.length === 0) return;
+
+        const index = elements[0].index;
+        const selectedDate = dateLabels[index];  // `dateLabels` should contain dates in DD-MM-YYYY
+
+        modalHeader.textContent = `Rincian Peminjaman ${selectedDate}`;
+
+        try {
+            const response = await fetch(`/daily-loan-details?date=${selectedDate}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const loanDetailsData = await response.json();
+            loanDetails.innerHTML = loanDetailsData.map(loan => `
+                <tr>
+                    <td>${loan.user && loan.user.first_name && loan.user.last_name ? `${capitalizeWords(loan.user.first_name)} ${capitalizeWords(loan.user.last_name)}` : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loan.book && loan.book.title ? capitalizeWords(loan.book.title) : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loan.limit_date ? new Date(loan.limit_date).toLocaleDateString('id-ID') : '<span class="missing-data">Tidak ada data</span>'}</td>
+                    <td>${loan.return_date ? new Date(loan.return_date).toLocaleDateString('id-ID') : 'Buku belum dikembalikan'}</td>
+                </tr>
+            `).join('');
+
+            loanModal.style.display = "block";
+            setTimeout(() => loanModal.classList.add('show'), 0);
+        } catch (error) {
+            console.error('Error fetching loan details:', error);
+        }
+    }
 
 });
 </script>
 
-
-
-
-
 @endsection
-
-
-
-
-
-
 
 <style>
 /* Add your custom styles here */
